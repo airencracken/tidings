@@ -1,10 +1,12 @@
 #!/bin/sh
 app=$1
+database="$app.db"
+if [ "$app" = tidings ]; then database=reader.db; fi
 case "$app" in folkweave|tidings) ;; *) exit 2 ;; esac
 apt-get update || exit 1
 apt-get install -y adduser ca-certificates init-system-helpers || exit 1
 dpkg -i /release.deb || exit 1
-[ ! -e "/var/lib/$app/$app.db" ] || exit 1
+[ ! -e "/var/lib/$app/$database" ] || exit 1
 [ "$(stat -c %a "/var/lib/$app")" = 700 ] || exit 1
 [ "$(stat -c %a "/etc/$app/$app.env")" = 600 ] || exit 1
 [ "$(id -u "$app")" != 0 ] || exit 1
@@ -22,13 +24,13 @@ case "$app" in
   tidings backup --destination /var/lib/tidings/manual || exit 1
   ;;
 esac
-[ "$(stat -c %U "/var/lib/$app/$app.db")" = "$app" ] || exit 1
+[ "$(stat -c %U "/var/lib/$app/$database")" = "$app" ] || exit 1
 printf '%s\n' '# retained package configuration' >> "/etc/$app/$app.env" || exit 1
 dpkg -i /release.deb || exit 1
 grep -q '^# retained package configuration$' "/etc/$app/$app.env" || exit 1
 dpkg --remove "$app" || exit 1
-[ -f "/var/lib/$app/$app.db" ] || exit 1
+[ -f "/var/lib/$app/$database" ] || exit 1
 dpkg --purge "$app" || exit 1
-[ -f "/var/lib/$app/$app.db" ] || exit 1
+[ -f "/var/lib/$app/$database" ] || exit 1
 getent passwd "$app" || exit 1
 printf '%s package lifecycle passed\n' "$app"

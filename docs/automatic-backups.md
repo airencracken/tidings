@@ -21,7 +21,7 @@ tidings backup --destination /var/lib/tidings/manual-backups
 This prints the complete verified backup directory. Pass that directory, including manifest.json and its snapshot archive, to restore.
 
 Stop the service before switching to a restored instance. Restore refuses an
-existing destination and validates the snapshot before exposing restored data:
+existing instance and validates the snapshot before exposing restored data:
 
 ```sh
 tidings restore --archive /private/tidings-backup --destination /private/tidings-restored
