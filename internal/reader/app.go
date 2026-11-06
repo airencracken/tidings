@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/airencracken/comfylib/token"
+	"github.com/airencracken/comfylib/ui"
 )
 
 //go:embed templates/*.html static/* catalog.json
@@ -29,6 +30,7 @@ var assets embed.FS
 type Config struct {
 	SecureCookies bool
 	BaseURL       string
+	Demo          bool
 }
 type App struct {
 	Store     *Store
@@ -66,6 +68,7 @@ type page struct {
 	Date                                               string
 	Groups                                             []FeedGroup
 	Collection                                         FeedGroup
+	Demo                                               bool
 }
 
 func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
@@ -210,6 +213,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) routes() {
+	a.mux.Handle("GET /static/comfy/", http.StripPrefix("/static/comfy/", http.FileServerFS(ui.Assets())))
 	a.mux.Handle("GET /static/", http.FileServerFS(assets))
 	a.mux.HandleFunc("GET /{$}", a.home)
 	a.mux.HandleFunc("GET /story/{id}", a.story)
@@ -240,6 +244,7 @@ func (a *App) routes() {
 }
 
 func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int) {
+	p.Demo = a.config.Demo
 	rc := current(r)
 	p.User = rc.User
 	p.CSRF = rc.CSRF

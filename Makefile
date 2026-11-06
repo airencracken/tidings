@@ -1,7 +1,13 @@
 GOCACHE ?= /tmp/tidings-go-cache
 export GOCACHE
+PORT ?= 8083
+.DEFAULT_GOAL := help
 
-.PHONY: build run test check test-mutations test-browser fuzz-smoke
+.PHONY: help demo build run test check test-mutations test-browser fuzz-smoke
+help:
+	@printf 'Tidings\n\n  make demo [PORT=9000]  Disposable demo with sample stories and logins\n  make build             Build the standalone server\n  make run               Run your instance using TIDINGS_* settings\n  make check             Formatting, vet, race tests, and mutations\n  make test-browser      Browser checks\n  make fuzz-smoke        Feed and OPML parser fuzzing\n'
+demo:
+	go run -buildvcs=false ./scripts/demo -port "$(PORT)"
 build:
 	go build -trimpath -o bin/tidings ./cmd/tidings
 run:
@@ -9,7 +15,7 @@ run:
 test:
 	go test -race ./...
 check:
-	test -z "$$(gofmt -l cmd internal)"
+	test -z "$$(gofmt -l cmd internal scripts/demo)"
 	go vet ./...
 	go test -race ./...
 	python3 scripts/mutate.py scripts/mutations.json

@@ -1,6 +1,7 @@
 # Third-party components
 
-Tidings uses Comfylib v0.1.7 for opaque tokens and session-bound CSRF tokens,
+Tidings uses Comfylib v0.1.7 for opaque tokens, session-bound CSRF tokens,
+password confirmation, and shared account-form styles,
 under AGPL-3.0-or-later. `scripts/mutate.py` is copied from Comfylib's mutation
 runner under the same license. The interface follows the Comfyware family palette
 and server-rendered form conventions used by Witmoot.
@@ -10,7 +11,7 @@ Go dependencies and their transitive versions are recorded in `go.mod` and
 
 | Component | Use | License |
 | --- | --- | --- |
-| Comfylib | Session and CSRF tokens | AGPL-3.0-or-later |
+| Comfylib | Tokens, password confirmation, shared forms | AGPL-3.0-or-later |
 | Go x/crypto | bcrypt passwords | BSD-3-Clause |
 | Go x/net | HTML text extraction and XML charset support | BSD-3-Clause |
 | Go x/term | Hidden terminal password input | BSD-3-Clause |

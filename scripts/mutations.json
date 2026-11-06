@@ -86,5 +86,45 @@
     "after": "t.user_id>=fg.user_id AND t.feed_id=e.feed_id",
     "package": "./internal/reader",
     "run": "^TestTagsAreScopedAndLiteral$"
+  },
+  {
+    "name": "demo loopback binding",
+    "file": "scripts/demo/main.go",
+    "before": "net.JoinHostPort(\"127.0.0.1\", strconv.Itoa(port))",
+    "after": "net.JoinHostPort(\"0.0.0.0\", strconv.Itoa(port))",
+    "package": "./scripts/demo",
+    "run": "^TestDemoLifecycleIsolationAndHTTPRoutes$"
+  },
+  {
+    "name": "demo ignores production settings",
+    "file": "scripts/demo/main.go",
+    "before": "reader.OpenStore(dir)",
+    "after": "reader.OpenStore(os.Getenv(\"TIDINGS_DATA_DIR\"))",
+    "package": "./scripts/demo",
+    "run": "^TestDemoLifecycleIsolationAndHTTPRoutes$"
+  },
+  {
+    "name": "demo temporary data cleanup",
+    "file": "scripts/demo/main.go",
+    "before": "os.RemoveAll(dir)",
+    "after": "os.RemoveAll(dir+\"-not-ours\")",
+    "package": "./scripts/demo",
+    "run": "^TestDemoLifecycleIsolationAndHTTPRoutes$"
+  },
+  {
+    "name": "offline demo feed allowlist",
+    "file": "scripts/demo/seed.go",
+    "before": "r.Method == \"GET\" && r.URL.String() == sampleURL(f)",
+    "after": "r.Method == \"GET\"",
+    "package": "./scripts/demo",
+    "run": "^TestSampleTransportContractAndAdversarialURLs$"
+  },
+  {
+    "name": "demo credentials stay out of normal pages",
+    "file": "internal/reader/app.go",
+    "before": "p.Demo = a.config.Demo",
+    "after": "p.Demo = true",
+    "package": "./internal/reader",
+    "run": "^TestComfylibStylesAndDemoBanner$"
   }
 ]

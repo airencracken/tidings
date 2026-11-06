@@ -17,6 +17,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/airencracken/comfylib/password"
 	"github.com/airencracken/tidings/internal/reader"
 	"golang.org/x/term"
 )
@@ -160,20 +161,5 @@ func readPassword(file string) (string, error) {
 	if !term.IsTerminal(fd) {
 		return "", errors.New("use a terminal for hidden password entry, or supply --password-file")
 	}
-	fmt.Fprint(os.Stderr, "Password: ")
-	first, err := term.ReadPassword(fd)
-	fmt.Fprintln(os.Stderr)
-	if err != nil {
-		return "", err
-	}
-	fmt.Fprint(os.Stderr, "Repeat password: ")
-	second, err := term.ReadPassword(fd)
-	fmt.Fprintln(os.Stderr)
-	if err != nil {
-		return "", err
-	}
-	if string(first) != string(second) {
-		return "", errors.New("passwords do not match")
-	}
-	return string(first), nil
+	return password.Confirm(os.Stderr, "Password: ", "Repeat password: ", func() ([]byte, error) { return term.ReadPassword(fd) })
 }

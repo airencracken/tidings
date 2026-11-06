@@ -8,6 +8,25 @@ ordinary HTML forms, and no frontend build or third-party requests in the reader
 One installation serves one household or small community. Each member has their
 own subscriptions, tags, feed groups, saved stories, and reading state.
 
+## Try the demo
+
+```sh
+make demo
+# Or choose another port:
+make demo PORT=9000
+```
+
+Open **http://127.0.0.1:8083**. Sign in as **demo** (host), **freya**, or
+**jules**, all with password **demo-password**. The host and Freya follow the
+household table; Jules starts opted out. Try both handpicked and tag-based feed
+groups, personal sources, saved stories, and independent reading state.
+
+The demo listens only on localhost, ignores all `TIDINGS_*` settings, and uses a
+fresh private temporary database. Its clearly labeled sample feeds refresh
+offline; no publisher requests are made, including for newly added sources.
+Press Ctrl-C to stop and remove the demo. Each run starts fresh. `make demo
+PORT=0` chooses a free port and prints its address.
+
 ## Start here
 
 Requires Go 1.26 or newer. There is no JavaScript build step or database server.
@@ -128,6 +147,15 @@ reading history; keep them private.
 The executable serves its own CSS, JavaScript, and templates. Reading, managing
 sources, and all account forms work with JavaScript disabled. JavaScript only
 adds a saved light/dark/system theme preference. Dates use UTC.
+
+The little town crier welcomes readers on the sign-in screen and first empty
+reading table. The transparent illustration is embedded in the binary; its
+[generation prompt](docs/town-crier-prompt.txt) is kept with the source.
+
+Comfylib v0.1.7 supplies opaque session/invitation tokens, session-bound CSRF
+tokens, confirmed terminal password prompting, and shared account-form styles.
+Tidings owns the feed parser, fetching policy, SQLite schema, account policy,
+and templates.
 
 Use an HTTPS reverse proxy for household hosting. Keep the application listener
 private; a loopback deployment with Caddy can use:

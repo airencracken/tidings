@@ -110,6 +110,20 @@ db.commit()
   assert.equal(data.username,'host');assert.equal(data.version,1);assert.equal(data.stories.length,1);assert.equal(data.feed_groups[0].name,'AI research');
   const screenshotDir = process.env.TIDINGS_SCREENSHOT_DIR;
   if(screenshotDir) await mkdir(screenshotDir,{recursive:true});
+  const welcomeContext=await browser.newContext();
+  const welcome=await welcomeContext.newPage();
+  welcome.on('pageerror',error=>errors.push(String(error)));
+  await welcome.goto(origin+'/login');
+  for(const theme of ['light','dark']) {
+    await welcome.getByLabel('Theme',{exact:true}).selectOption(theme);
+    for(const width of [375,1440]) {
+      await welcome.setViewportSize({width,height:1000});
+      assert.ok(await welcome.locator('.welcome-mascot').evaluate(img=>img.complete&&img.naturalWidth>0),'mascot did not load');
+      assert.ok(await welcome.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`welcome overflows at ${width} in ${theme}`);
+      if(screenshotDir) await welcome.screenshot({path:path.join(screenshotDir,`welcome-${theme}-${width}.png`),fullPage:true});
+    }
+  }
+  await welcomeContext.close();
   for (const theme of ['light','dark']) {
     await page.goto(origin+'/');
     await page.getByLabel('Theme',{exact:true}).selectOption(theme);
