@@ -152,6 +152,11 @@ The little town crier welcomes readers on the sign-in screen and first empty
 reading table. The transparent illustration is embedded in the binary; its
 [generation prompt](docs/town-crier-prompt.txt) is kept with the source.
 
+A simple cream bell on Tidings green identifies browser tabs. Its
+[SVG source](internal/reader/static/favicon.svg), 16/32/48-pixel ICO frames, and
+180-pixel Apple touch icon are embedded and available before sign-in. See
+[favicon artwork](docs/favicon.md) for regenerating the raster sizes.
+
 Comfylib v0.1.7 supplies opaque session/invitation tokens, session-bound CSRF
 tokens, confirmed terminal password prompting, and shared account-form styles.
 Tidings owns the feed parser, fetching policy, SQLite schema, account policy,

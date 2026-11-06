@@ -55,7 +55,15 @@ db.commit()
   const context = await browser.newContext({ viewport:{width:1440,height:1000} });
   context.on('request',request => observed.add(request.url()));
   const page=await context.newPage();page.on('pageerror',error => errors.push(String(error)));
+  for(const icon of ['/favicon.ico','/static/favicon.svg','/static/apple-touch-icon.png']) {
+    const response=await context.request.get(origin+icon);
+    assert.equal(response.status(),200,`public favicon ${icon}`);
+    assert.ok(!response.headers()['set-cookie'],'favicon starts an anonymous session');
+  }
   await signIn(page,origin);
+  assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg');
+  assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png');
+  await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg';await icon.decode();if(!icon.naturalWidth)throw new Error('SVG favicon did not render');});
   assert.equal(await page.locator('.story-row').count(),30);
   await page.getByRole('link',{name:'Next page',exact:true}).click();
   assert.equal(await page.locator('.story-row').count(),5);

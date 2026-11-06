@@ -126,5 +126,29 @@
     "after": "p.Demo = true",
     "package": "./internal/reader",
     "run": "^TestComfylibStylesAndDemoBanner$"
+  },
+  {
+    "name": "favicon available before sign-in",
+    "file": "internal/reader/app.go",
+    "before": " || r.URL.Path == \"/favicon.ico\"",
+    "after": "",
+    "package": "./internal/reader",
+    "run": "^TestFaviconRoutesArePublicAndReadOnly$"
+  },
+  {
+    "name": "favicon public path stays exact",
+    "file": "internal/reader/app.go",
+    "before": " || r.URL.Path == \"/favicon.ico\"",
+    "after": " || strings.HasPrefix(r.URL.Path, \"/favicon.ico\")",
+    "package": "./internal/reader",
+    "run": "^TestFaviconRoutesArePublicAndReadOnly$"
+  },
+  {
+    "name": "favicon declarations on every page",
+    "file": "internal/reader/templates/pages.html",
+    "before": "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" sizes=\"any\">",
+    "after": "",
+    "package": "./internal/reader",
+    "run": "^TestEveryPageDeclaresFavicons$"
   }
 ]

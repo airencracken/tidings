@@ -158,7 +158,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "ok")
 		return
 	}
-	if strings.HasPrefix(r.URL.Path, "/static/") {
+	if strings.HasPrefix(r.URL.Path, "/static/") || r.URL.Path == "/favicon.ico" {
 		a.mux.ServeHTTP(w, r)
 		return
 	}
@@ -213,6 +213,10 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) routes() {
+	a.mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/x-icon")
+		http.ServeFileFS(w, r, assets, "static/favicon.ico")
+	})
 	a.mux.Handle("GET /static/comfy/", http.StripPrefix("/static/comfy/", http.FileServerFS(ui.Assets())))
 	a.mux.Handle("GET /static/", http.FileServerFS(assets))
 	a.mux.HandleFunc("GET /{$}", a.home)
