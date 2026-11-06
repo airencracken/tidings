@@ -14,7 +14,16 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-This is an early development build. There are no published release packages or container images yet.
+Initial release: **[0.1.0](https://github.com/airencracken/tidings/releases/tag/v0.1.0)**.
+
+## Install
+
+Choose a [Linux archive or Debian package](docs/releases.md),
+[Docker Compose](docs/containers.md), or the
+[Comfyware Gentoo overlay](https://github.com/airencracken/comfyware#add-the-overlay).
+Read the [hosting](docs/deployment.md), [backup/recovery](docs/automatic-backups.md),
+and [release notes](docs/release-notes.md) before sharing an installation.
+The source demos below use disposable local data.
 
 ## Try the demo
 
@@ -24,7 +33,7 @@ make demo
 make demo PORT=9000
 ```
 
-Open **http://127.0.0.1:8083**. Sign in as **demo** (host), **freya**, or
+Open **http://127.0.0.1:8085**. Sign in as **demo** (host), **freya**, or
 **jules**, all with password **demo-password**. The host and Freya follow the
 household table; Jules starts opted out. Try both handpicked and tag-based feed
 groups, personal sources, saved stories, and independent reading state.
@@ -46,7 +55,7 @@ make build
 ```
 
 The account command asks twice for a password with terminal echo disabled.
-Open **http://127.0.0.1:8083** and sign in. Your first reading table is empty.
+Open **http://127.0.0.1:8085** and sign in. Your first reading table is empty.
 Under **Sources**, paste a direct RSS/Atom address or follow a source from the
 catalog. Choose **Refresh feeds** to collect stories. Refresh is asynchronous;
 reload when you want to see the results. The running server also checks feeds
@@ -195,7 +204,7 @@ you need to return to an older binary.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `TIDINGS_ADDR` | `127.0.0.1:8083` | HTTP listener |
+| `TIDINGS_ADDR` | `127.0.0.1:8085` | HTTP listener |
 | `TIDINGS_DATA_DIR` | `./data` | Private data directory, mode 0700 |
 | `TIDINGS_BASE_URL` | unset | Public HTTPS origin for invitation links |
 | `TIDINGS_SECURE_COOKIES` | automatic with base URL | Set `true` to require HTTPS cookies |
@@ -261,7 +270,7 @@ application listener private; a loopback deployment with Caddy can use:
 
 ```caddyfile
 tidings.example.org {
-    reverse_proxy 127.0.0.1:8083
+    reverse_proxy 127.0.0.1:8085
 }
 ```
 
@@ -270,8 +279,8 @@ secure `__Host-` cookies and prints complete invitation links. Listening beyond
 loopback requires an HTTPS base URL and secure cookies. For a container,
 provision a writable private `/data` volume for the container's non-root UID,
 create the first owner using the same image and volume, then run `serve` behind
-your HTTPS proxy. A [Dockerfile](Dockerfile) is included; the container build has
-not been exercised as part of the initial local validation.
+your HTTPS proxy. The [container guide](docs/containers.md) covers the published, tested image
+and its private named-volume setup.
 
 `/healthz` is an unauthenticated readiness check with no account or feed data.
 Sessions expire after 30 days. Login and invitation attempts share a limit of 20

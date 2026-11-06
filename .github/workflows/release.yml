@@ -1,0 +1,124 @@
+name: Release
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  GOWORK: 'off'
+defaults:
+  run:
+    shell: bash --noprofile --norc {0}
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: '1.26.x'
+      - name: Validate release on master
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          case "$RELEASE_REF" in
+            refs/tags/v*)
+              git merge-base --is-ancestor HEAD origin/master || exit 1
+              test "$RELEASE_REF" = "refs/tags/v$(cat VERSION)" || exit 1
+              ;;
+          esac
+          go mod download || exit 1
+          git diff --exit-code -- go.mod go.sum || exit 1
+          make check build || exit 1
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
+        with:
+          version: v2.18.2
+          install-only: true
+      - name: Build native archives without publishing
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          goreleaser check || exit 1
+          case "$RELEASE_REF" in
+            refs/tags/v*) goreleaser release --clean --skip=publish || exit 1 ;;
+            *) goreleaser release --snapshot --clean --skip=publish || exit 1 ;;
+          esac
+      - name: Verify release archives and source documentation
+        run: python3 scripts/release/check_artifacts.py
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-packages
+          if-no-files-found: error
+          compression-level: 0
+          path: |
+            dist/*.deb
+            dist/*.tar.gz
+            dist/*_checksums.txt
+
+
+  packages:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: release-packages
+          path: dist
+      - name: Debian package lifecycle
+        env:
+          PACKAGE_ARCH: ${{ matrix.arch }}
+        run: python3 scripts/release/test_deb.py --arch "$PACKAGE_ARCH"
+
+  containers:
+    needs: [build]
+    uses: ./.github/workflows/containers.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      publish: ${{ startsWith(github.ref, 'refs/tags/v') && github.repository == 'airencracken/tidings' }}
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v') && github.repository == 'airencracken/tidings'
+    needs: [build, packages, containers]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-packages
+          path: dist
+      - name: Publish tested artifacts to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft > release-draft; then
+            [ "$(cat release-draft)" = true ] || { echo 'Release already published; refusing to replace it.' >&2; exit 1; }
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --generate-notes --title "tidings $RELEASE_TAG" || exit 1
+          fi
+          gh release upload "$RELEASE_TAG" dist/* --clobber || exit 1
+          case "$RELEASE_TAG" in
+            *-*) gh release edit "$RELEASE_TAG" --draft=false --prerelease || exit 1 ;;
+            *) gh release edit "$RELEASE_TAG" --draft=false || exit 1 ;;
+          esac

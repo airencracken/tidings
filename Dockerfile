@@ -1,14 +1,32 @@
-FROM golang:1.26 AS build
+FROM golang:1.26-alpine@sha256:27f2d3b83cfc5803c8078f8e730af0f7c431bf067afaec8f60a36fb763187cba AS build
 WORKDIR /src
+ENV GOWORK=off CGO_ENABLED=0
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -trimpath -o /tidings ./cmd/tidings
+ARG VERSION=development
+RUN go build -buildvcs=false -trimpath -ldflags="-s -w -X main.version=$VERSION" -o /out/tidings ./cmd/tidings
 
-FROM gcr.io/distroless/static-debian12:nonroot
-COPY --from=build /tidings /tidings
-ENV TIDINGS_DATA_DIR=/data TIDINGS_ADDR=0.0.0.0:8083
+FROM alpine:3.23@sha256:21f3e19bafab57a9ff7aa9dd571dac72f868370472c10f450cc0416cc1aca553
+ARG VERSION=development
+ARG REVISION=unknown
+LABEL org.opencontainers.image.source="https://github.com/airencracken/tidings" \
+      org.opencontainers.image.licenses="AGPL-3.0-or-later" \
+      org.opencontainers.image.version="$VERSION" \
+      org.opencontainers.image.revision="$REVISION"
+RUN apk add --no-cache ca-certificates tzdata zstd \
+    && addgroup -S -g 10001 tidings \
+    && adduser -S -D -H -u 10001 -G tidings -h /data tidings \
+    && mkdir /data \
+    && chown 10001:10001 /data \
+    && chmod 0700 /data
+ENV TIDINGS_DATA_DIR=/data TIDINGS_ADDR=0.0.0.0:8080 TMPDIR=/tmp
+USER 10001:10001
 VOLUME ["/data"]
-EXPOSE 8083
-ENTRYPOINT ["/tidings"]
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD port="${TIDINGS_ADDR##*:}"; wget -q -T 4 -O /dev/null "http://127.0.0.1:${port:-8080}/healthz" || exit 1
+ENTRYPOINT ["/usr/local/bin/tidings"]
 CMD ["serve"]
+COPY --from=build /out/tidings /usr/local/bin/tidings
+COPY LICENSE README.md /usr/share/doc/tidings/

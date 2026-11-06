@@ -30,6 +30,8 @@ import (
 	"golang.org/x/term"
 )
 
+var version = "0.1.0"
+
 var instanceCommands = map[string]bool{"create-owner": true, "set-password": true, "backup": true, "restore": true}
 var serviceSettings = []string{"TIDINGS_BASE_URL", "TIDINGS_ADDR", "TIDINGS_SECURE_COOKIES", "TIDINGS_TRUSTED_PROXIES", "TIDINGS_BACKUP_INTERVAL", "TIDINGS_BACKUP_KEEP", "TIDINGS_BACKUP_MAX_BYTES", "TIDINGS_BACKUP_COPY_MAX_BYTES"}
 
@@ -48,19 +50,23 @@ func main() {
 	}
 }
 func run() error {
+	if len(os.Args) > 1 && (os.Args[1] == "version" || os.Args[1] == "--version") {
+		fmt.Println("tidings", version)
+		return nil
+	}
 	if len(os.Args) > 1 && (os.Args[1] == "--help" || os.Args[1] == "-h" || os.Args[1] == "help") {
-		fmt.Println("Tidings — a quiet RSS and Atom reader for you and your people.\n\nUsage:\n  tidings serve\n  tidings create-owner --username NAME [--password-file PATH]\n  tidings set-password --username NAME [--password-file PATH]\n  tidings backup --destination PRIVATE_DIRECTORY\n  tidings restore --archive BACKUP_DIRECTORY --destination NEW_DATA_DIRECTORY\n  tidings proxy-config caddy|nginx|apache --domain YOUR_DOMAIN\n\nEnvironment:\n  TIDINGS_ADDR       Listen address (127.0.0.1:8083)\n  TIDINGS_DATA_DIR   Private SQLite data directory (./data)\n  TIDINGS_BASE_URL   Public HTTPS origin for shared invitations\n  TIDINGS_SECURE_COOKIES  true behind an HTTPS proxy\n  TIDINGS_TRUSTED_PROXIES Explicit trusted proxy IPs or CIDRs\n  TIDINGS_BACKUP_INTERVAL 24h (0 disables); KEEP=7\n  TIDINGS_BACKUP_MAX_BYTES 10 GiB retained; COPY_MAX_BYTES 5 GiB per snapshot\n\nPasswords are read twice with terminal echo disabled, or from a private file.\nVerified automatic backups are stored in the private backups directory. Restore into a new directory, then switch your service configuration.")
+		fmt.Println("Tidings — a quiet RSS and Atom reader for you and your people.\n\nUsage:\n  tidings serve\n  tidings create-owner --username NAME [--password-file PATH]\n  tidings set-password --username NAME [--password-file PATH]\n  tidings backup --destination PRIVATE_DIRECTORY\n  tidings restore --archive BACKUP_DIRECTORY --destination NEW_DATA_DIRECTORY\n  tidings proxy-config caddy|nginx|apache --domain YOUR_DOMAIN\n\nEnvironment:\n  TIDINGS_ADDR       Listen address (127.0.0.1:8085)\n  TIDINGS_DATA_DIR   Private SQLite data directory (./data)\n  TIDINGS_BASE_URL   Public HTTPS origin for shared invitations\n  TIDINGS_SECURE_COOKIES  true behind an HTTPS proxy\n  TIDINGS_TRUSTED_PROXIES Explicit trusted proxy IPs or CIDRs\n  TIDINGS_BACKUP_INTERVAL 24h (0 disables); KEEP=7\n  TIDINGS_BACKUP_MAX_BYTES 10 GiB retained; COPY_MAX_BYTES 5 GiB per snapshot\n\nPasswords are read twice with terminal echo disabled, or from a private file.\nVerified automatic backups are stored in the private backups directory. Restore into a new directory, then switch your service configuration.")
 		return nil
 	}
 	if len(os.Args) > 1 && os.Args[1] == "proxy-config" {
-		return proxyconfig.Run(proxyconfig.Spec{App: "tidings", ExampleDomain: "tidings.example.org", DefaultUpstream: "127.0.0.1:8083", ProxyEnvironment: "TIDINGS_TRUSTED_PROXIES=127.0.0.1/32,::1/128", Examples: deploy.Examples}, os.Args[2:], os.Stdout)
+		return proxyconfig.Run(proxyconfig.Spec{App: "tidings", ExampleDomain: "tidings.example.org", DefaultUpstream: "127.0.0.1:8085", ProxyEnvironment: "TIDINGS_TRUSTED_PROXIES=127.0.0.1/32,::1/128", Examples: deploy.Examples}, os.Args[2:], os.Stdout)
 	}
 	if len(os.Args) > 2 && privdrop.HasHelpFlag(os.Args[2:]) {
 		fmt.Println("Use tidings --help for commands and settings. backup needs --destination; restore needs --archive and --destination. Account commands accept --username and --password-file.")
 		return nil
 	}
 	paths := svcconfig.Detect("tidings", "/var/lib/tidings")
-	settings, err := paths.Settings(serviceSettings...)
+	settings, err := processSettings(paths)
 	if err != nil {
 		return err
 	}
@@ -175,7 +181,7 @@ func run() error {
 	}
 	addr := lookup("TIDINGS_ADDR")
 	if addr == "" {
-		addr = "127.0.0.1:8083"
+		addr = "127.0.0.1:8085"
 	}
 	host, _, err := net.SplitHostPort(addr)
 	if err != nil {
@@ -275,4 +281,19 @@ func readPassword(file string) (string, error) {
 		return password.WithHiddenInput(fd, confirm)
 	}
 	return confirm()
+}
+
+// Service managers and root administrative re-execution already supply the
+// resolved environment. A service account must not reopen root-only config.
+func processSettings(paths svcconfig.Paths) (map[string]string, error) {
+	if os.Geteuid() == 0 {
+		return paths.Settings(serviceSettings...)
+	}
+	settings := map[string]string{}
+	for _, key := range serviceSettings {
+		if value := os.Getenv(key); value != "" {
+			settings[key] = value
+		}
+	}
+	return settings, nil
 }

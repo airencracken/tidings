@@ -1,0 +1,91 @@
+version: 2
+project_name: tidings
+before:
+  hooks:
+    - sh scripts/release/prepare.sh
+builds:
+  - id: tidings
+    main: ./cmd/tidings
+    binary: tidings
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [amd64, arm64]
+    flags: [-trimpath, -buildvcs=false]
+    ldflags:
+      - "-s -w -X main.version={{ .Version }}"
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    wrap_in_directory: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - docs/*
+      - docs/**/*
+      - deploy/**/*
+      - THIRD_PARTY.md
+      - src: .release/THIRD_PARTY_NOTICES.txt
+        dst: .
+        strip_parent: true
+source:
+  enabled: true
+  name_template: "{{ .ProjectName }}_{{ .Version }}_source"
+  prefix_template: "{{ .ProjectName }}_{{ .Version }}_source/"
+  format: tar.gz
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+nfpms:
+  - id: deb
+    package_name: tidings
+    file_name_template: "{{ .ConventionalFileName }}"
+    homepage: https://github.com/airencracken/tidings
+    maintainer: Marcus J. Hildum <airencracken@users.noreply.github.com>
+    description: Self-hosted RSS and Atom reader
+    license: AGPL-3.0-or-later
+    formats: [deb]
+    bindir: /usr/bin
+    section: web
+    priority: optional
+    dependencies:
+      - adduser
+      - ca-certificates
+      - init-system-helpers
+    contents:
+      - src: .release/tidings.service
+        dst: /usr/lib/systemd/system/tidings.service
+      - src: .release/tidings.env
+        dst: /etc/tidings/tidings.env
+        type: config
+        file_info:
+          mode: 0600
+      - src: .release/copyright
+        dst: /usr/share/doc/tidings/copyright
+      - src: LICENSE
+        dst: /usr/share/doc/tidings/LICENSE
+      - src: README.md
+        dst: /usr/share/doc/tidings/README.md
+      - src: docs/
+        dst: /usr/share/doc/tidings/docs
+        type: tree
+      - src: deploy/caddy/
+        dst: /usr/share/doc/tidings/deploy/caddy
+        type: tree
+      - src: deploy/nginx/
+        dst: /usr/share/doc/tidings/deploy/nginx
+        type: tree
+      - src: deploy/apache/
+        dst: /usr/share/doc/tidings/deploy/apache
+        type: tree
+    scripts:
+      postinstall: deploy/debian/postinst
+      preremove: deploy/debian/prerm
+      postremove: deploy/debian/postrm
+    mtime: "{{ .CommitDate }}"
+changelog:
+  use: git
+release:
+  github:
+    owner: airencracken
+    name: tidings

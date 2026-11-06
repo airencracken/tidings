@@ -10,7 +10,7 @@ import (
 )
 
 func TestProxyExamplesRenderAndRejectInjection(t *testing.T) {
-	spec := proxyconfig.Spec{App: "tidings", ExampleDomain: "tidings.example.org", DefaultUpstream: "127.0.0.1:8083", Examples: Examples}
+	spec := proxyconfig.Spec{App: "tidings", ExampleDomain: "tidings.example.org", DefaultUpstream: "127.0.0.1:8085", Examples: Examples}
 	for _, server := range []string{"caddy", "nginx", "apache"} {
 		got, err := proxyconfig.Render(spec, proxyconfig.Options{Server: server, Domain: "reader.example.net", Upstream: "127.0.0.1:9000"})
 		if err != nil || !strings.Contains(got, "reader.example.net") || !strings.Contains(got, "127.0.0.1:9000") || strings.Contains(got, "tidings.example.org") {

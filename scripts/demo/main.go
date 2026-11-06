@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	port := flag.Int("port", 8083, "local demo port (0 chooses a free port)")
+	port := flag.Int("port", 8085, "local demo port (0 chooses a free port)")
 	flag.Parse()
 	if flag.NArg() != 0 {
 		fmt.Fprintln(os.Stderr, "usage: demo [-port PORT]")

@@ -1,0 +1,9 @@
+/var/log/tidings.log {
+    weekly
+    rotate 8
+    compress
+    missingok
+    notifempty
+    copytruncate
+    create 0600 tidings tidings
+}

@@ -53,7 +53,7 @@ func TestCommandsAndConfiguration(t *testing.T) {
 		}
 	}
 	os.Args = []string{"tidings", "serve"}
-	t.Setenv("TIDINGS_ADDR", "0.0.0.0:8083")
+	t.Setenv("TIDINGS_ADDR", "0.0.0.0:8085")
 	if err := run(); err == nil || !strings.Contains(err.Error(), "beyond loopback") {
 		t.Fatalf("unsafe bind accepted %v", err)
 	}

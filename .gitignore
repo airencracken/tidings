@@ -4,3 +4,9 @@
 /go.work
 /go.work.sum
 /scripts/browser/node_modules/
+
+/.release/
+/container-artifacts/
+/dist/
+
+__pycache__/

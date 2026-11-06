@@ -1,0 +1,8 @@
+services:
+  tidings:
+    image: tidings:local
+    pull_policy: build
+    build:
+      context: .
+      args:
+        VERSION: development

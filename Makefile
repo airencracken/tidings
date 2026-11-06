@@ -1,6 +1,6 @@
 GOCACHE ?= /tmp/tidings-go-cache
 export GOCACHE
-PORT ?= 8083
+PORT ?= 8085
 .DEFAULT_GOAL := help
 
 .PHONY: help demo build run test check test-mutations test-browser fuzz-smoke
@@ -9,12 +9,14 @@ help:
 demo:
 	go run -buildvcs=false ./scripts/demo -port "$(PORT)"
 build:
-	go build -trimpath -o bin/tidings ./cmd/tidings
+	go build -trimpath -ldflags "-X main.version=$$(cat VERSION)" -o bin/tidings ./cmd/tidings
 run:
 	go run ./cmd/tidings serve
 test:
 	go test -race ./...
 check:
+	python3 -m unittest discover -s scripts/containers -p "test_*.py"
+	python3 scripts/release/test_config.py
 	python3 scripts/test_project.py
 	test -z "$$(gofmt -l cmd internal deploy scripts/demo)"
 	go vet ./...
@@ -46,3 +48,9 @@ install-openrc: install
 # Service installation is explicit; these targets never start or enable it.
 
 .PHONY: install install-systemd install-openrc
+
+.PHONY: test-containers test-container-registry
+test-containers:
+	python3 -m unittest discover -s scripts/containers -p 'test_*.py'
+test-container-registry:
+	python3 scripts/containers/check_registry.py
