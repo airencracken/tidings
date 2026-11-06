@@ -20,9 +20,29 @@ func TestMascotIsEmbeddedAndTransparent(t *testing.T) {
 	if bounds.Dx() < 256 || bounds.Dy() < 256 {
 		t.Fatal("mascot source is too small")
 	}
-	_, _, _, alpha := img.At(bounds.Min.X, bounds.Min.Y).RGBA()
-	if alpha != 0 {
-		t.Fatal("mascot needs a transparent background")
+	visible := 0
+	var painted image.Rectangle
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			_, _, _, alpha := img.At(x, y).RGBA()
+			// Ignore edge noise below 1% opacity when measuring the figure.
+			if alpha > 0x0202 {
+				visible++
+				pixel := image.Rect(x, y, x+1, y+1)
+				if painted.Empty() {
+					painted = pixel
+				} else {
+					painted = painted.Union(pixel)
+				}
+			}
+		}
+	}
+	area := bounds.Dx() * bounds.Dy()
+	if visible < area/20 || visible > area*19/20 {
+		t.Fatal("mascot must contain a visible character and a transparent background")
+	}
+	if painted.Min.X <= bounds.Min.X || painted.Min.Y <= bounds.Min.Y || painted.Max.X >= bounds.Max.X || painted.Max.Y >= bounds.Max.Y {
+		t.Fatal("mascot needs transparent padding on every edge so the figure is not cropped")
 	}
 }
 func TestComfylibStylesAndDemoBanner(t *testing.T) {
