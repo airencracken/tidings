@@ -160,6 +160,7 @@ func TestOPML(t *testing.T) {
 
 func FuzzParseFeed(f *testing.F) {
 	f.Add([]byte(rssFixture))
+	f.Add([]byte(`<rss><channel><item><link>https://example.org/story</link><description>&lt;img src="/photo.png"&gt;</description></item></channel></rss>`))
 	f.Add([]byte(`<feed xmlns="http://www.w3.org/2005/Atom"/>`))
 	f.Fuzz(func(t *testing.T, data []byte) {
 		out, err := ParseFeed(data, "https://example.org/feed", fixtureTime)
@@ -172,6 +173,11 @@ func FuzzParseFeed(f *testing.F) {
 		for _, e := range out.Entries {
 			if _, err = WebURL(e.URL); err != nil {
 				t.Fatal(err)
+			}
+			if e.ImageURL != "" {
+				if address, err := WebURL(e.ImageURL); err != nil || address != e.ImageURL {
+					t.Fatal("unsafe image address", e.ImageURL, err)
+				}
 			}
 			if e.Published > fixtureTime.Unix() {
 				t.Fatal("future date")

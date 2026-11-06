@@ -17,6 +17,12 @@ func TestVerifiedBackupAndRestore(t *testing.T) {
 	s := testStore(t)
 	ctx := context.Background()
 	f := testSource(t, s, 2, "backed-up", false)
+	if err := s.SetImagesEnabled(ctx, 1, true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.DB.Exec("UPDATE entries SET image_url='https://example.org/photo.png' WHERE feed_id=?", f.ID); err != nil {
+		t.Fatal(err)
+	}
 	if err := s.SetCatalogCategories(ctx, 1, []string{"Science"}, []CatalogCategory{{Name: "Science"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +49,10 @@ func TestVerifiedBackupAndRestore(t *testing.T) {
 	if enabled, err := next.CatalogCategories(ctx); err != nil || !enabled["Science"] || len(enabled) != 1 {
 		t.Fatal("suggestion settings missing from backup", enabled, err)
 	}
-	if got := entries(t, next, 2, "saved"); len(got) != 1 {
+	if enabled, err := next.ImagesEnabled(ctx); err != nil || !enabled {
+		t.Fatal("image setting missing from backup", enabled, err)
+	}
+	if got := entries(t, next, 2, "saved"); len(got) != 1 || got[0].ImageURL != "https://example.org/photo.png" {
 		t.Fatal("saved state missing", got)
 	}
 	if err = RestoreInstance(ctx, archive, destination, 5<<30); err == nil || !strings.Contains(err.Error(), "in use") {

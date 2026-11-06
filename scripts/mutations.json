@@ -42,8 +42,8 @@
   {
     "name": "stable publication dates",
     "file": "internal/reader/store.go",
-    "before": "body=excluded.body WHERE entries.import_owner IS NULL`",
-    "after": "body=excluded.body,published=excluded.published WHERE entries.import_owner IS NULL`",
+    "before": "body=excluded.body,image_url=excluded.image_url WHERE entries.import_owner IS NULL`",
+    "after": "body=excluded.body,image_url=excluded.image_url,published=excluded.published WHERE entries.import_owner IS NULL`",
     "package": "./internal/reader",
     "run": "^TestRefreshIdempotentAndDatesStable$"
   },
@@ -286,5 +286,77 @@
     "after": "if false && present {",
     "package": "./internal/reader",
     "run": "^TestBrowserFirstOwnerContract$"
+  },
+  {
+    "name": "fetch status keeps private source scope",
+    "file": "internal/reader/fetch_status.go",
+    "before": "s.user_id=?)",
+    "after": "s.user_id>=?)",
+    "package": "./internal/reader",
+    "run": "^TestFetchStatusScopeAndHTTPContract$"
+  },
+  {
+    "name": "following starts the first fetch immediately",
+    "file": "internal/reader/app.go",
+    "before": "a.StartRefresh(u.ID, false)\n\tto := \"/sources?notice=subscribed\"",
+    "after": "to := \"/sources?notice=subscribed\"",
+    "package": "./internal/reader",
+    "run": "^TestFetchStatusTransitionsAndImmediateFollow$"
+  },
+  {
+    "name": "image fetching requires instance opt-in",
+    "file": "internal/reader/images.go",
+    "before": "if !enabled {",
+    "after": "if false && !enabled {",
+    "package": "./internal/reader",
+    "run": "^TestImagesRequireOptInAndStoryAuthorization$"
+  },
+  {
+    "name": "image requests enforce story ownership",
+    "file": "internal/reader/images.go",
+    "before": "a.Store.Entry(r.Context(), current(r).User.ID, id)",
+    "after": "a.Store.Entry(r.Context(), 2, id)",
+    "package": "./internal/reader",
+    "run": "^TestImagesRequireOptInAndStoryAuthorization$"
+  },
+  {
+    "name": "image downloads have a byte cap",
+    "file": "internal/reader/image_cache.go",
+    "before": "if len(data) > imageDownloadLimit {",
+    "after": "if false && len(data) > imageDownloadLimit {",
+    "package": "./internal/reader",
+    "run": "^TestImageLimitsFailuresAndPruning$"
+  },
+  {
+    "name": "image previews reject excessive dimensions",
+    "file": "internal/reader/image_cache.go",
+    "before": "config.Width > 8192",
+    "after": "config.Width > 10000",
+    "package": "./internal/reader",
+    "run": "^TestImageLimitsFailuresAndPruning$"
+  },
+  {
+    "name": "cached images expire",
+    "file": "internal/reader/image_cache.go",
+    "before": "time.Since(info.ModTime()) > imageCacheAge",
+    "after": "false",
+    "package": "./internal/reader",
+    "run": "^TestImageCacheSharedPrivateAndExpired$"
+  },
+  {
+    "name": "image settings require an active owner",
+    "file": "internal/reader/images.go",
+    "before": "id=? AND owner=1 AND suspended=0",
+    "after": "id=? AND owner IN(0,1) AND suspended=0",
+    "package": "./internal/reader",
+    "run": "^TestImagesRequireOptInAndStoryAuthorization$"
+  },
+  {
+    "name": "image setting schema is boolean",
+    "file": "internal/reader/migration_v4.sql",
+    "before": "images_enabled IN(0,1)",
+    "after": "images_enabled IN(0,1,2)",
+    "package": "./internal/reader",
+    "run": "^TestImagesRequireOptInAndStoryAuthorization$"
   }
 ]

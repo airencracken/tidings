@@ -26,6 +26,7 @@ type Entry struct {
 	Title     string `json:"title"`
 	URL       string `json:"url"`
 	Body      string `json:"body"`
+	ImageURL  string `json:"image_url,omitempty"`
 	Published int64  `json:"published"`
 	Read      bool   `json:"read"`
 	Saved     bool   `json:"saved"`
@@ -38,9 +39,11 @@ type ParsedFeed struct {
 	Entries []Entry
 }
 type xmlText struct {
-	Text  string `xml:",chardata"`
-	Inner string `xml:",innerxml"`
-	Type  string `xml:"type,attr"`
+	Text   string `xml:",chardata"`
+	Inner  string `xml:",innerxml"`
+	Type   string `xml:"type,attr"`
+	URL    string `xml:"url,attr"`
+	Medium string `xml:"medium,attr"`
 }
 
 func (t xmlText) value() string {
@@ -63,6 +66,7 @@ func (t xmlText) raw() string {
 type xmlLink struct {
 	Href string `xml:"href,attr"`
 	Rel  string `xml:"rel,attr"`
+	Type string `xml:"type,attr"`
 	Text string `xml:",chardata"`
 }
 type xmlEntry struct {
@@ -72,12 +76,18 @@ type xmlEntry struct {
 	ID          string    `xml:"id"`
 	Description string    `xml:"description"`
 	Summary     xmlText   `xml:"summary"`
-	Content     xmlText   `xml:"content"`
-	Encoded     string    `xml:"encoded"`
-	PubDate     string    `xml:"pubDate"`
-	Published   string    `xml:"published"`
-	Updated     string    `xml:"updated"`
-	Date        string    `xml:"date"`
+	Contents    []xmlText `xml:"content"`
+	Thumbnails  []xmlText `xml:"thumbnail"`
+	Enclosures  []xmlText `xml:"enclosure"`
+	MediaGroup  struct {
+		Thumbnails []xmlText `xml:"thumbnail"`
+		Contents   []xmlText `xml:"content"`
+	} `xml:"group"`
+	Encoded   string `xml:"encoded"`
+	PubDate   string `xml:"pubDate"`
+	Published string `xml:"published"`
+	Updated   string `xml:"updated"`
+	Date      string `xml:"date"`
 }
 
 func WebURL(raw string) (string, error) {
@@ -214,7 +224,12 @@ func normalizeEntry(x xmlEntry, base string, now time.Time) (Entry, bool) {
 	}
 	body := x.Encoded
 	if body == "" {
-		body = x.Content.raw()
+		for _, content := range x.Contents {
+			if content.URL == "" {
+				body = content.raw()
+				break
+			}
+		}
 	}
 	if body == "" {
 		body = x.Description
@@ -247,5 +262,5 @@ func normalizeEntry(x xmlEntry, base string, now time.Time) (Entry, bool) {
 		key = link
 	}
 	sum := sha256.Sum256([]byte(key))
-	return Entry{Key: hex.EncodeToString(sum[:]), Title: title, URL: link, Body: readerText(body, 64000), Published: stamp.Unix()}, true
+	return Entry{Key: hex.EncodeToString(sum[:]), Title: title, URL: link, Body: readerText(body, 64000), ImageURL: entryImage(x, body, base), Published: stamp.Unix()}, true
 }

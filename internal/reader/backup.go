@@ -103,7 +103,7 @@ func (s *Store) Snapshot(ctx context.Context, destination string, limit int64) (
 	if err != nil {
 		return err
 	}
-	b, err := json.Marshal(snapshotInfo{"tidings", 1, 2, hash})
+	b, err := json.Marshal(snapshotInfo{"tidings", 1, 4, hash})
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func verifyDatabase(ctx context.Context, path string) error {
 	if err = db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return err
 	}
-	if version != 2 && version != 3 {
+	if version != 2 && version != 3 && version != 4 {
 		return fmt.Errorf("unsupported backup schema %d", version)
 	}
 	var check string
@@ -318,7 +318,7 @@ func RestoreInstance(ctx context.Context, archive, destination string, limit int
 	var meta snapshotInfo
 	d = json.NewDecoder(bytes.NewReader(b))
 	d.DisallowUnknownFields()
-	if err = d.Decode(&meta); err != nil || d.Decode(new(any)) != io.EOF || meta.App != "tidings" || meta.Version != 1 || meta.Schema != 2 {
+	if err = d.Decode(&meta); err != nil || d.Decode(new(any)) != io.EOF || meta.App != "tidings" || meta.Version != 1 || (meta.Schema < 2 || meta.Schema > 4) {
 		return errors.New("invalid snapshot metadata")
 	}
 	file := filepath.Join(stage, "reader.db")

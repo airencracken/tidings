@@ -57,7 +57,7 @@ make build
 The account command asks twice for a password with terminal echo disabled.
 Open **http://127.0.0.1:8085** and sign in. Your first reading table is empty.
 Under **Sources**, paste a direct RSS/Atom address or follow a source from the
-catalog. Choose **Refresh feeds** to collect stories. Refresh is asynchronous;
+catalog. New follows fetch immediately. Fetching runs in the background;
 reload when you want to see the results. The running server also checks feeds
 every 30 minutes, with a five-minute minimum between checks of any one source.
 
@@ -194,7 +194,7 @@ restored instance on a separate loopback port, then stop both servers and switch
 `TIDINGS_DATA_DIR` in your service configuration to the restored directory.
 Keep the original directory until you have checked the restored reader. When
 using the supplied systemd unit, also update `WorkingDirectory` and
-`ReadWritePaths` for a custom location. Schema v1 databases migrate to v2 on
+`ReadWritePaths` for a custom location. Existing databases migrate transactionally to schema 4 on
 open; take a stopped copy of the entire original directory before upgrading if
 you need to return to an older binary.
 
@@ -216,7 +216,7 @@ The executable serves its own CSS, JavaScript, and templates. Reading, managing
 sources, and all account forms work with JavaScript disabled. JavaScript only
 adds a saved light/dark/system theme preference. Dates use UTC. Refresh requests
 from different readers queue without being dropped; repeated requests coalesce,
-and sources keep a five-minute fetch cooldown. Reload to check refresh progress.
+and sources keep a five-minute fetch cooldown. The fetch indicator updates as work progresses and shows the next automatic check.
 The reader preserves feed paragraphs, lists, and code indentation as escaped text.
 
 The little town crier welcomes readers on the sign-in screen and first empty
@@ -293,7 +293,7 @@ Feeds must use public HTTP(S) URLs on port 80 or 443. DNS results are checked an
 the validated IP is dialed directly, including on redirects. Private networks,
 local services, and cloud metadata addresses are blocked. Responses are bounded
 to 4 MiB and 1,000 entries per fetch. Tidings renders publisher-supplied text as
-plain text without remote images, scripts, or automatic embeds. It does not
+plain text. Hosts may enable feed-supplied images, which are fetched and cached by Tidings. It does not
 scrape full articles beyond the supplied feed; open the original when needed.
 
 ## Development and verification
@@ -343,3 +343,29 @@ See [LICENSE](LICENSE) and [third-party components](THIRD_PARTY.md).
 New source builds share [browser and command-line setup](docs/setup.md) with the
 other Comfyware apps: `tidings setup` authorizes the first-owner browser page,
 and `tidings create-owner --username NAME` prompts privately by default.
+
+## Feed images and fetch progress
+
+The reading table and Sources show live fetch status, completed checks, failures,
+and the next automatic check. Following a source or importing OPML starts its
+first fetch immediately. A completed fetch offers a link to the updated reading
+table, so the page does not move while you read. Without JavaScript, reload to
+see the current status.
+
+Owners can enable **Your account → Feed images → Show feed images**. This is off
+by default, including on upgrade. Readers receive previews from authenticated
+Tidings routes; their browsers do not contact image publishers. The fetcher uses
+the same validated public-network transport as RSS, with a 5 MiB download cap,
+12-million-pixel decode cap, and previews up to 1280 pixels. JPEG, PNG, GIF, and
+WebP inputs become static JPEG previews. Concurrent requests share one download.
+
+The private `cache/images` directory has a 100 MiB/2,048-file retention cap and a
+seven-day lifetime. Expired previews are fetched again on access; old files are
+pruned on writes. Cached images are derived data and are excluded from database
+backups. Image settings and source image addresses are preserved in backups.
+
+Check the bundled sources with the production fetcher before a release:
+
+```sh
+TIDINGS_LIVE_FETCH_TEST=1 go test ./internal/reader -run TestLiveCatalogFetch -v -parallel 4
+```

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -29,6 +30,9 @@ func webHarness(t *testing.T) *harness {
 	if err != nil {
 		t.Fatal(err)
 	}
+	a.Fetcher = &Fetcher{Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 304, Header: http.Header{}, Body: io.NopCloser(strings.NewReader("")), Request: r}, nil
+	})}}
 	t.Cleanup(func() { cancel(); a.Wait() })
 	h := &harness{app: a, store: s, tokens: map[int64]string{0: strings.Repeat("0", 64)}}
 	for _, id := range []int64{1, 2, 3} {

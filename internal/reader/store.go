@@ -26,6 +26,9 @@ var migrationV2 string
 //go:embed migration_v3.sql
 var migrationV3 string
 
+//go:embed migration_v4.sql
+var migrationV4 string
+
 type Store struct {
 	DB        *sql.DB
 	lock      *flock.Flock
@@ -112,7 +115,7 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 3 {
+	if version > 4 {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
@@ -122,8 +125,11 @@ func OpenStore(dir string) (store *Store, failure error) {
 	if err == nil && version < 3 {
 		_, err = tx.Exec(migrationV3)
 	}
+	if err == nil && version < 4 {
+		_, err = tx.Exec(migrationV4)
+	}
 	if err == nil {
-		_, err = tx.Exec("PRAGMA user_version=3")
+		_, err = tx.Exec("PRAGMA user_version=4")
 	}
 	if err == nil {
 		err = tx.Commit()
@@ -311,7 +317,7 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 
 func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool, error) {
 	where, args := entryWhere(uid, f)
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
 	params := []any{uid, uid}
 	params = append(params, args...)
 	params = append(params, f.Page*30)
@@ -323,7 +329,7 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 	out := []Entry{}
 	for rows.Next() {
 		var e Entry
-		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.Published, &e.Read, &e.Saved, &e.Source, &e.Category); err != nil {
+		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source, &e.Category); err != nil {
 			return nil, false, err
 		}
 		out = append(out, e)
@@ -337,8 +343,8 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 
 func (s *Store) Entry(ctx context.Context, uid, id int64) (Entry, error) {
 	var e Entry
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
-	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.Published, &e.Read, &e.Saved, &e.Source)
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
+	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source)
 	return e, err
 }
 
@@ -392,7 +398,7 @@ func (s *Store) ApplyFetch(ctx context.Context, f Feed, r FetchResult) error {
 	defer tx.Rollback()
 	if !r.Unchanged {
 		for _, e := range r.Feed.Entries {
-			_, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO UPDATE SET title=excluded.title,url=excluded.url,body=excluded.body WHERE entries.import_owner IS NULL`, f.ID, e.Key, e.Title, e.URL, e.Body, e.Published)
+			_, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,title,url,body,image_url,published) VALUES(?,?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO UPDATE SET title=excluded.title,url=excluded.url,body=excluded.body,image_url=excluded.image_url WHERE entries.import_owner IS NULL`, f.ID, e.Key, e.Title, e.URL, e.Body, e.ImageURL, e.Published)
 			if err != nil {
 				return err
 			}
@@ -496,14 +502,14 @@ func (s *Store) Export(ctx context.Context, u User) (Export, error) {
 		return out, err
 	}
 	// The export includes only personally marked stories and subscribed sources.
-	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.published,st.read,st.saved,f.title FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
+	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.image_url,e.published,st.read,st.saved,f.title FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
 	if err != nil {
 		return out, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var e Entry
-		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.Published, &e.Read, &e.Saved, &e.Source); err != nil {
+		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source); err != nil {
 			return out, err
 		}
 		out.Stories = append(out.Stories, e)

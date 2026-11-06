@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
 import { createServer } from 'node:net';
@@ -46,8 +47,9 @@ db.execute("INSERT INTO feeds(id,url,title,checked) VALUES(2,'https://example.or
 db.execute("INSERT INTO group_feeds(feed_id,category) VALUES(2,'Infosec')")
 db.execute("INSERT INTO household_tags(feed_id,tag) VALUES(2,'security')")
 for i in range(35):
- db.execute("INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(1,?,?,?,?,?)",(str(i),'Test story %02d: understanding our tools'%i,'https://example.org/story/'+str(i),'This is a local browser-test fixture. A readable explanation with no scripts, embeds, or external images.',now-i))
+ db.execute("INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(1,?,?,?,?,?)",(str(i),'Test story %02d: understanding our tools'%i,'https://example.org/story/'+str(i),'A closer look at the tools we use, the ideas behind them, and the small discoveries that make everyday work more interesting.',now-i))
 db.execute("INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(2,'shared','A shared test story','https://example.org/shared-story','A household browser-test fixture.',?)",(now,))
+db.execute("UPDATE entries SET image_url='https://example.org/preview.png' WHERE id=1")
 db.commit()
 `, path.join(env.TIDINGS_DATA_DIR,'reader.db')], { encoding:'utf8' });
   assert.equal(seeded.status, 0, seeded.stderr);
@@ -69,10 +71,43 @@ db.commit()
     assert.equal(response.status(),200,`public favicon ${icon}`);
     assert.ok(!response.headers()['set-cookie'],'favicon starts an anonymous session');
   }
+
+  const preview = await page.evaluate(() => {
+    const canvas = document.createElement('canvas'); canvas.width=640;canvas.height=360;
+    const context=canvas.getContext('2d');context.fillStyle='#dce6cf';context.fillRect(0,0,640,360);
+    context.fillStyle='#355c48';context.fillRect(80,60,480,240);context.fillStyle='#fffef9';context.font='36px Georgia';context.fillText('A quieter reading table',135,195);
+    return canvas.toDataURL('image/jpeg').split(',')[1];
+  });
+  const cacheDirectory=path.join(env.TIDINGS_DATA_DIR,'cache','images');await mkdir(cacheDirectory,{recursive:true,mode:0o700});
+  await writeFile(path.join(cacheDirectory,createHash('sha256').update('https://example.org/preview.png').digest('hex')+'.jpg'),Buffer.from(preview,'base64'),{mode:0o600});
   await signIn(page,origin);
   assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg');
   assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png');
   await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg';await icon.decode();if(!icon.naturalWidth)throw new Error('SVG favicon did not render');});
+
+  assert.ok(await page.locator('[data-fetch-status]').isVisible());
+  const statusResponse=await context.request.get(origin+'/api/v1/fetch-status');assert.equal(statusResponse.status(),200);
+  assert.ok((await statusResponse.json()).next_check.startsWith('Next automatic check'));
+  const initialCheck=Number(await page.locator('[data-fetch-status]').getAttribute('data-checked'));
+  let fetchStage=0;
+  await page.route('**/api/v1/fetch-status',route => route.fulfill({json:{state:['queued','fetching','idle'][Math.min(fetchStage++,2)],message:['Your sources are queued for fetching.','Fetching your sources.','Feeds checked just now.'][Math.min(fetchStage-1,2)],detail:'',checked:initialCheck+1,next_check:'Next automatic check in 30 minutes.'}}));
+  await page.reload();
+  await page.getByText('Your sources are queued for fetching.',{exact:true}).waitFor();
+  await page.getByText('Fetching your sources.',{exact:true}).waitFor();
+  await page.getByText('Feeds checked just now.',{exact:true}).waitFor();
+  assert.ok(await page.getByRole('link',{name:'Show updated stories',exact:true}).isVisible());
+  await page.unroute('**/api/v1/fetch-status');
+  await page.goto(origin+'/account');
+  assert.equal(await page.getByLabel('Show feed images',{exact:true}).isChecked(),false);
+  await page.getByLabel('Show feed images',{exact:true}).check();await page.getByRole('button',{name:'Save image settings',exact:true}).click();
+  await page.goto(origin+'/');
+  await page.locator('[data-feed-image]').first().evaluate(image=>image.decode());
+  assert.equal((await context.request.get(origin+'/story/1/image')).status(),200);
+  await page.goto(origin+'/story/1');assert.equal(await page.locator('.story-hero img').count(),1);
+  assert.ok(!(await page.locator('body').innerText()).includes('The text supplied by this feed'));
+  await page.goto(origin+'/account');await page.getByLabel('Show feed images',{exact:true}).uncheck();await page.getByRole('button',{name:'Save image settings',exact:true}).click();
+  assert.equal((await context.request.get(origin+'/story/1/image')).status(),404);
+  await page.goto(origin+'/');
   assert.equal(await page.locator('.story-row').count(),30);
   await page.getByRole('link',{name:'Next page',exact:true}).click();
   assert.equal(await page.locator('.story-row').count(),5);
@@ -229,7 +264,7 @@ db.commit()
   await plainContext.close();
   assert.deepEqual(errors,[]);
   assert.ok([...observed].every(address => address.startsWith(origin+'/')),'browser contacted a third party');
-  console.log('Browser checks passed: accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, both themes, and five routes at four widths.');
+  console.log('Browser checks passed: live fetch status, cached feed images, accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, both themes, and five routes at four widths.');
 } finally {
   if(browser) await browser.close();
   if(server && server.exitCode===null){server.kill('SIGTERM');await Promise.race([once(server,'exit'),new Promise(resolve=>setTimeout(resolve,5000))]);if(server.exitCode===null)server.kill('SIGKILL');}

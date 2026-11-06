@@ -29,7 +29,9 @@ sudo tidings create-owner --username yourname
 sudo tidings set-password --username yourname
 ```
 
-Both commands prompt twice with echo disabled. Automation may explicitly use
+Both commands accept `--data-dir DIRECTORY` to select a portable instance.
+Without it, they discover the installed service or use the app’s data-directory
+environment variable. Both commands prompt twice with echo disabled. Automation may explicitly use
 `--password-stdin` or `--password-file /private/path/password`; the file must be
 a private regular file. `--password-prompt` remains supported. New passwords
 need at least 12 characters and at most 72 UTF-8 bytes. Existing usernames are
@@ -39,3 +41,7 @@ account's earlier sessions.
 Use `tidings help setup` or `tidings setup --help` for command help. Application-specific
 settings and invitations are available after signing in. Existing command names
 remain supported for compatibility.
+
+Future Bubble Tea administration panels should call the same account and
+settings operations as these commands, retaining their validation and session
+revocation rules. Interactive panels supplement the commands used by automation.

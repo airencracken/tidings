@@ -37,6 +37,7 @@ type Config struct {
 type App struct {
 	Store               *Store
 	Fetcher             *Fetcher
+	images              *imageCache
 	config              Config
 	templates           *template.Template
 	mux                 *http.ServeMux
@@ -49,6 +50,7 @@ type App struct {
 	refreshCurrent      int64
 	refreshCurrentAll   bool
 	refreshCurrentForce bool
+	refreshNextCheck    time.Time
 	ctx                 context.Context
 	wg                  sync.WaitGroup
 	Catalog             []Suggestion
@@ -78,6 +80,8 @@ type page struct {
 	Groups                                             []FeedGroup
 	Collection                                         FeedGroup
 	Refresh                                            RefreshStatus
+	Fetch                                              fetchOverview
+	ImagesEnabled                                      bool
 	Backup                                             autobackup.Status
 	InviteRef                                          string
 	Members                                            []User
@@ -90,7 +94,7 @@ type page struct {
 }
 
 func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
-	a := &App{Store: s, Fetcher: NewFetcher(), config: c, ctx: ctx, mux: http.NewServeMux()}
+	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), config: c, ctx: ctx, mux: http.NewServeMux()}
 	funcs := template.FuncMap{
 		"date": func(n int64) string { return time.Unix(n, 0).UTC().Format("Jan 2, 2006") },
 		"checked": func(n int64) string {
@@ -155,7 +159,7 @@ func (a *App) cookie(w http.ResponseWriter, name, value string, age int) {
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Referrer-Policy", "no-referrer")
 	w.Header().Set("Cache-Control", "no-store")
@@ -235,6 +239,9 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) routes() {
+	a.mux.HandleFunc("GET /api/v1/fetch-status", a.fetchStatus)
+	a.mux.HandleFunc("GET /story/{id}/image", a.storyImage)
+	a.mux.HandleFunc("POST /account/images", a.saveImages)
 	a.mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "image/x-icon")
 		http.ServeFileFS(w, r, assets, "static/favicon.ico")
@@ -281,6 +288,14 @@ func (a *App) routes() {
 func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int) {
 	p.Demo = a.config.Demo
 	p.Refresh = a.RefreshStatus(current(r).User.ID)
+	if current(r).User.ID > 0 {
+		p.ImagesEnabled, _ = a.Store.ImagesEnabled(r.Context())
+		var err error
+		p.Fetch, err = a.fetchOverview(r.Context(), current(r).User.ID)
+		if err != nil {
+			p.Fetch = fetchOverview{State: "unavailable", Message: "Fetch status is unavailable."}
+		}
+	}
 	if current(r).User.Owner {
 		p.Backup = a.config.Backups.Status()
 	}
@@ -317,7 +332,7 @@ func back(r *http.Request) string {
 	return u.RequestURI()
 }
 func notice(r *http.Request) string {
-	return map[string]string{"refresh-all": "All feeds will be fetched now. You can keep reading; reload to check progress.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added. Use Refresh feeds to collect its stories.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "refresh": "Refresh requested. You can keep reading; reload when you are ready.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
+	return map[string]string{"images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
 }
 func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
@@ -554,6 +569,7 @@ func (a *App) subscribe(w http.ResponseWriter, r *http.Request) {
 		a.bad(w, r, err.Error())
 		return
 	}
+	a.StartRefresh(u.ID, false)
 	to := "/sources?notice=subscribed"
 	if group {
 		to += "&scope=household"
@@ -609,6 +625,7 @@ func (a *App) importOPML(w http.ResponseWriter, r *http.Request) {
 		a.bad(w, r, err.Error())
 		return
 	}
+	a.StartRefresh(u.ID, false)
 	to := "/sources?notice=imported"
 	if group {
 		to += "&scope=household"
@@ -784,14 +801,15 @@ func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {
 }
 
 type RefreshStatus struct {
-	Running bool
-	Queued  bool
+	Running   bool
+	Queued    bool
+	NextCheck time.Time
 }
 
 func (a *App) RefreshStatus(uid int64) RefreshStatus {
 	a.refreshMu.Lock()
 	defer a.refreshMu.Unlock()
-	return RefreshStatus{Running: a.refreshRunning && (a.refreshCurrent == uid || a.refreshCurrentAll), Queued: a.refreshAll || a.refreshPending[uid]}
+	return RefreshStatus{Running: a.refreshRunning && (a.refreshCurrent == uid || a.refreshCurrentAll), Queued: a.refreshAll || a.refreshPending[uid], NextCheck: a.refreshNextCheck}
 }
 
 // One worker drains a bounded set of account requests, coalescing duplicates.
@@ -917,6 +935,9 @@ func (a *App) refreshFeeds(uid int64, all, force bool) {
 }
 func (a *App) Wait() { a.wg.Wait() }
 func (a *App) Poll(ctx context.Context, interval time.Duration) {
+	a.refreshMu.Lock()
+	a.refreshNextCheck = time.Now().Add(interval)
+	a.refreshMu.Unlock()
 	a.StartRefresh(0, true)
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -924,7 +945,10 @@ func (a *App) Poll(ctx context.Context, interval time.Duration) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-ticker.C:
+		case now := <-ticker.C:
+			a.refreshMu.Lock()
+			a.refreshNextCheck = now.Add(interval)
+			a.refreshMu.Unlock()
 			a.StartRefresh(0, true)
 		}
 	}
