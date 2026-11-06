@@ -2,12 +2,12 @@
 
 The [GitHub releases](https://github.com/airencracken/tidings/releases) provide
 versioned Linux amd64 and arm64 archives, Debian packages, a source archive,
-and a SHA-256 checksum manifest. The initial release is **0.1.0**.
+and a SHA-256 checksum manifest. The current release is **0.2.0**.
 
 ## Linux archive
 
 Choose your architecture, download the archive and matching checksum manifest,
-and run `sha256sum -c tidings_0.1.0_checksums.txt --ignore-missing` in that directory.
+and run `sha256sum -c tidings_0.2.0_checksums.txt --ignore-missing` in that directory.
 Each archive contains the executable, license and dependency notices, README,
 maintained guides, and service/proxy examples under `deploy/`.
 
@@ -18,7 +18,7 @@ create a private data directory and set `TIDINGS_DATA_DIR` explicitly. Run
 ## Debian or Ubuntu
 
 ```sh
-sudo apt install ./tidings_0.1.0_amd64.deb
+sudo apt install ./tidings_0.2.0_amd64.deb
 sudo tidings create-owner --username owner
 sudo systemctl enable --now tidings
 ```

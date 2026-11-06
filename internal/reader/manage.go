@@ -122,7 +122,7 @@ func (a *App) revokeInvite(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/account", 303)
+	http.Redirect(w, r, "/account/invitations", 303)
 }
 func (s *Store) SetTopic(ctx context.Context, u User, fid int64, raw string, household bool) error {
 	topic, err := category(raw)

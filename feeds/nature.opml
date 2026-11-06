@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Nature</title>
+  </head>
+  <body>
+    <outline text="Yale Environment 360" title="Yale Environment 360" type="rss" xmlUrl="https://e360.yale.edu/feed.xml" category="Nature" />
+  </body>
+</opml>

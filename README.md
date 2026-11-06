@@ -14,7 +14,7 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Initial release: **[0.1.0](https://github.com/airencracken/tidings/releases/tag/v0.1.0)**.
+Current release: **[0.2.0](https://github.com/airencracken/tidings/releases/tag/v0.2.0)**.
 
 ## Install
 
@@ -111,35 +111,33 @@ list. Each source can have up to 12 tags, each at most 40 characters. Groups can
 overlap; read/save state follows the story across all views. The optional main
 topic is an additional simple filter and sets the initial tag when none is given.
 
-## AI, tech, and infosec
+## Suggested sources
 
-The catalog includes **37 feeds verified on November 6, 2026** using the same
-public-only HTTP client and parser as the application: 15 AI, 10 tech, and 12
-infosec sources. It mixes independent writers, reporting, research, and primary
-sources, with vendor and paywall context in the descriptions. Nothing is
-subscribed automatically. A high-volume source can bring a large backlog; you
-can mark just the current page read without changing anyone else's state.
+The owner chooses which categories are available under **Your account → Suggested
+sources**. Suggestions begin disabled on fresh installs and upgrades. Enable news,
+science, culture, food, sports, nature, AI, tech, or infosec to suit your household.
+Enabling a category never subscribes anyone; disabling it leaves existing
+subscriptions and reading state intact. Members can always enter their own feed
+URLs, discover feeds from websites, or import OPML.
 
-For a whole topic, import a bundle under **Sources → Import subscriptions**:
+The optional catalog has 45 feeds. The eight general-interest additions were
+checked on November 6, 2026 with the application's public-only client and parser.
+Feeds may change or disappear; errors appear beside subscribed sources. Some
+sources publish excerpts or require a subscription for the original article.
 
-| Bundle | Feeds |
-| --- | --- |
-| [AI](feeds/ai.opml) | 15 |
-| [Tech](feeds/tech.opml) | 10 |
-| [Infosec](feeds/infosec.opml) | 12 |
-| [All three](feeds/all.opml) | 37 |
+Category bundles are available in [feeds/](feeds/), including [all categories](feeds/all.opml).
+Import an OPML bundle under **Sources → Import subscriptions**, or use **Household
+sources** to add it to the opt-in shared table. Imports are transactional and keep
+existing subscriptions, topics, and tags.
 
-Import on the **Household sources** page to add the bundle to the shared table
-instead. Imports are transactional and keep existing subscriptions, topics, and tags.
-Search the suggested catalog by name, topic, or description. To find a feed from
-a website, open **Find feeds from a website**, enter its address, and choose
-one of its advertised RSS or Atom links. Discovery uses the same public-network
-fetching policy as feed refreshes. Edit topics and tags beside each subscribed
-source, and rename an interest group from its own page.
-The catalog and bundles are checked together to prevent drift. Feed availability
-can change; errors appear beside the affected source. The initial check excluded
-Dan Luu's oversized feed and Rapid7's malformed XML rather than listing sources
-the application could not ingest.
+## Owner feed controls
+
+Under **Your account → Feed fetching**, choose **Fetch all feeds now** to fetch
+all active personal and household sources immediately. This bypasses the normal
+five-minute cooldown, runs in the background, and coalesces repeated requests.
+Normal refresh and scheduled polling retain their cooldown. No reading state or
+subscriptions are changed, and members cannot invoke the instance-wide action.
+
 
 ## Own your reading life
 

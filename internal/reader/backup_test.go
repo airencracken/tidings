@@ -17,6 +17,9 @@ func TestVerifiedBackupAndRestore(t *testing.T) {
 	s := testStore(t)
 	ctx := context.Background()
 	f := testSource(t, s, 2, "backed-up", false)
+	if err := s.SetCatalogCategories(ctx, 1, []string{"Science"}, []CatalogCategory{{Name: "Science"}}); err != nil {
+		t.Fatal(err)
+	}
 	if err := s.SetState(ctx, 2, entryID(t, s, f), "saved", true); err != nil {
 		t.Fatal(err)
 	}
@@ -37,6 +40,9 @@ func TestVerifiedBackupAndRestore(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer next.Close()
+	if enabled, err := next.CatalogCategories(ctx); err != nil || !enabled["Science"] || len(enabled) != 1 {
+		t.Fatal("suggestion settings missing from backup", enabled, err)
+	}
 	if got := entries(t, next, 2, "saved"); len(got) != 1 {
 		t.Fatal("saved state missing", got)
 	}

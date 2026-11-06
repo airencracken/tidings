@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
+import { createServer } from 'node:net';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -11,12 +12,17 @@ const { chromium } = await import(process.env.TIDINGS_PLAYWRIGHT_PATH
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const moduleDir = spawnSync('go',['list','-m','-f','{{.Dir}}','github.com/airencracken/comfylib'],{cwd:root,encoding:'utf8'});
 assert.equal(moduleDir.status,0,moduleDir.stderr);
-const { accountLayout,accountWidths } = await import(pathToFileURL(path.join(moduleDir.stdout.trim(),'ui/uitest/layout.mjs')).href);
+const { accountLayout,accountWidths,invitationLayout,invitationWidths,assertInvitationLayout } = await import(pathToFileURL(path.join(moduleDir.stdout.trim(),'ui/uitest/layout.mjs')).href);
 const temporary = await mkdtemp(path.join(tmpdir(), 'tidings-browser-'));
 const password = 'quiet mornings and books';
 const passwordFile = path.join(temporary, 'password');
 await writeFile(passwordFile, password + '\n', { mode: 0o600 });
-const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:0', TIDINGS_BASE_URL: '', TIDINGS_SECURE_COOKIES: '' };
+const reservation=createServer();
+await new Promise(resolve=>reservation.listen(0,'127.0.0.1',resolve));
+const port=reservation.address().port;
+await new Promise(resolve=>reservation.close(resolve));
+const localOrigin='http://127.0.0.1:'+port;
+const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:'+port, TIDINGS_BASE_URL: localOrigin, TIDINGS_SECURE_COOKIES: '' };
 const binary = path.join(root, 'bin/tidings');
 let server, browser;
 const errors = [];
@@ -54,7 +60,7 @@ db.commit()
     server.stdout.on('data',capture);server.stderr.on('data',capture);
   });
   assert.equal((await fetch(origin + '/healthz')).status,200);
-  browser = await chromium.launch({ headless:true });
+  browser = await chromium.launch({ headless:true, executablePath: process.env.CHROMIUM || '/usr/bin/chromium' });
   const context = await browser.newContext({ viewport:{width:1440,height:1000} });
   context.on('request',request => observed.add(request.url()));
   const page=await context.newPage();page.on('pageerror',error => errors.push(String(error)));
@@ -91,13 +97,33 @@ db.commit()
   await page.goto(origin+'/?view=group');
   assert.equal(await page.getByRole('heading',{name:'A shared test story',exact:true}).count(),1);
 
+  // The host enables categories without subscribing any household member.
+  await page.goto(origin+'/sources');
+  assert.equal(await page.locator('.catalog-card').count(),0);
+  await page.goto(origin+'/account');
+  for(const category of ['Tech','Science']) await page.locator(`input[name="category"][value="${category}"]`).check();
+  await page.getByRole('button',{name:'Save suggested categories',exact:true}).click();
+  await page.goto(origin+'/sources');
+  assert.ok(await page.locator('.catalog-card').count()>0);
+  assert.equal(await page.getByRole('heading',{name:'Simon Willison',exact:true}).count(),0);
+  await page.goto(origin+'/account/invitations');
+  for(const theme of ['light','dark']) {
+    await page.getByLabel('Theme',{exact:true}).selectOption(theme);
+    for(const width of invitationWidths) {
+      await page.setViewportSize({width,height:1000});
+      assertInvitationLayout(await page.evaluate(invitationLayout),width,theme+' invitations');
+    }
+  }
+  await page.setViewportSize({width:1440,height:1000});
+
   // An invitation is redeemed in a genuinely separate browser context.
   await page.goto(origin+'/account');
   await page.getByRole('button',{name:'Create an invitation',exact:true}).click();
   const invitation = await page.locator('#invitation').inputValue();
   const newcomer=await browser.newContext();
   const member=await newcomer.newPage();
-  await member.goto(origin+invitation);
+  assert.ok(invitation.startsWith(origin+"/join?code="));
+  await member.goto(invitation);
   await member.getByLabel('Choose a username').fill('alice');
   await member.getByLabel('Choose a password').fill(password);
   await member.getByRole('button',{name:'Make yourself at home',exact:true}).click();
@@ -127,6 +153,8 @@ db.commit()
   assert.equal(await member.locator('.story-row').count(),1);
   await member.goto(origin+'/account');
   assert.equal(await member.getByRole('heading',{name:'Instance backups',exact:true}).count(),0);
+  assert.equal(await member.getByRole('button',{name:'Fetch all feeds now',exact:true}).count(),0);
+  assert.equal(await member.getByRole('button',{name:'Save suggested categories',exact:true}).count(),0);
   await page.goto(origin+'/account');
   let alice=page.locator('details.admin-row').filter({has:page.locator('summary').filter({hasText:'alice'})});
   await alice.locator('summary').click();
@@ -170,9 +198,10 @@ db.commit()
     await page.getByLabel('Theme',{exact:true}).selectOption(theme);
     for(const width of [375,768,1024,1440]) {
       await page.setViewportSize({width,height:1000});
-      for(const route of ['/','/sources','/groups','/account','/story/1']) {
+      for(const route of ['/','/sources','/groups','/account','/account/invitations','/story/1']) {
         await page.goto(origin+route);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth<=innerWidth+1),`${route} overflows at ${width} in ${theme}`);
+        if(screenshotDir && route==='/account/invitations' && [375,1440].includes(width))await page.screenshot({path:path.join(screenshotDir,`invitations-${theme}-${width}.png`),fullPage:true});
         if(screenshotDir && route==='/account' && [375,1440].includes(width))await page.screenshot({path:path.join(screenshotDir,`account-${theme}-${width}.png`),fullPage:true});
       }
       if(screenshotDir && (width===375 || width===1440)) {

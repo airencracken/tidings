@@ -257,5 +257,61 @@
     "Category": "Infosec",
     "Description": "Threat research, incident findings, and product news. From Microsoft itself.",
     "verified": "2026-11-06"
+  },
+  {
+    "Title": "BBC World News",
+    "URL": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "Category": "News",
+    "Description": "World news headlines and reporting from the BBC.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "NPR News",
+    "URL": "https://feeds.npr.org/1001/rss.xml",
+    "Category": "News",
+    "Description": "National and international reporting from NPR.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "NASA",
+    "URL": "https://www.nasa.gov/feed/",
+    "Category": "Science",
+    "Description": "Space missions, discoveries, and updates from NASA. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "ScienceDaily",
+    "URL": "https://www.sciencedaily.com/rss/top/science.xml",
+    "Category": "Science",
+    "Description": "Science research news and summaries across disciplines.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Smithsonian Magazine",
+    "URL": "https://www.smithsonianmag.com/rss/latest_articles/",
+    "Category": "Culture",
+    "Description": "History, art, culture, and the natural world.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Good Food",
+    "URL": "https://www.bbcgoodfood.com/feed",
+    "Category": "Food",
+    "Description": "Recipes, cooking ideas, and food features.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "BBC Sport",
+    "URL": "https://feeds.bbci.co.uk/sport/rss.xml?edition=uk",
+    "Category": "Sports",
+    "Description": "Sports reporting, results, and features from the BBC.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Yale Environment 360",
+    "URL": "https://e360.yale.edu/feed.xml",
+    "Category": "Nature",
+    "Description": "Environmental reporting and analysis from Yale Environment 360.",
+    "verified": "2026-11-06"
   }
 ]

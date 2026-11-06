@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings News</title>
+  </head>
+  <body>
+    <outline text="BBC World News" title="BBC World News" type="rss" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" category="News" />
+    <outline text="NPR News" title="NPR News" type="rss" xmlUrl="https://feeds.npr.org/1001/rss.xml" category="News" />
+  </body>
+</opml>

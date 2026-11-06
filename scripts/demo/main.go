@@ -62,7 +62,8 @@ func run(ctx context.Context, port int, out io.Writer) (err error) {
 	}
 	appCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	app, err := reader.NewApp(appCtx, s, reader.Config{Demo: true})
+	base := "http://" + listener.Addr().String()
+	app, err := reader.NewApp(appCtx, s, reader.Config{Demo: true, BaseURL: base})
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,6 @@ func run(ctx context.Context, port int, out io.Writer) (err error) {
 	pollDone := make(chan struct{})
 	go func() { defer close(pollDone); app.Poll(appCtx, 30*time.Minute) }()
 	defer func() { cancel(); <-pollDone; app.Wait() }()
-	base := "http://" + listener.Addr().String()
 	if _, err = fmt.Fprintf(out, "\nOpen %s\nOwner: demo\nMembers: freya, jules\nPassword for all three: %s\n\nTry personal sources, handpicked and tag-based groups, and saved stories.\nDemo and freya follow the household table; jules starts opted out.\nSample feeds refresh offline. No publisher requests are made in this demo.\nDemo data: %s\nPress Ctrl-C to stop and remove this demo. Each run starts fresh.\n\n", base, demoPassword, dir); err != nil {
 		return err
 	}

@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Science</title>
+  </head>
+  <body>
+    <outline text="NASA" title="NASA" type="rss" xmlUrl="https://www.nasa.gov/feed/" category="Science" />
+    <outline text="ScienceDaily" title="ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/top/science.xml" category="Science" />
+  </body>
+</opml>

@@ -23,6 +23,9 @@ var schema string
 //go:embed migration_v2.sql
 var migrationV2 string
 
+//go:embed migration_v3.sql
+var migrationV3 string
+
 type Store struct {
 	DB        *sql.DB
 	lock      *flock.Flock
@@ -109,15 +112,18 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 2 {
+	if version > 3 {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
 	if _, err = tx.Exec(schema); err == nil && version < 2 {
 		_, err = tx.Exec(migrationV2)
 	}
+	if err == nil && version < 3 {
+		_, err = tx.Exec(migrationV3)
+	}
 	if err == nil {
-		_, err = tx.Exec("PRAGMA user_version=2")
+		_, err = tx.Exec("PRAGMA user_version=3")
 	}
 	if err == nil {
 		err = tx.Commit()

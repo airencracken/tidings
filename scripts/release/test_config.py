@@ -2,6 +2,11 @@
 """Release metadata, documentation, service and publication contracts."""
 from pathlib import Path
 import re
+import json
+import os
+import shlex
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -32,6 +37,24 @@ class ReleaseTests(unittest.TestCase):
             self.assertNotIn('set -e',script.read_text())
             self.assertNotIn('rm -rf',script.read_text())
         self.assertNotIn(' enable ',(ROOT/'deploy/debian/postinst').read_text())
+
+    def test_openrc_exports_ordinary_configuration_assignments(self):
+        prefix = APP.upper() + '_'
+        main = (ROOT/'cmd'/APP/'main.go').read_text()
+        declaration = main.split('var serviceSettings = []string{', 1)[1].split('}', 1)[0]
+        keys = re.findall(r'"(' + prefix + r'[A-Z_]+)"', declaration)
+        keys.append(prefix + 'DATA_DIR')
+        expected = {key: 'value with spaces; $literal ' + str(index) for index, key in enumerate(keys)}
+        assignments = '\n'.join(key + '=' + shlex.quote(value) for key, value in expected.items())
+        probe = 'import json, os; print(json.dumps({k:v for k,v in os.environ.items() if k.startswith(' + repr(prefix) + ')}))'
+        env = {key:value for key,value in os.environ.items() if not key.startswith(prefix)}
+        for shell in ('sh', 'bash'):
+            with self.subTest(shell=shell):
+                command = assignments + '\n. ' + shlex.quote(str(ROOT/'deploy/openrc'/APP))
+                command += '\n' + shlex.join([sys.executable, '-c', probe])
+                result = subprocess.run([shell, '-c', command], env=env, text=True, capture_output=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout), expected)
 
     def test_source_and_checksums_and_publication_gates(self):
         config=(ROOT/'.goreleaser.yaml').read_text()

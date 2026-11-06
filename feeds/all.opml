@@ -1,51 +1,53 @@
 <?xml version='1.0' encoding='utf-8'?>
 <opml version="2.0">
   <head>
-    <title>Tidings: AI, Tech, Infosec</title>
+    <title>Tidings all categories</title>
   </head>
   <body>
-    <outline text="AI">
-      <outline type="rss" text="Simon Willison" title="Simon Willison" xmlUrl="https://simonwillison.net/atom/everything/" />
-      <outline type="rss" text="Hugging Face" title="Hugging Face" xmlUrl="https://huggingface.co/blog/feed.xml" />
-      <outline type="rss" text="Google Research" title="Google Research" xmlUrl="https://research.google/blog/rss/" />
-      <outline type="rss" text="Google DeepMind" title="Google DeepMind" xmlUrl="https://deepmind.google/blog/rss.xml" />
-      <outline type="rss" text="OpenAI" title="OpenAI" xmlUrl="https://openai.com/news/rss.xml" />
-      <outline type="rss" text="Berkeley AI Research" title="Berkeley AI Research" xmlUrl="https://bair.berkeley.edu/blog/feed.xml" />
-      <outline type="rss" text="Machine Learning at CMU" title="Machine Learning at CMU" xmlUrl="https://blog.ml.cmu.edu/feed/" />
-      <outline type="rss" text="Lilian Weng" title="Lilian Weng" xmlUrl="https://lilianweng.github.io/index.xml" />
-      <outline type="rss" text="Ahead of AI" title="Ahead of AI" xmlUrl="https://magazine.sebastianraschka.com/feed" />
-      <outline type="rss" text="Interconnects" title="Interconnects" xmlUrl="https://www.interconnects.ai/feed" />
-      <outline type="rss" text="Latent Space" title="Latent Space" xmlUrl="https://www.latent.space/feed" />
-      <outline type="rss" text="Import AI" title="Import AI" xmlUrl="https://importai.substack.com/feed" />
-      <outline type="rss" text="The Gradient" title="The Gradient" xmlUrl="https://thegradient.pub/rss/" />
-      <outline type="rss" text="Chip Huyen" title="Chip Huyen" xmlUrl="https://huyenchip.com/feed.xml" />
-      <outline type="rss" text="Microsoft Research" title="Microsoft Research" xmlUrl="https://www.microsoft.com/en-us/research/feed/" />
-    </outline>
-    <outline text="Tech">
-      <outline type="rss" text="Ars Technica" title="Ars Technica" xmlUrl="https://feeds.arstechnica.com/arstechnica/index" />
-      <outline type="rss" text="The Verge" title="The Verge" xmlUrl="https://www.theverge.com/rss/index.xml" />
-      <outline type="rss" text="TechCrunch" title="TechCrunch" xmlUrl="https://techcrunch.com/feed/" />
-      <outline type="rss" text="404 Media" title="404 Media" xmlUrl="https://www.404media.co/rss/" />
-      <outline type="rss" text="LWN.net" title="LWN.net" xmlUrl="https://lwn.net/headlines/rss" />
-      <outline type="rss" text="Phoronix" title="Phoronix" xmlUrl="https://www.phoronix.com/rss.php" />
-      <outline type="rss" text="Julia Evans" title="Julia Evans" xmlUrl="https://jvns.ca/atom.xml" />
-      <outline type="rss" text="Mozilla" title="Mozilla" xmlUrl="https://blog.mozilla.org/feed/" />
-      <outline type="rss" text="Cloudflare" title="Cloudflare" xmlUrl="https://blog.cloudflare.com/rss/" />
-      <outline type="rss" text="GitHub" title="GitHub" xmlUrl="https://github.blog/feed/" />
-    </outline>
-    <outline text="Infosec">
-      <outline type="rss" text="Krebs on Security" title="Krebs on Security" xmlUrl="https://krebsonsecurity.com/feed/" />
-      <outline type="rss" text="Schneier on Security" title="Schneier on Security" xmlUrl="https://www.schneier.com/feed/atom/" />
-      <outline type="rss" text="SANS Internet Storm Center" title="SANS Internet Storm Center" xmlUrl="https://isc.sans.edu/rssfeed.xml" />
-      <outline type="rss" text="Google Project Zero" title="Google Project Zero" xmlUrl="https://projectzero.google/feed.xml" />
-      <outline type="rss" text="Google Security Blog" title="Google Security Blog" xmlUrl="https://security.googleblog.com/feeds/posts/default" />
-      <outline type="rss" text="Cisco Talos" title="Cisco Talos" xmlUrl="https://blog.talosintelligence.com/rss/" />
-      <outline type="rss" text="The DFIR Report" title="The DFIR Report" xmlUrl="https://thedfirreport.com/feed/" />
-      <outline type="rss" text="Trail of Bits" title="Trail of Bits" xmlUrl="https://blog.trailofbits.com/feed/" />
-      <outline type="rss" text="PortSwigger Research" title="PortSwigger Research" xmlUrl="https://portswigger.net/research/rss" />
-      <outline type="rss" text="BleepingComputer" title="BleepingComputer" xmlUrl="https://www.bleepingcomputer.com/feed/" />
-      <outline type="rss" text="The Hacker News" title="The Hacker News" xmlUrl="https://feeds.feedburner.com/TheHackersNews" />
-      <outline type="rss" text="Microsoft Security" title="Microsoft Security" xmlUrl="https://www.microsoft.com/en-us/security/blog/feed/" />
-    </outline>
+    <outline text="Simon Willison" title="Simon Willison" type="rss" xmlUrl="https://simonwillison.net/atom/everything/" category="AI" />
+    <outline text="Hugging Face" title="Hugging Face" type="rss" xmlUrl="https://huggingface.co/blog/feed.xml" category="AI" />
+    <outline text="Google Research" title="Google Research" type="rss" xmlUrl="https://research.google/blog/rss/" category="AI" />
+    <outline text="Google DeepMind" title="Google DeepMind" type="rss" xmlUrl="https://deepmind.google/blog/rss.xml" category="AI" />
+    <outline text="OpenAI" title="OpenAI" type="rss" xmlUrl="https://openai.com/news/rss.xml" category="AI" />
+    <outline text="Berkeley AI Research" title="Berkeley AI Research" type="rss" xmlUrl="https://bair.berkeley.edu/blog/feed.xml" category="AI" />
+    <outline text="Machine Learning at CMU" title="Machine Learning at CMU" type="rss" xmlUrl="https://blog.ml.cmu.edu/feed/" category="AI" />
+    <outline text="Lilian Weng" title="Lilian Weng" type="rss" xmlUrl="https://lilianweng.github.io/index.xml" category="AI" />
+    <outline text="Ahead of AI" title="Ahead of AI" type="rss" xmlUrl="https://magazine.sebastianraschka.com/feed" category="AI" />
+    <outline text="Interconnects" title="Interconnects" type="rss" xmlUrl="https://www.interconnects.ai/feed" category="AI" />
+    <outline text="Latent Space" title="Latent Space" type="rss" xmlUrl="https://www.latent.space/feed" category="AI" />
+    <outline text="Import AI" title="Import AI" type="rss" xmlUrl="https://importai.substack.com/feed" category="AI" />
+    <outline text="The Gradient" title="The Gradient" type="rss" xmlUrl="https://thegradient.pub/rss/" category="AI" />
+    <outline text="Chip Huyen" title="Chip Huyen" type="rss" xmlUrl="https://huyenchip.com/feed.xml" category="AI" />
+    <outline text="Microsoft Research" title="Microsoft Research" type="rss" xmlUrl="https://www.microsoft.com/en-us/research/feed/" category="AI" />
+    <outline text="Ars Technica" title="Ars Technica" type="rss" xmlUrl="https://feeds.arstechnica.com/arstechnica/index" category="Tech" />
+    <outline text="The Verge" title="The Verge" type="rss" xmlUrl="https://www.theverge.com/rss/index.xml" category="Tech" />
+    <outline text="TechCrunch" title="TechCrunch" type="rss" xmlUrl="https://techcrunch.com/feed/" category="Tech" />
+    <outline text="404 Media" title="404 Media" type="rss" xmlUrl="https://www.404media.co/rss/" category="Tech" />
+    <outline text="LWN.net" title="LWN.net" type="rss" xmlUrl="https://lwn.net/headlines/rss" category="Tech" />
+    <outline text="Phoronix" title="Phoronix" type="rss" xmlUrl="https://www.phoronix.com/rss.php" category="Tech" />
+    <outline text="Julia Evans" title="Julia Evans" type="rss" xmlUrl="https://jvns.ca/atom.xml" category="Tech" />
+    <outline text="Mozilla" title="Mozilla" type="rss" xmlUrl="https://blog.mozilla.org/feed/" category="Tech" />
+    <outline text="Cloudflare" title="Cloudflare" type="rss" xmlUrl="https://blog.cloudflare.com/rss/" category="Tech" />
+    <outline text="GitHub" title="GitHub" type="rss" xmlUrl="https://github.blog/feed/" category="Tech" />
+    <outline text="Krebs on Security" title="Krebs on Security" type="rss" xmlUrl="https://krebsonsecurity.com/feed/" category="Infosec" />
+    <outline text="Schneier on Security" title="Schneier on Security" type="rss" xmlUrl="https://www.schneier.com/feed/atom/" category="Infosec" />
+    <outline text="SANS Internet Storm Center" title="SANS Internet Storm Center" type="rss" xmlUrl="https://isc.sans.edu/rssfeed.xml" category="Infosec" />
+    <outline text="Google Project Zero" title="Google Project Zero" type="rss" xmlUrl="https://projectzero.google/feed.xml" category="Infosec" />
+    <outline text="Google Security Blog" title="Google Security Blog" type="rss" xmlUrl="https://security.googleblog.com/feeds/posts/default" category="Infosec" />
+    <outline text="Cisco Talos" title="Cisco Talos" type="rss" xmlUrl="https://blog.talosintelligence.com/rss/" category="Infosec" />
+    <outline text="The DFIR Report" title="The DFIR Report" type="rss" xmlUrl="https://thedfirreport.com/feed/" category="Infosec" />
+    <outline text="Trail of Bits" title="Trail of Bits" type="rss" xmlUrl="https://blog.trailofbits.com/feed/" category="Infosec" />
+    <outline text="PortSwigger Research" title="PortSwigger Research" type="rss" xmlUrl="https://portswigger.net/research/rss" category="Infosec" />
+    <outline text="BleepingComputer" title="BleepingComputer" type="rss" xmlUrl="https://www.bleepingcomputer.com/feed/" category="Infosec" />
+    <outline text="The Hacker News" title="The Hacker News" type="rss" xmlUrl="https://feeds.feedburner.com/TheHackersNews" category="Infosec" />
+    <outline text="Microsoft Security" title="Microsoft Security" type="rss" xmlUrl="https://www.microsoft.com/en-us/security/blog/feed/" category="Infosec" />
+    <outline text="BBC World News" title="BBC World News" type="rss" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" category="News" />
+    <outline text="NPR News" title="NPR News" type="rss" xmlUrl="https://feeds.npr.org/1001/rss.xml" category="News" />
+    <outline text="NASA" title="NASA" type="rss" xmlUrl="https://www.nasa.gov/feed/" category="Science" />
+    <outline text="ScienceDaily" title="ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/top/science.xml" category="Science" />
+    <outline text="Smithsonian Magazine" title="Smithsonian Magazine" type="rss" xmlUrl="https://www.smithsonianmag.com/rss/latest_articles/" category="Culture" />
+    <outline text="Good Food" title="Good Food" type="rss" xmlUrl="https://www.bbcgoodfood.com/feed" category="Food" />
+    <outline text="BBC Sport" title="BBC Sport" type="rss" xmlUrl="https://feeds.bbci.co.uk/sport/rss.xml?edition=uk" category="Sports" />
+    <outline text="Yale Environment 360" title="Yale Environment 360" type="rss" xmlUrl="https://e360.yale.edu/feed.xml" category="Nature" />
   </body>
 </opml>

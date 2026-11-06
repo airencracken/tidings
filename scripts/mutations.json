@@ -238,5 +238,45 @@
     "after": "WHERE 0 AND own.feed_id=? AND own.original_key=? AND own.url=?",
     "package": "./internal/reader",
     "run": "^TestRestoredStateFollowsLaterPublisherFetch$"
+  },
+  {
+    "name": "force fetch bypasses cooldown",
+    "file": "internal/reader/app.go",
+    "before": "a.startRefresh(0, true, true)",
+    "after": "a.startRefresh(0, true, false)",
+    "package": "./internal/reader",
+    "run": "^TestOwnerForceFetchContract$"
+  },
+  {
+    "name": "owner-only instance fetch",
+    "file": "internal/reader/app.go",
+    "before": "func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {\n\tif !current(r).User.Owner {",
+    "after": "func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {\n\tif false {",
+    "package": "./internal/reader",
+    "run": "^TestOwnerForceFetchContract$"
+  },
+  {
+    "name": "suggestions honor enabled categories",
+    "file": "internal/reader/app.go",
+    "before": "enabled[item.Category] &&",
+    "after": "true &&",
+    "package": "./internal/reader",
+    "run": "^TestSuggestionCategoriesDefaultAuthorizationAndAtomicity$"
+  },
+  {
+    "name": "suggestion settings validate owner in transaction",
+    "file": "internal/reader/catalog.go",
+    "before": "if !owner {",
+    "after": "if false {",
+    "package": "./internal/reader",
+    "run": "^TestSuggestionCategoriesDefaultAuthorizationAndAtomicity$"
+  },
+  {
+    "name": "public invitations require HTTPS",
+    "file": "internal/reader/invitations.go",
+    "before": "u.Scheme != \"http\" || ip == nil || !ip.IsLoopback()",
+    "after": "u.Scheme != \"http\" || ip == nil",
+    "package": "./internal/reader",
+    "run": "^TestPublicOriginAdversarialInputs$"
   }
 ]

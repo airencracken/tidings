@@ -25,7 +25,7 @@ func webHarness(t *testing.T) *harness {
 	t.Helper()
 	s := testStore(t)
 	ctx, cancel := context.WithCancel(context.Background())
-	a, err := NewApp(ctx, s, Config{})
+	a, err := NewApp(ctx, s, Config{BaseURL: "https://tidings.example.test"})
 	if err != nil {
 		t.Fatal(err)
 	}

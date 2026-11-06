@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -30,7 +29,7 @@ import (
 	"golang.org/x/term"
 )
 
-var version = "0.1.0"
+var version = "0.2.0"
 
 var instanceCommands = map[string]bool{"create-owner": true, "set-password": true, "backup": true, "restore": true}
 var serviceSettings = []string{"TIDINGS_BASE_URL", "TIDINGS_ADDR", "TIDINGS_SECURE_COOKIES", "TIDINGS_TRUSTED_PROXIES", "TIDINGS_BACKUP_INTERVAL", "TIDINGS_BACKUP_KEEP", "TIDINGS_BACKUP_MAX_BYTES", "TIDINGS_BACKUP_COPY_MAX_BYTES"}
@@ -173,11 +172,11 @@ func run() error {
 	base := lookup("TIDINGS_BASE_URL")
 	secure := lookup("TIDINGS_SECURE_COOKIES") == "true"
 	if base != "" {
-		u, e := url.Parse(base)
-		if e != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Path != "" && u.Path != "/") {
-			return errors.New("TIDINGS_BASE_URL must be an HTTPS origin, such as https://tidings.example.org")
+		base, err = reader.PublicOrigin(base)
+		if err != nil {
+			return fmt.Errorf("TIDINGS_BASE_URL: %w", err)
 		}
-		secure = true
+		secure = secure || strings.HasPrefix(base, "https://")
 	}
 	addr := lookup("TIDINGS_ADDR")
 	if addr == "" {

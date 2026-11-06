@@ -23,6 +23,7 @@ archives:
       - README.md
       - docs/*
       - docs/**/*
+      - feeds/*
       - deploy/**/*
       - THIRD_PARTY.md
       - src: .release/THIRD_PARTY_NOTICES.txt
@@ -68,6 +69,9 @@ nfpms:
         dst: /usr/share/doc/tidings/README.md
       - src: docs/
         dst: /usr/share/doc/tidings/docs
+        type: tree
+      - src: feeds/
+        dst: /usr/share/doc/tidings/feeds
         type: tree
       - src: deploy/caddy/
         dst: /usr/share/doc/tidings/deploy/caddy

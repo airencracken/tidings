@@ -60,7 +60,7 @@ func TestOPMLBundlesMatchCatalog(t *testing.T) {
 	if err = json.Unmarshal(b, &rows); err != nil {
 		t.Fatal(err)
 	}
-	for file, cat := range map[string]string{"all": "", "ai": "AI", "tech": "Tech", "infosec": "Infosec"} {
+	for file, cat := range map[string]string{"all": "", "ai": "AI", "tech": "Tech", "infosec": "Infosec", "news": "News", "science": "Science", "culture": "Culture", "food": "Food", "sports": "Sports", "nature": "Nature"} {
 		b, err = os.ReadFile(filepath.Join("..", "..", "feeds", file+".opml"))
 		if err != nil {
 			t.Fatal(err)
@@ -131,11 +131,17 @@ func TestLiveCatalog(t *testing.T) {
 		}()
 	}
 	for i := range rows {
+		if categories := os.Getenv("TIDINGS_LIVE_CATEGORIES"); categories != "" && !strings.Contains(","+categories+",", ","+rows[i].Category+",") {
+			continue
+		}
 		jobs <- i
 	}
 	close(jobs)
 	wg.Wait()
 	for _, r := range reports {
+		if r.URL == "" {
+			continue
+		}
 		if r.Error != "" {
 			t.Errorf("%s: %s", r.Title, r.Error)
 		} else {

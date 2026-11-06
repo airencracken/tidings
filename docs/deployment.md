@@ -16,6 +16,9 @@ Only trust proxies that you control. Examples for Caddy, nginx, and Apache are
 included under `deploy/`. Keep the upstream listener private and terminate TLS
 at your proxy. Native defaults use 8085; containers use port 8080 internally.
 
+OpenRC accepts ordinary `TIDINGS_*=value` assignments in `/etc/conf.d/tidings`;
+`export` is optional. The init script passes the supported settings to the service.
+
 ## Services and account commands
 
 The Debian and Gentoo packages use `/usr/bin/tidings`. Source service examples

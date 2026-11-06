@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Sports</title>
+  </head>
+  <body>
+    <outline text="BBC Sport" title="BBC Sport" type="rss" xmlUrl="https://feeds.bbci.co.uk/sport/rss.xml?edition=uk" category="Sports" />
+  </body>
+</opml>

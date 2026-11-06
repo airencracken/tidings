@@ -35,21 +35,23 @@ type Config struct {
 	Demo           bool
 }
 type App struct {
-	Store             *Store
-	Fetcher           *Fetcher
-	config            Config
-	templates         *template.Template
-	mux               *http.ServeMux
-	limit             limiter
-	refreshMu         sync.Mutex
-	refreshRunning    bool
-	refreshPending    map[int64]bool
-	refreshAll        bool
-	refreshCurrent    int64
-	refreshCurrentAll bool
-	ctx               context.Context
-	wg                sync.WaitGroup
-	Catalog           []Suggestion
+	Store               *Store
+	Fetcher             *Fetcher
+	config              Config
+	templates           *template.Template
+	mux                 *http.ServeMux
+	limit               limiter
+	refreshMu           sync.Mutex
+	refreshRunning      bool
+	refreshPending      map[int64]bool
+	refreshAll          bool
+	refreshForce        bool
+	refreshCurrent      int64
+	refreshCurrentAll   bool
+	refreshCurrentForce bool
+	ctx                 context.Context
+	wg                  sync.WaitGroup
+	Catalog             []Suggestion
 }
 type Suggestion struct {
 	Title, URL, Category, Description string
@@ -82,6 +84,8 @@ type page struct {
 	Invitations                                        []Invitation
 	Discovered                                         []DiscoveredFeed
 	CatalogQuery                                       string
+	CatalogCategories                                  []CatalogCategory
+	SuggestionsEnabled                                 bool
 	Demo                                               bool
 }
 
@@ -242,6 +246,8 @@ func (a *App) routes() {
 	a.mux.HandleFunc("POST /story/{id}/state", a.state)
 	a.mux.HandleFunc("POST /read-page", a.readPage)
 	a.mux.HandleFunc("POST /refresh", a.refresh)
+	a.mux.HandleFunc("POST /account/refresh", a.forceRefresh)
+	a.mux.HandleFunc("POST /account/suggestions", a.saveSuggestions)
 	a.mux.HandleFunc("GET /sources", a.sources)
 	a.mux.HandleFunc("POST /sources", a.subscribe)
 	a.mux.HandleFunc("POST /sources/discover", a.discover)
@@ -260,6 +266,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /subscriptions.opml", a.exportOPML)
 	a.mux.HandleFunc("GET /api/v1/export", a.export)
 	a.mux.HandleFunc("GET /account", a.account)
+	a.mux.HandleFunc("GET /account/invitations", a.invitations)
 	a.mux.HandleFunc("POST /account/restore", a.restorePersonal)
 	a.mux.HandleFunc("POST /account/household", a.groupOptin)
 	a.mux.HandleFunc("POST /account/password", a.password)
@@ -310,7 +317,7 @@ func back(r *http.Request) string {
 	return u.RequestURI()
 }
 func notice(r *http.Request) string {
-	return map[string]string{"restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added. Use Refresh feeds to collect its stories.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "refresh": "Refresh requested. You can keep reading; reload when you are ready.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
+	return map[string]string{"refresh-all": "All feeds will be fetched now. You can keep reading; reload to check progress.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added. Use Refresh feeds to collect its stories.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "refresh": "Refresh requested. You can keep reading; reload when you are ready.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
 }
 func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
@@ -508,15 +515,20 @@ func (a *App) sources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	query := strings.ToLower(p.CatalogQuery)
+	enabled, err := a.Store.CatalogCategories(r.Context())
+	if err != nil {
+		a.fail(w, r, err)
+		return
+	}
+	p.SuggestionsEnabled = len(enabled) > 0
 	for _, item := range a.Catalog {
-		if query == "" || strings.Contains(strings.ToLower(item.Title+" "+item.Description+" "+item.Category), query) {
+		if enabled[item.Category] && (query == "" || strings.Contains(strings.ToLower(item.Title+" "+item.Description+" "+item.Category), query)) {
 			p.Suggestions = append(p.Suggestions, item)
 		}
 	}
 	if p.GroupScope {
 		p.Title = "Household sources"
 	}
-	var err error
 	p.Feeds, err = a.Store.Feeds(r.Context(), u.ID, p.GroupScope)
 	if err != nil {
 		a.fail(w, r, err)
@@ -643,7 +655,7 @@ func (a *App) account(w http.ResponseWriter, r *http.Request) {
 			a.fail(w, r, err)
 			return
 		}
-		p.Invitations, err = a.Store.Invitations(r.Context())
+		p.CatalogCategories, err = a.catalogSettings(r.Context())
 		if err != nil {
 			a.fail(w, r, err)
 			return
@@ -687,12 +699,17 @@ func (a *App) invite(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Only owners can invite members", 403)
 		return
 	}
+	base, err := PublicOrigin(a.config.BaseURL)
+	if err != nil {
+		a.bad(w, r, err.Error())
+		return
+	}
 	raw, err := a.Store.Invite(r.Context())
 	if err != nil {
 		a.fail(w, r, err)
 		return
 	}
-	a.render(w, r, page{Title: "An invitation", Kind: "invite", InviteRef: token.Hash(raw)[:8], Invite: strings.TrimRight(a.config.BaseURL, "/") + "/join?code=" + raw}, 200)
+	a.renderInvitations(w, r, base+"/join?code="+raw, token.Hash(raw)[:8])
 }
 func (a *App) clientKey(r *http.Request) string {
 	return clientip.NetworkKey(a.config.TrustedProxies.Client(r))
@@ -754,6 +771,18 @@ func (a *App) refresh(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/?notice=refresh", 303)
 }
 
+func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {
+	if !current(r).User.Owner {
+		http.Error(w, "Only owners can fetch all feeds", http.StatusForbidden)
+		return
+	}
+	if !a.startRefresh(0, true, true) {
+		http.Error(w, "The server is shutting down. Try again after it restarts.", http.StatusServiceUnavailable)
+		return
+	}
+	http.Redirect(w, r, "/account?notice=refresh-all", http.StatusSeeOther)
+}
+
 type RefreshStatus struct {
 	Running bool
 	Queued  bool
@@ -767,13 +796,21 @@ func (a *App) RefreshStatus(uid int64) RefreshStatus {
 
 // One worker drains a bounded set of account requests, coalescing duplicates.
 func (a *App) StartRefresh(uid int64, all bool) bool {
+	return a.startRefresh(uid, all, false)
+}
+
+func (a *App) startRefresh(uid int64, all, force bool) bool {
 	a.refreshMu.Lock()
 	defer a.refreshMu.Unlock()
 	if a.ctx.Err() != nil || (!all && uid <= 0) {
 		return false
 	}
 	if all {
+		if force && a.refreshCurrentAll && a.refreshCurrentForce {
+			return true
+		}
 		a.refreshAll = true
+		a.refreshForce = a.refreshForce || force
 		a.refreshPending = map[int64]bool{}
 	} else if !a.refreshAll {
 		if a.refreshPending == nil {
@@ -793,16 +830,20 @@ func (a *App) StartRefresh(uid int64, all bool) bool {
 			if a.ctx.Err() != nil {
 				a.refreshPending = nil
 				a.refreshAll = false
+				a.refreshForce = false
 				a.refreshRunning = false
 				a.refreshCurrent = 0
 				a.refreshCurrentAll = false
+				a.refreshCurrentForce = false
 				a.refreshMu.Unlock()
 				return
 			}
 			all := a.refreshAll
+			force := a.refreshForce
 			uid := int64(0)
 			if all {
 				a.refreshAll = false
+				a.refreshForce = false
 				a.refreshPending = map[int64]bool{}
 			} else {
 				for id := range a.refreshPending {
@@ -813,6 +854,7 @@ func (a *App) StartRefresh(uid int64, all bool) bool {
 					a.refreshRunning = false
 					a.refreshCurrent = 0
 					a.refreshCurrentAll = false
+					a.refreshCurrentForce = false
 					a.refreshMu.Unlock()
 					return
 				}
@@ -820,13 +862,14 @@ func (a *App) StartRefresh(uid int64, all bool) bool {
 			}
 			a.refreshCurrent = uid
 			a.refreshCurrentAll = all
+			a.refreshCurrentForce = force
 			a.refreshMu.Unlock()
-			a.refreshFeeds(uid, all)
+			a.refreshFeeds(uid, all, force)
 		}
 	}()
 	return true
 }
-func (a *App) refreshFeeds(uid int64, all bool) {
+func (a *App) refreshFeeds(uid int64, all, force bool) {
 	feeds, err := a.Store.RefreshFeeds(a.ctx, uid, all)
 	if err != nil {
 		if !errors.Is(err, context.Canceled) {
@@ -845,7 +888,7 @@ func (a *App) refreshFeeds(uid int64, all bool) {
 				if err := a.Store.DB.QueryRowContext(a.ctx, "SELECT checked FROM feeds WHERE id=?", f.ID).Scan(&checked); err != nil {
 					continue
 				}
-				if time.Since(time.Unix(checked, 0)) < 5*time.Minute {
+				if !force && time.Since(time.Unix(checked, 0)) < 5*time.Minute {
 					continue
 				}
 				result, err := a.Fetcher.Fetch(a.ctx, f.URL, f.ETag, f.Modified)

@@ -1,3 +1,19 @@
+# Tidings 0.2.0
+
+- Fix OpenRC configuration inheritance for plain assignments, including the
+  public address, secure cookies, trusted proxies, and backup settings.
+- Give invitations a dedicated page using the shared Comfyware layout. Generated
+  links use the configured public origin and are shown only when created.
+- Add an owner-only **Fetch all feeds now** action. It fetches all subscribed and
+  household feeds, bypasses the five-minute cooldown, coalesces repeated requests,
+  and preserves individual subscriptions and reading state.
+- Let owners enable suggested-source categories. All categories begin disabled,
+  including on upgrade; enabling or disabling them changes suggestions only.
+  Add news, science, culture, food, sports, and nature alongside the existing
+  AI, tech, and infosec catalogs. The 45 optional feeds are never auto-subscribed.
+- Upgrade the database to schema 3 transactionally. Pre-upgrade schema-2 backups
+  remain supported; restore a pre-upgrade backup to roll back to version 0.1.0.
+
 # Tidings 0.1.0
 
 The first public release of Tidings. This is an early release for small,

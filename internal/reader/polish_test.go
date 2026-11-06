@@ -243,7 +243,7 @@ func TestSchemaV1Upgrade(t *testing.T) {
 	}
 	defer s.Close()
 	var n int
-	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&n); err != nil || n != 2 {
+	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&n); err != nil || n != 3 {
 		t.Fatal(n, err)
 	}
 }

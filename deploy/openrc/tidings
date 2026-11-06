@@ -11,6 +11,11 @@ output_log="/var/log/tidings.log"
 error_log="/var/log/tidings.log"
 umask 0077
 
+# Pass ordinary conf.d assignments to the unprivileged application process.
+export TIDINGS_DATA_DIR TIDINGS_ADDR TIDINGS_BASE_URL TIDINGS_SECURE_COOKIES
+export TIDINGS_TRUSTED_PROXIES TIDINGS_BACKUP_INTERVAL TIDINGS_BACKUP_KEEP
+export TIDINGS_BACKUP_MAX_BYTES TIDINGS_BACKUP_COPY_MAX_BYTES
+
 depend() {
  need net
 }
