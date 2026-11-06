@@ -11,15 +11,15 @@ import (
 	"html/template"
 	"io"
 	"log/slog"
-	"net"
 	"net/http"
-	"net/netip"
 	"net/url"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/airencracken/comfylib/autobackup"
+	"github.com/airencracken/comfylib/clientip"
 	"github.com/airencracken/comfylib/token"
 	"github.com/airencracken/comfylib/ui"
 )
@@ -28,21 +28,28 @@ import (
 var assets embed.FS
 
 type Config struct {
-	SecureCookies bool
-	BaseURL       string
-	Demo          bool
+	TrustedProxies clientip.Resolver
+	Backups        *autobackup.Runner
+	SecureCookies  bool
+	BaseURL        string
+	Demo           bool
 }
 type App struct {
-	Store     *Store
-	Fetcher   *Fetcher
-	config    Config
-	templates *template.Template
-	mux       *http.ServeMux
-	limit     limiter
-	refreshMu sync.Mutex
-	ctx       context.Context
-	wg        sync.WaitGroup
-	Catalog   []Suggestion
+	Store             *Store
+	Fetcher           *Fetcher
+	config            Config
+	templates         *template.Template
+	mux               *http.ServeMux
+	limit             limiter
+	refreshMu         sync.Mutex
+	refreshRunning    bool
+	refreshPending    map[int64]bool
+	refreshAll        bool
+	refreshCurrent    int64
+	refreshCurrentAll bool
+	ctx               context.Context
+	wg                sync.WaitGroup
+	Catalog           []Suggestion
 }
 type Suggestion struct {
 	Title, URL, Category, Description string
@@ -68,6 +75,13 @@ type page struct {
 	Date                                               string
 	Groups                                             []FeedGroup
 	Collection                                         FeedGroup
+	Refresh                                            RefreshStatus
+	Backup                                             autobackup.Status
+	InviteRef                                          string
+	Members                                            []User
+	Invitations                                        []Invitation
+	Discovered                                         []DiscoveredFeed
+	CatalogQuery                                       string
 	Demo                                               bool
 }
 
@@ -190,9 +204,13 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	rc.CSRF = token.SessionCSRF(rc.Session, "tidings:forms")
 	if r.Method != "GET" && r.Method != "HEAD" {
-		r.Body = http.MaxBytesReader(w, r.Body, 2<<20)
+		formLimit := int64(2 << 20)
+		if r.URL.Path == "/account/restore" {
+			formLimit = MaxRestoreBytes + (64 << 10)
+		}
+		r.Body = http.MaxBytesReader(w, r.Body, formLimit)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
-			if err := r.ParseMultipartForm(2 << 20); err != nil {
+			if err := r.ParseMultipartForm(formLimit); err != nil {
 				http.Error(w, "Invalid or oversized form", 400)
 				return
 			}
@@ -226,6 +244,11 @@ func (a *App) routes() {
 	a.mux.HandleFunc("POST /refresh", a.refresh)
 	a.mux.HandleFunc("GET /sources", a.sources)
 	a.mux.HandleFunc("POST /sources", a.subscribe)
+	a.mux.HandleFunc("POST /sources/discover", a.discover)
+	a.mux.HandleFunc("POST /sources/{id}/topic", a.sourceTopic)
+	a.mux.HandleFunc("POST /groups/{id}/rename", a.renameGroup)
+	a.mux.HandleFunc("POST /account/members/{id}", a.memberAction)
+	a.mux.HandleFunc("POST /account/invitations/revoke", a.revokeInvite)
 	a.mux.HandleFunc("POST /sources/{id}/remove", a.unsubscribe)
 	a.mux.HandleFunc("POST /sources/{id}/tags", a.sourceTags)
 	a.mux.HandleFunc("GET /groups", a.groups)
@@ -237,6 +260,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /subscriptions.opml", a.exportOPML)
 	a.mux.HandleFunc("GET /api/v1/export", a.export)
 	a.mux.HandleFunc("GET /account", a.account)
+	a.mux.HandleFunc("POST /account/restore", a.restorePersonal)
 	a.mux.HandleFunc("POST /account/household", a.groupOptin)
 	a.mux.HandleFunc("POST /account/password", a.password)
 	a.mux.HandleFunc("POST /account/invite", a.invite)
@@ -249,6 +273,10 @@ func (a *App) routes() {
 
 func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int) {
 	p.Demo = a.config.Demo
+	p.Refresh = a.RefreshStatus(current(r).User.ID)
+	if current(r).User.Owner {
+		p.Backup = a.config.Backups.Status()
+	}
 	rc := current(r)
 	p.User = rc.User
 	p.CSRF = rc.CSRF
@@ -282,7 +310,7 @@ func back(r *http.Request) string {
 	return u.RequestURI()
 }
 func notice(r *http.Request) string {
-	return map[string]string{"subscribed": "Source added. Use Refresh feeds to collect its stories.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "refresh": "Refresh requested. You can keep reading; reload when you are ready.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
+	return map[string]string{"restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added. Use Refresh feeds to collect its stories.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "refresh": "Refresh requested. You can keep reading; reload when you are ready.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
 }
 func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
@@ -473,7 +501,18 @@ func (a *App) readPage(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) sources(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
-	p := page{Title: "Your sources", Kind: "sources", GroupScope: scope(r), Notice: notice(r), Suggestions: a.Catalog}
+	p := page{Title: "Your sources", Kind: "sources", GroupScope: scope(r), Notice: notice(r)}
+	p.CatalogQuery = strings.TrimSpace(r.URL.Query().Get("catalog_q"))
+	if len(p.CatalogQuery) > 200 {
+		a.bad(w, r, "Search is too long")
+		return
+	}
+	query := strings.ToLower(p.CatalogQuery)
+	for _, item := range a.Catalog {
+		if query == "" || strings.Contains(strings.ToLower(item.Title+" "+item.Description+" "+item.Category), query) {
+			p.Suggestions = append(p.Suggestions, item)
+		}
+	}
 	if p.GroupScope {
 		p.Title = "Household sources"
 	}
@@ -596,7 +635,21 @@ func (a *App) export(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) account(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, page{Title: "Your place here", Kind: "account", Notice: notice(r)}, 200)
+	p := page{Title: "Your place here", Kind: "account", Notice: notice(r)}
+	if current(r).User.Owner {
+		var err error
+		p.Members, err = a.Store.Members(r.Context())
+		if err != nil {
+			a.fail(w, r, err)
+			return
+		}
+		p.Invitations, err = a.Store.Invitations(r.Context())
+		if err != nil {
+			a.fail(w, r, err)
+			return
+		}
+	}
+	a.render(w, r, p, 200)
 }
 func (a *App) groupOptin(w http.ResponseWriter, r *http.Request) {
 	value := r.PostFormValue("enabled") == "true"
@@ -639,22 +692,10 @@ func (a *App) invite(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, err)
 		return
 	}
-	a.render(w, r, page{Title: "An invitation", Kind: "invite", Invite: strings.TrimRight(a.config.BaseURL, "/") + "/join?code=" + raw}, 200)
+	a.render(w, r, page{Title: "An invitation", Kind: "invite", InviteRef: token.Hash(raw)[:8], Invite: strings.TrimRight(a.config.BaseURL, "/") + "/join?code=" + raw}, 200)
 }
-func clientKey(r *http.Request) string {
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
-	}
-	ip, err := netip.ParseAddr(host)
-	if err != nil {
-		return host
-	}
-	ip = ip.Unmap()
-	if ip.Is6() {
-		return netip.PrefixFrom(ip, 64).Masked().String()
-	}
-	return ip.String()
+func (a *App) clientKey(r *http.Request) string {
+	return clientip.NetworkKey(a.config.TrustedProxies.Client(r))
 }
 func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
@@ -665,7 +706,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, page{Title: "Welcome back", Kind: "login", Notice: notice(r)}, 200)
 		return
 	}
-	if !a.limit.allow(clientKey(r)) {
+	if !a.limit.allow(a.clientKey(r)) {
 		http.Error(w, "Too many attempts. Please wait 15 minutes.", 429)
 		return
 	}
@@ -686,7 +727,7 @@ func (a *App) join(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, page{Title: "A place at the table", Kind: "join", Invite: r.URL.Query().Get("code")}, 200)
 		return
 	}
-	if !a.limit.allow(clientKey(r)) {
+	if !a.limit.allow(a.clientKey(r)) {
 		http.Error(w, "Too many attempts. Please wait 15 minutes.", 429)
 		return
 	}
@@ -712,59 +753,124 @@ func (a *App) refresh(w http.ResponseWriter, r *http.Request) {
 	a.StartRefresh(current(r).User.ID, false)
 	http.Redirect(w, r, "/?notice=refresh", 303)
 }
+
+type RefreshStatus struct {
+	Running bool
+	Queued  bool
+}
+
+func (a *App) RefreshStatus(uid int64) RefreshStatus {
+	a.refreshMu.Lock()
+	defer a.refreshMu.Unlock()
+	return RefreshStatus{Running: a.refreshRunning && (a.refreshCurrent == uid || a.refreshCurrentAll), Queued: a.refreshAll || a.refreshPending[uid]}
+}
+
+// One worker drains a bounded set of account requests, coalescing duplicates.
 func (a *App) StartRefresh(uid int64, all bool) bool {
-	if !a.refreshMu.TryLock() {
+	a.refreshMu.Lock()
+	defer a.refreshMu.Unlock()
+	if a.ctx.Err() != nil || (!all && uid <= 0) {
 		return false
 	}
+	if all {
+		a.refreshAll = true
+		a.refreshPending = map[int64]bool{}
+	} else if !a.refreshAll {
+		if a.refreshPending == nil {
+			a.refreshPending = map[int64]bool{}
+		}
+		a.refreshPending[uid] = true
+	}
+	if a.refreshRunning {
+		return true
+	}
+	a.refreshRunning = true
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
-		defer a.refreshMu.Unlock()
-		feeds, err := a.Store.RefreshFeeds(a.ctx, uid, all)
-		if err != nil {
-			slog.Error("list refresh sources", "error", err)
-			return
-		}
-		jobs := make(chan Feed)
-		var workers sync.WaitGroup
-		for range 4 {
-			workers.Add(1)
-			go func() {
-				defer workers.Done()
-				for f := range jobs {
-					var checked int64
-					if err := a.Store.DB.QueryRowContext(a.ctx, "SELECT checked FROM feeds WHERE id=?", f.ID).Scan(&checked); err != nil {
-						continue
-					}
-					if time.Since(time.Unix(checked, 0)) < 5*time.Minute {
-						continue
-					}
-					r, err := a.Fetcher.Fetch(a.ctx, f.URL, f.ETag, f.Modified)
-					if err == nil {
-						err = a.Store.ApplyFetch(a.ctx, f, r)
-					}
-					if err != nil && !errors.Is(err, context.Canceled) {
-						_, writeErr := a.Store.DB.ExecContext(a.ctx, "UPDATE feeds SET checked=?,error=? WHERE id=?", time.Now().Unix(), plainText(err.Error(), 300), f.ID)
-						if writeErr != nil && !errors.Is(writeErr, context.Canceled) {
-							slog.Error("record refresh failure", "error", writeErr)
-						}
-					}
-				}
-			}()
-		}
-		for _, f := range feeds {
-			select {
-			case jobs <- f:
-			case <-a.ctx.Done():
-				close(jobs)
-				workers.Wait()
+		for {
+			a.refreshMu.Lock()
+			if a.ctx.Err() != nil {
+				a.refreshPending = nil
+				a.refreshAll = false
+				a.refreshRunning = false
+				a.refreshCurrent = 0
+				a.refreshCurrentAll = false
+				a.refreshMu.Unlock()
 				return
 			}
+			all := a.refreshAll
+			uid := int64(0)
+			if all {
+				a.refreshAll = false
+				a.refreshPending = map[int64]bool{}
+			} else {
+				for id := range a.refreshPending {
+					uid = id
+					break
+				}
+				if uid == 0 {
+					a.refreshRunning = false
+					a.refreshCurrent = 0
+					a.refreshCurrentAll = false
+					a.refreshMu.Unlock()
+					return
+				}
+				delete(a.refreshPending, uid)
+			}
+			a.refreshCurrent = uid
+			a.refreshCurrentAll = all
+			a.refreshMu.Unlock()
+			a.refreshFeeds(uid, all)
 		}
-		close(jobs)
-		workers.Wait()
 	}()
 	return true
+}
+func (a *App) refreshFeeds(uid int64, all bool) {
+	feeds, err := a.Store.RefreshFeeds(a.ctx, uid, all)
+	if err != nil {
+		if !errors.Is(err, context.Canceled) {
+			slog.Error("list refresh sources", "error", err)
+		}
+		return
+	}
+	jobs := make(chan Feed)
+	var workers sync.WaitGroup
+	for range 4 {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			for f := range jobs {
+				var checked int64
+				if err := a.Store.DB.QueryRowContext(a.ctx, "SELECT checked FROM feeds WHERE id=?", f.ID).Scan(&checked); err != nil {
+					continue
+				}
+				if time.Since(time.Unix(checked, 0)) < 5*time.Minute {
+					continue
+				}
+				result, err := a.Fetcher.Fetch(a.ctx, f.URL, f.ETag, f.Modified)
+				if err == nil {
+					err = a.Store.ApplyFetch(a.ctx, f, result)
+				}
+				if err != nil && !errors.Is(err, context.Canceled) {
+					if _, e := a.Store.DB.ExecContext(a.ctx, "UPDATE feeds SET checked=?,error=? WHERE id=?", time.Now().Unix(), plainText(err.Error(), 300), f.ID); e != nil && !errors.Is(e, context.Canceled) {
+						slog.Error("record refresh failure", "error", e)
+					}
+				}
+			}
+		}()
+	}
+	for _, f := range feeds {
+		select {
+		case jobs <- f:
+		case <-a.ctx.Done():
+			close(jobs)
+			workers.Wait()
+			return
+		}
+	}
+	close(jobs)
+	workers.Wait()
 }
 func (a *App) Wait() { a.wg.Wait() }
 func (a *App) Poll(ctx context.Context, interval time.Duration) {

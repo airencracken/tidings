@@ -18,7 +18,7 @@ const rssFixture = `<?xml version="1.0"?><rss version="2.0" xmlns:content="http:
 
 func TestParseFeedFormats(t *testing.T) {
 	cases := []struct{ name, xml, title, body, link string }{
-		{"rss", rssFixture, "A & B", "Hello world .", "https://example.org/story"},
+		{"rss", rssFixture, "A & B", "Hello world.", "https://example.org/story"},
 		{"atom", `<feed xmlns="http://www.w3.org/2005/Atom"><title>Atom</title><entry><id>tag:example,1</id><title>Story</title><link rel="self" href="https://example.org/api"/><link rel="alternate" href="/story"/><published>2026-11-05T12:00:00Z</published><content type="html">&lt;p&gt;Hello atom&lt;/p&gt;</content></entry></feed>`, "Atom", "Hello atom", "https://example.org/story"},
 		{"xhtml", `<feed xmlns="http://www.w3.org/2005/Atom"><title>Rich</title><entry><title>Story</title><link href="/story"/><content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Hello rich</p><script>evil()</script></div></content></entry></feed>`, "Rich", "Hello rich", "https://example.org/story"},
 		{"rdf", `<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/"><channel><title>RDF</title></channel><item><title>Story</title><link>https://example.org/story</link><description>Hello rdf</description></item></rdf:RDF>`, "RDF", "Hello rdf", "https://example.org/story"},

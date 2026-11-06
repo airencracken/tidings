@@ -97,7 +97,11 @@ func (s *Store) SetTags(ctx context.Context, u User, fid int64, raw string, hous
 }
 
 func (s *Store) Groups(ctx context.Context, u User) ([]FeedGroup, error) {
-	rows, err := s.DB.QueryContext(ctx, "SELECT id,name,tag,user_id IS NULL FROM feed_groups WHERE user_id=? OR (user_id IS NULL AND (? OR ?)) ORDER BY user_id IS NULL,name", u.ID, u.Owner, u.GroupOptin)
+	return groupList(ctx, s.DB, u)
+}
+
+func groupList(ctx context.Context, db queryer, u User) ([]FeedGroup, error) {
+	rows, err := db.QueryContext(ctx, "SELECT id,name,tag,user_id IS NULL FROM feed_groups WHERE user_id=? OR (user_id IS NULL AND (? OR ?)) ORDER BY user_id IS NULL,name", u.ID, u.Owner, u.GroupOptin)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +121,7 @@ func (s *Store) Groups(ctx context.Context, u User) ([]FeedGroup, error) {
 	}
 	for i := range out {
 		out[i].FeedIDs = []int64{}
-		rows, err = s.DB.QueryContext(ctx, "SELECT feed_id FROM feed_group_members WHERE group_id=? ORDER BY feed_id", out[i].ID)
+		rows, err = db.QueryContext(ctx, "SELECT feed_id FROM feed_group_members WHERE group_id=? ORDER BY feed_id", out[i].ID)
 		if err != nil {
 			return nil, err
 		}

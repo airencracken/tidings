@@ -25,7 +25,7 @@ func testStore(t *testing.T) *Store {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { s.DB.Close() })
+	t.Cleanup(func() { s.Close() })
 	hash, err := bcrypt.GenerateFromPassword([]byte(testPassword), bcrypt.MinCost)
 	if err != nil {
 		t.Fatal(err)
@@ -270,7 +270,7 @@ func TestSchemaValidationAndReopen(t *testing.T) {
 	if err = s.CreateOwner(context.Background(), "host", testPassword); err != nil {
 		t.Fatal(err)
 	}
-	if err = s.DB.Close(); err != nil {
+	if err = s.Close(); err != nil {
 		t.Fatal(err)
 	}
 	s, err = OpenStore(dir)
@@ -284,9 +284,9 @@ func TestSchemaValidationAndReopen(t *testing.T) {
 	if _, err = s.DB.Exec("PRAGMA user_version=99"); err != nil {
 		t.Fatal(err)
 	}
-	s.DB.Close()
+	s.Close()
 	if next, e := OpenStore(dir); e == nil {
-		next.DB.Close()
+		next.Close()
 		t.Fatal("future schema accepted")
 	}
 	info, err := os.Stat(filepath.Join(dir, "reader.db"))

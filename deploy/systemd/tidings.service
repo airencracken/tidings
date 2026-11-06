@@ -1,0 +1,25 @@
+[Unit]
+Description=Tidings household feed reader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tidings
+Group=tidings
+WorkingDirectory=/var/lib/tidings
+StateDirectory=tidings
+StateDirectoryMode=0700
+EnvironmentFile=-/etc/tidings/tidings.env
+ExecStart=/usr/local/bin/tidings serve
+Restart=on-failure
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/tidings
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

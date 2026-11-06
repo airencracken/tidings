@@ -42,8 +42,8 @@
   {
     "name": "stable publication dates",
     "file": "internal/reader/store.go",
-    "before": "body=excluded.body`",
-    "after": "body=excluded.body,published=excluded.published`",
+    "before": "body=excluded.body WHERE entries.import_owner IS NULL`",
+    "after": "body=excluded.body,published=excluded.published WHERE entries.import_owner IS NULL`",
     "package": "./internal/reader",
     "run": "^TestRefreshIdempotentAndDatesStable$"
   },
@@ -58,8 +58,8 @@
   {
     "name": "single-use invitations",
     "file": "internal/reader/auth.go",
-    "before": "WHERE token=? AND used=0 AND expires>?",
-    "after": "WHERE token=? AND expires>?",
+    "before": "WHERE token=? AND used=0 AND revoked=0 AND expires>?",
+    "after": "WHERE token=? AND revoked=0 AND expires>?",
     "package": "./internal/reader",
     "run": "^TestInvitationAtomicityAndRace$"
   },
@@ -150,5 +150,93 @@
     "after": "",
     "package": "./internal/reader",
     "run": "^TestEveryPageDeclaresFavicons$"
+  },
+  {
+    "name": "queued account refresh retained",
+    "file": "internal/reader/app.go",
+    "before": "a.refreshPending[uid] = true",
+    "after": "if !a.refreshRunning { a.refreshPending[uid] = true }",
+    "package": "./internal/reader",
+    "run": "^TestRefreshQueueKeepsOtherAccounts$"
+  },
+  {
+    "name": "duplicate follows preserve tags",
+    "file": "internal/reader/store.go",
+    "before": "if existed == 0 {",
+    "after": "if existed >= 0 {",
+    "package": "./internal/reader",
+    "run": "^TestSubscribePreservesMetadataAndExplicitEdits$"
+  },
+  {
+    "name": "imported stories remain private",
+    "file": "internal/reader/store.go",
+    "before": "e.import_owner IS NULL OR e.import_owner=st.user_id",
+    "after": "1=1",
+    "package": "./internal/reader",
+    "run": "^TestPersonalRestoreRoundTripIsolationAndAtomicity$"
+  },
+  {
+    "name": "last active owner retained",
+    "file": "internal/reader/manage.go",
+    "before": "if n <= 1 {",
+    "after": "if n < 1 {",
+    "package": "./internal/reader",
+    "run": "^TestMemberActionsAndRevokedInvitations$"
+  },
+  {
+    "name": "revoked invitation cannot join",
+    "file": "internal/reader/auth.go",
+    "before": "AND used=0 AND revoked=0 AND expires>?",
+    "after": "AND used=0 AND expires>?",
+    "package": "./internal/reader",
+    "run": "^TestMemberActionsAndRevokedInvitations$"
+  },
+  {
+    "name": "suspended accounts cannot log in",
+    "file": "internal/reader/auth.go",
+    "before": "WHERE username=? AND suspended=0",
+    "after": "WHERE username=?",
+    "package": "./internal/reader",
+    "run": "^TestMemberActionsAndRevokedInvitations$"
+  },
+  {
+    "name": "backup checksum checked",
+    "file": "internal/reader/backup.go",
+    "before": "n != m.Bytes || hex.EncodeToString(h.Sum(nil)) != m.SHA256",
+    "after": "n != m.Bytes",
+    "package": "./internal/reader",
+    "run": "^TestVerifiedBackupAndRestore$"
+  },
+  {
+    "name": "backup copy cap checked before copying",
+    "file": "internal/reader/backup.go",
+    "before": "if size <= 0 || pages > (limit-1024)/size {",
+    "after": "if size <= 0 {",
+    "package": "./internal/reader",
+    "run": "^TestVerifiedBackupAndRestore$"
+  },
+  {
+    "name": "archive path allowlist",
+    "file": "internal/reader/backup.go",
+    "before": "(header.Name != \"reader.db\" && header.Name != \"snapshot.json\")",
+    "after": "false",
+    "package": "./internal/reader",
+    "run": "^TestSnapshotArchiveAdversarialMembers$"
+  },
+  {
+    "name": "proxy headers require explicit trust",
+    "file": "internal/reader/app.go",
+    "before": "return clientip.NetworkKey(a.config.TrustedProxies.Client(r))",
+    "after": "trusted,_:=clientip.ParseTrusted(\"0.0.0.0/0,::/0\",\"test\"); return clientip.NetworkKey((clientip.Resolver{Trusted:trusted}).Client(r))",
+    "package": "./internal/reader",
+    "run": "^TestTrustedProxyRateLimitKey$"
+  },
+  {
+    "name": "restored markers follow publisher fetch",
+    "file": "internal/reader/store.go",
+    "before": "WHERE own.feed_id=? AND own.original_key=? AND own.url=?",
+    "after": "WHERE 0 AND own.feed_id=? AND own.original_key=? AND own.url=?",
+    "package": "./internal/reader",
+    "run": "^TestRestoredStateFollowsLaterPublisherFetch$"
   }
 ]

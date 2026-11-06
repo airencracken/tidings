@@ -13,17 +13,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofrs/flock"
 	_ "modernc.org/sqlite"
 )
 
 //go:embed schema.sql
 var schema string
 
-type Store struct{ DB *sql.DB }
+//go:embed migration_v2.sql
+var migrationV2 string
+
+type Store struct {
+	DB        *sql.DB
+	lock      *flock.Flock
+	Directory string
+}
+
+func (s *Store) Close() error { return errors.Join(s.DB.Close(), s.lock.Close()) }
+
 type User struct {
 	ID                int64
 	Username          string
 	Owner, GroupOptin bool
+	Suspended         bool
 }
 type Feed struct {
 	ID       int64    `json:"id"`
@@ -45,7 +57,7 @@ type Filter struct {
 	GroupID               int64
 }
 
-func OpenStore(dir string) (*Store, error) {
+func OpenStore(dir string) (store *Store, failure error) {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return nil, err
 	}
@@ -56,6 +68,19 @@ func OpenStore(dir string) (*Store, error) {
 	if info.Mode().Perm()&0077 != 0 {
 		return nil, errors.New("data directory must be accessible only by its owner (mode 0700)")
 	}
+	lock := flock.New(filepath.Join(dir, ".instance.lock"), flock.SetPermissions(0600))
+	locked, err := lock.TryRLock()
+	if err != nil {
+		return nil, err
+	}
+	if !locked {
+		return nil, errors.New("instance is locked for restore")
+	}
+	defer func() {
+		if failure != nil {
+			lock.Close()
+		}
+	}()
 	file := filepath.Join(dir, "reader.db")
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
@@ -84,12 +109,15 @@ func OpenStore(dir string) (*Store, error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 1 {
+	if version > 2 {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
-	if _, err = tx.Exec(schema); err == nil {
-		_, err = tx.Exec("PRAGMA user_version=1")
+	if _, err = tx.Exec(schema); err == nil && version < 2 {
+		_, err = tx.Exec(migrationV2)
+	}
+	if err == nil {
+		_, err = tx.Exec("PRAGMA user_version=2")
 	}
 	if err == nil {
 		err = tx.Commit()
@@ -98,7 +126,7 @@ func OpenStore(dir string) (*Store, error) {
 		db.Close()
 		return nil, err
 	}
-	return &Store{DB: db}, nil
+	return &Store{DB: db, lock: lock, Directory: dir}, nil
 }
 
 func category(s string) (string, error) {
@@ -158,17 +186,37 @@ func (s *Store) Subscribe(ctx context.Context, uid int64, feeds []Feed, group bo
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM feeds").Scan(&count); err != nil {
 		return err
 	}
-	if count+len(feeds) > 2000 {
+	newURLs := map[string]bool{}
+	for _, f := range feeds {
+		var exists int
+		if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM feeds WHERE url=?", f.URL).Scan(&exists); err != nil {
+			return err
+		}
+		if exists == 0 {
+			newURLs[f.URL] = true
+		}
+	}
+	if count+len(newURLs) > 2000 {
 		return errors.New("instance feed limit reached (2000)")
 	}
 	for _, f := range feeds {
 		if _, err = tx.ExecContext(ctx, "INSERT INTO feeds(url,title) VALUES(?,?) ON CONFLICT(url) DO NOTHING", f.URL, f.Title); err != nil {
 			return err
 		}
+		var existed int
+		table := "SELECT count(*) FROM subscriptions s JOIN feeds f ON f.id=s.feed_id WHERE s.user_id=? AND f.url=?"
+		params := []any{uid, f.URL}
 		if group {
-			_, err = tx.ExecContext(ctx, "INSERT INTO group_feeds(feed_id,category) SELECT id,? FROM feeds WHERE url=? ON CONFLICT(feed_id) DO UPDATE SET category=excluded.category", f.Category, f.URL)
+			table = "SELECT count(*) FROM group_feeds s JOIN feeds f ON f.id=s.feed_id WHERE f.url=?"
+			params = []any{f.URL}
+		}
+		if err = tx.QueryRowContext(ctx, table, params...).Scan(&existed); err != nil {
+			return err
+		}
+		if group {
+			_, err = tx.ExecContext(ctx, "INSERT INTO group_feeds(feed_id,category) SELECT id,? FROM feeds WHERE url=? ON CONFLICT(feed_id) DO NOTHING", f.Category, f.URL)
 		} else {
-			_, err = tx.ExecContext(ctx, "INSERT INTO subscriptions(user_id,feed_id,category) SELECT ?,id,? FROM feeds WHERE url=? ON CONFLICT(user_id,feed_id) DO UPDATE SET category=excluded.category", uid, f.Category, f.URL)
+			_, err = tx.ExecContext(ctx, "INSERT INTO subscriptions(user_id,feed_id,category) SELECT ?,id,? FROM feeds WHERE url=? ON CONFLICT(user_id,feed_id) DO NOTHING", uid, f.Category, f.URL)
 		}
 		if err != nil {
 			return err
@@ -177,21 +225,27 @@ func (s *Store) Subscribe(ctx context.Context, uid int64, feeds []Feed, group bo
 		if err = tx.QueryRowContext(ctx, "SELECT id FROM feeds WHERE url=?", f.URL).Scan(&fid); err != nil {
 			return err
 		}
-		if err = writeTags(ctx, tx, uid, fid, f.Tags, group); err != nil {
-			return err
+		if existed == 0 {
+			if err = writeTags(ctx, tx, uid, fid, f.Tags, group); err != nil {
+				return err
+			}
 		}
 	}
 	return tx.Commit()
 }
 
 func (s *Store) Feeds(ctx context.Context, uid int64, group bool) ([]Feed, error) {
+	return feedList(ctx, s.DB, uid, group)
+}
+
+func feedList(ctx context.Context, db queryer, uid int64, group bool) ([]Feed, error) {
 	q := "SELECT f.id,f.url,f.title,s.category,f.etag,f.modified,f.checked,f.error,(SELECT json_group_array(tag) FROM subscription_tags t WHERE t.user_id=s.user_id AND t.feed_id=f.id) FROM feeds f JOIN subscriptions s ON s.feed_id=f.id WHERE s.user_id=? ORDER BY s.category,f.title"
 	args := []any{uid}
 	if group {
 		q = "SELECT f.id,f.url,f.title,g.category,f.etag,f.modified,f.checked,f.error,(SELECT json_group_array(tag) FROM household_tags t WHERE t.feed_id=f.id) FROM feeds f JOIN group_feeds g ON g.feed_id=f.id ORDER BY g.category,f.title"
 		args = nil
 	}
-	rows, err := s.DB.QueryContext(ctx, q, args...)
+	rows, err := db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +266,7 @@ func (s *Store) Feeds(ctx context.Context, uid int64, group bool) ([]Feed, error
 	return out, rows.Err()
 }
 
-const visible = `(EXISTS(SELECT 1 FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id) OR EXISTS(SELECT 1 FROM group_feeds g JOIN users u ON u.id=? WHERE u.group_optin=1 AND g.feed_id=e.feed_id))`
+const visible = `((e.import_owner IS NULL OR e.import_owner=st.user_id) AND (EXISTS(SELECT 1 FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id) OR EXISTS(SELECT 1 FROM group_feeds g JOIN users u ON u.id=? WHERE u.group_optin=1 AND g.feed_id=e.feed_id)))`
 
 func entryWhere(uid int64, f Filter) (string, []any) {
 	where := visible
@@ -251,7 +305,7 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 
 func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool, error) {
 	where, args := entryWhere(uid, f)
-	q := `SELECT e.id,e.feed_id,e.key,e.title,e.url,e.body,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
 	params := []any{uid, uid}
 	params = append(params, args...)
 	params = append(params, f.Page*30)
@@ -277,7 +331,7 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 
 func (s *Store) Entry(ctx context.Context, uid, id int64) (Entry, error) {
 	var e Entry
-	q := `SELECT e.id,e.feed_id,e.key,e.title,e.url,e.body,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
 	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.Published, &e.Read, &e.Saved, &e.Source)
 	return e, err
 }
@@ -332,8 +386,23 @@ func (s *Store) ApplyFetch(ctx context.Context, f Feed, r FetchResult) error {
 	defer tx.Rollback()
 	if !r.Unchanged {
 		for _, e := range r.Feed.Entries {
-			_, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO UPDATE SET title=excluded.title,url=excluded.url,body=excluded.body`, f.ID, e.Key, e.Title, e.URL, e.Body, e.Published)
+			_, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO UPDATE SET title=excluded.title,url=excluded.url,body=excluded.body WHERE entries.import_owner IS NULL`, f.ID, e.Key, e.Title, e.URL, e.Body, e.Published)
 			if err != nil {
+				return err
+			}
+
+			// When the publisher later supplies a restored story, move the
+			// reader's markers onto that canonical entry, without publishing
+			// any uploaded text. Existing canonical markers take precedence.
+			if _, err = tx.ExecContext(ctx, `INSERT INTO states(user_id,entry_id,read,saved)
+              SELECT st.user_id,real.id,st.read,st.saved FROM entries own
+              JOIN states st ON st.entry_id=own.id AND st.user_id=own.import_owner
+              JOIN entries real ON real.feed_id=own.feed_id AND real.key=own.original_key AND real.url=own.url AND real.import_owner IS NULL
+              WHERE own.feed_id=? AND own.original_key=? AND own.url=?
+              ON CONFLICT(user_id,entry_id) DO NOTHING`, f.ID, e.Key, e.URL); err != nil {
+				return err
+			}
+			if _, err = tx.ExecContext(ctx, `DELETE FROM entries WHERE import_owner IS NOT NULL AND feed_id=? AND original_key=? AND url=? AND EXISTS(SELECT 1 FROM entries real WHERE real.feed_id=entries.feed_id AND real.key=entries.original_key AND real.url=entries.url AND real.import_owner IS NULL)`, f.ID, e.Key, e.URL); err != nil {
 				return err
 			}
 		}
@@ -383,35 +452,45 @@ func (s *Store) Unsubscribe(ctx context.Context, uid, id int64, group bool) erro
 	return err
 }
 
+type queryer interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
 type Export struct {
-	Version    int         `json:"version"`
-	Username   string      `json:"username"`
-	GroupOptin bool        `json:"group_optin"`
-	Feeds      []Feed      `json:"feeds"`
-	GroupFeeds []Feed      `json:"household_feeds,omitempty"`
-	Stories    []Entry     `json:"stories"`
-	Groups     []FeedGroup `json:"feed_groups"`
+	StorySources []Feed      `json:"story_sources,omitempty"`
+	Version      int         `json:"version"`
+	Username     string      `json:"username"`
+	GroupOptin   bool        `json:"group_optin"`
+	Feeds        []Feed      `json:"feeds"`
+	GroupFeeds   []Feed      `json:"household_feeds,omitempty"`
+	Stories      []Entry     `json:"stories"`
+	Groups       []FeedGroup `json:"feed_groups"`
 }
 
 func (s *Store) Export(ctx context.Context, u User) (Export, error) {
+	tx, err := s.DB.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		return Export{}, err
+	}
+	defer tx.Rollback()
 	out := Export{Version: 1, Username: u.Username, GroupOptin: u.GroupOptin, Stories: []Entry{}}
-	var err error
-	out.Feeds, err = s.Feeds(ctx, u.ID, false)
+	out.Feeds, err = feedList(ctx, tx, u.ID, false)
 	if err != nil {
 		return out, err
 	}
 	if u.GroupOptin {
-		out.GroupFeeds, err = s.Feeds(ctx, u.ID, true)
+		out.GroupFeeds, err = feedList(ctx, tx, u.ID, true)
 		if err != nil {
 			return out, err
 		}
 	}
-	out.Groups, err = s.Groups(ctx, u)
+	out.Groups, err = groupList(ctx, tx, u)
 	if err != nil {
 		return out, err
 	}
 	// The export includes only personally marked stories and subscribed sources.
-	rows, err := s.DB.QueryContext(ctx, `SELECT e.id,e.feed_id,e.key,e.title,e.url,e.body,e.published,st.read,st.saved,f.title FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
+	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.published,st.read,st.saved,f.title FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
 	if err != nil {
 		return out, err
 	}
@@ -423,7 +502,27 @@ func (s *Store) Export(ctx context.Context, u User) (Export, error) {
 		}
 		out.Stories = append(out.Stories, e)
 	}
-	return out, rows.Err()
+	if err = rows.Err(); err != nil {
+		return out, err
+	}
+	rows.Close()
+	sourceRows, err := tx.QueryContext(ctx, `SELECT DISTINCT f.id,f.url,f.title FROM feeds f WHERE EXISTS(SELECT 1 FROM entries e JOIN states st ON st.entry_id=e.id WHERE e.feed_id=f.id AND st.user_id=?) OR EXISTS(SELECT 1 FROM feed_group_members gm JOIN feed_groups g ON g.id=gm.group_id WHERE gm.feed_id=f.id AND g.user_id=?) ORDER BY f.id`, u.ID, u.ID)
+	if err != nil {
+		return out, err
+	}
+	defer sourceRows.Close()
+	for sourceRows.Next() {
+		var f Feed
+		if err = sourceRows.Scan(&f.ID, &f.URL, &f.Title); err != nil {
+			return out, err
+		}
+		out.StorySources = append(out.StorySources, f)
+	}
+	if err = sourceRows.Err(); err != nil {
+		return out, err
+	}
+	sourceRows.Close()
+	return out, tx.Commit()
 }
 
 func (s *Store) String() string { return fmt.Sprintf("reader store %p", s.DB) }

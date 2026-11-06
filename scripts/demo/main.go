@@ -56,7 +56,7 @@ func run(ctx context.Context, port int, out io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-	defer func() { err = errors.Join(err, s.DB.Close()) }()
+	defer func() { err = errors.Join(err, s.Close()) }()
 	if err = seed(ctx, s); err != nil {
 		return fmt.Errorf("seed demo: %w", err)
 	}

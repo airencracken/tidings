@@ -74,7 +74,7 @@ func (s *Store) SetPassword(ctx context.Context, username, password string) erro
 func (s *Store) Login(ctx context.Context, username, password string) (string, error) {
 	var id int64
 	var hash []byte
-	err := s.DB.QueryRowContext(ctx, "SELECT id,password FROM users WHERE username=?", username).Scan(&id, &hash)
+	err := s.DB.QueryRowContext(ctx, "SELECT id,password FROM users WHERE username=? AND suspended=0", username).Scan(&id, &hash)
 	if err != nil && err != sql.ErrNoRows {
 		return "", err
 	}
@@ -105,7 +105,7 @@ func (s *Store) Session(ctx context.Context, raw string) (User, error) {
 	if len(raw) != 64 {
 		return u, sql.ErrNoRows
 	}
-	err := s.DB.QueryRowContext(ctx, "SELECT u.id,u.username,u.owner,u.group_optin FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token=? AND s.expires>?", token.Hash(raw), time.Now().Unix()).Scan(&u.ID, &u.Username, &u.Owner, &u.GroupOptin)
+	err := s.DB.QueryRowContext(ctx, "SELECT u.id,u.username,u.owner,u.group_optin FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token=? AND s.expires>? AND u.suspended=0", token.Hash(raw), time.Now().Unix()).Scan(&u.ID, &u.Username, &u.Owner, &u.GroupOptin)
 	return u, err
 }
 
@@ -128,7 +128,7 @@ func (s *Store) Join(ctx context.Context, code, username, password string) error
 		return err
 	}
 	defer tx.Rollback()
-	res, err := tx.ExecContext(ctx, "UPDATE invites SET used=1 WHERE token=? AND used=0 AND expires>?", token.Hash(code), time.Now().Unix())
+	res, err := tx.ExecContext(ctx, "UPDATE invites SET used=1 WHERE token=? AND used=0 AND revoked=0 AND expires>?", token.Hash(code), time.Now().Unix())
 	if err != nil {
 		return err
 	}

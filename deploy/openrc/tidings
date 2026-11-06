@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+name="Tidings"
+description="A quiet household feed reader"
+command="/usr/local/bin/tidings"
+command_args="serve"
+command_user="${TIDINGS_USER:-tidings}:${TIDINGS_GROUP:-tidings}"
+directory="${TIDINGS_DATA_DIR:-/var/lib/tidings}"
+command_background="yes"
+pidfile="/run/tidings.pid"
+output_log="/var/log/tidings.log"
+error_log="/var/log/tidings.log"
+umask 0077
+
+depend() {
+ need net
+}
+
+start_pre() {
+ checkpath --directory --mode 0700 --owner "$command_user" "$directory" || return 1
+ checkpath --file --mode 0600 --owner "$command_user" "$output_log" || return 1
+}

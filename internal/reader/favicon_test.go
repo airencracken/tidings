@@ -133,7 +133,7 @@ func TestFaviconRoutesArePublicAndReadOnly(t *testing.T) {
 			t.Fatalf("favicon public exception covers another path: %s", path)
 		}
 	}
-	if err := h.store.DB.Close(); err != nil {
+	if err := h.store.Close(); err != nil {
 		t.Fatal(err)
 	}
 	w := h.request(0, "GET", "/favicon.ico", nil)

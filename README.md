@@ -88,7 +88,7 @@ Use **Feed groups** to create either kind of interest group:
 - **Chosen feeds:** explicitly select sources. The same source can belong to
   several groups, such as “AI research” and “Weekend reading”.
 - **Tag-based:** choose one source tag, such as `research`. Sources join and leave
-  automatically as you add and remove that tag under **Sources → Edit tags**.
+  automatically as you add and remove that tag under **Sources → Edit tags and topic**.
 
 Personal groups belong to their creator. Hosts can create shared household
 groups using household sources and household tags. Household groups are available
@@ -121,7 +121,12 @@ For a whole topic, import a bundle under **Sources → Import subscriptions**:
 | [All three](feeds/all.opml) | 37 |
 
 Import on the **Household sources** page to add the bundle to the shared table
-instead. Imports are transactional and do not clear existing subscriptions.
+instead. Imports are transactional and keep existing subscriptions, topics, and tags.
+Search the suggested catalog by name, topic, or description. To find a feed from
+a website, open **Find feeds from a website**, enter its address, and choose
+one of its advertised RSS or Atom links. Discovery uses the same public-network
+fetching policy as feed refreshes. Edit topics and tags beside each subscribed
+source, and rename an interest group from its own page.
 The catalog and bundles are checked together to prevent drift. Feed availability
 can change; errors appear beside the affected source. The initial check excluded
 Dan Luu's oversized feed and Rapid7's malformed XML rather than listing sources
@@ -135,13 +140,56 @@ interest groups, reading state, and text of stories you have marked. Household
 sources are included when followed. No credentials or other members' personal
 data are exported. Shared group definitions are also available to hosts.
 
-OPML import is supported. Importing JSON reading-state exports is not yet
-implemented. The JSON export is a portable record, not a full instance backup.
+Merge a Tidings JSON export under **Your account** (up to 16 MiB, 10,000 marked
+stories, 2,000 distinct sources, and 100 personal groups). The entire merge is
+transactional. Existing topics, tags, groups with the same name, and marked
+reading states take precedence. Household sources, household groups, and your
+household opt-in are not changed. Imported story copies stay private to your
+account; publisher content already present is never overwritten by an upload.
+Stories saved from a source you have since removed can also be restored. When
+a publisher later supplies an imported story, its read/save markers move onto
+the publisher entry and its private duplicate is removed.
+Exports from older Tidings builds work when their story sources are included;
+otherwise make a fresh export before migrating. Explicit group membership is
+restored for sources included in your personal subscriptions.
 
-For a complete backup, **stop Tidings and copy the entire data directory**.
-Restore the directory with Tidings stopped. Do not copy only a live SQLite file
-while its WAL journal may be active. Backups include credentials and private
-reading history; keep them private.
+A personal export excludes credentials and is not a full instance backup.
+Verified full snapshots run daily by default, starting one minute after the
+server starts. The last success and any failure appear on the owner's account
+page. SQLite's online backup API holds a consistent read snapshot, enforces the
+uncompressed byte cap before copying, and checks database integrity and foreign
+keys before publication. Comfylib compresses, checksums, publishes, and retains
+these archives in the private `backups` directory (seven copies, up to 10 GiB).
+The uncompressed snapshot cap defaults to 5 GiB. Compression uses `zstd` when
+installed, otherwise gzip. Restoring a zstd archive also requires `zstd`.
+
+For a manual copy while the server is running:
+
+```sh
+tidings backup --destination /private/path/manual-tidings-backups
+```
+
+Manual archives have a separate name and are never rotated automatically. Copy
+completed archive directories off the host if you need protection against disk
+loss. Full backups include passwords, invitations, sessions, and all members'
+private reading data; keep their directories private.
+
+Restore a complete archive into a **new, empty** private directory:
+
+```sh
+tidings restore --archive /private/path/manual-tidings-backups/manual-tidings-... --destination /private/path/tidings-restored
+```
+
+Restore checks the compressed checksum, allowed archive members, database
+checksum, schema, integrity, and foreign keys before publishing the database.
+It rejects a destination in use or containing an existing instance. Check the
+restored instance on a separate loopback port, then stop both servers and switch
+`TIDINGS_DATA_DIR` in your service configuration to the restored directory.
+Keep the original directory until you have checked the restored reader. When
+using the supplied systemd unit, also update `WorkingDirectory` and
+`ReadWritePaths` for a custom location. Schema v1 databases migrate to v2 on
+open; take a stopped copy of the entire original directory before upgrading if
+you need to return to an older binary.
 
 ## Hosting
 
@@ -151,10 +199,18 @@ reading history; keep them private.
 | `TIDINGS_DATA_DIR` | `./data` | Private data directory, mode 0700 |
 | `TIDINGS_BASE_URL` | unset | Public HTTPS origin for invitation links |
 | `TIDINGS_SECURE_COOKIES` | automatic with base URL | Set `true` to require HTTPS cookies |
+| `TIDINGS_TRUSTED_PROXIES` | none | Explicit trusted proxy IPs/CIDRs, comma-separated |
+| `TIDINGS_BACKUP_INTERVAL` | `24h` | Automatic backup interval, `0` disables |
+| `TIDINGS_BACKUP_KEEP` | `7` | Retained automatic copies (1–30) |
+| `TIDINGS_BACKUP_MAX_BYTES` | `10737418240` | Total automatic archive cap |
+| `TIDINGS_BACKUP_COPY_MAX_BYTES` | `5368709120` | Uncompressed snapshot cap |
 
 The executable serves its own CSS, JavaScript, and templates. Reading, managing
 sources, and all account forms work with JavaScript disabled. JavaScript only
-adds a saved light/dark/system theme preference. Dates use UTC.
+adds a saved light/dark/system theme preference. Dates use UTC. Refresh requests
+from different readers queue without being dropped; repeated requests coalesce,
+and sources keep a five-minute fetch cooldown. Reload to check refresh progress.
+The reader preserves feed paragraphs, lists, and code indentation as escaped text.
 
 The little town crier welcomes readers on the sign-in screen and first empty
 reading table. The transparent illustration is embedded in the binary; its
@@ -166,12 +222,42 @@ A simple cream bell on Tidings green identifies browser tabs. Its
 [favicon artwork](docs/favicon.md) for regenerating the raster sizes.
 
 Comfylib v0.1.7 supplies opaque session/invitation tokens, session-bound CSRF
-tokens, confirmed terminal password prompting, and shared account-form styles.
+tokens, confirmed terminal password prompting (with echo disabled before the
+first Linux prompt), trusted proxy resolution, backup scheduling and archives,
+service configuration resolution, administrative privilege dropping, reverse
+proxy configuration generation, account-form styles, and shared browser layout
+assertions. These features use the existing release; no comfylib update is
+required.
 Tidings owns the feed parser, fetching policy, SQLite schema, account policy,
 and templates.
 
-Use an HTTPS reverse proxy for household hosting. Keep the application listener
-private; a loopback deployment with Caddy can use:
+The supplied [systemd](deploy/systemd/tidings.service) and
+[OpenRC](deploy/openrc/tidings) services run as `tidings`, use a private
+`/var/lib/tidings`, and keep configuration under `/etc/tidings/tidings.env` or
+`/etc/conf.d/tidings`. Create the `tidings` system user/group and its private
+state directory before creating the first owner. `make install-systemd` and
+`make install-openrc` install the binary and service files, preserve existing
+configuration, and do not enable or start the service. `DESTDIR=/tmp/package`
+can stage an installation; service files expect the default `/usr/local` prefix.
+
+Administrative commands resolve the installed service's data directory and
+settings. When invoked as root they re-run as the configured service account;
+unmanaged root writes are refused. Password files must be readable by that
+account. Portable installs should run all commands as their own unprivileged
+user. Owners can create and revoke invitations, suspend/resume members, or
+permanently remove a member after confirming their own password and the member's
+username. The final active owner cannot be suspended or removed.
+
+Use an HTTPS reverse proxy for household hosting. Generate a configuration with:
+
+```sh
+tidings proxy-config caddy --domain tidings.example.org
+# nginx and apache are also supported; see proxy-config --help.
+```
+
+This command prints configuration without opening the database or modifying the
+host. Validate the complete proxy configuration before loading it. Keep the
+application listener private; a loopback deployment with Caddy can use:
 
 ```caddyfile
 tidings.example.org {
@@ -189,8 +275,11 @@ not been exercised as part of the initial local validation.
 
 `/healthz` is an unauthenticated readiness check with no account or feed data.
 Sessions expire after 30 days. Login and invitation attempts share a limit of 20
-per 15 minutes per connection IP (IPv6 grouped by /64). Forwarded client headers
-are deliberately not trusted; clients behind a proxy share its attempt budget.
+per 15 minutes per client IP (IPv6 grouped by /64). Forwarding headers are
+honored only when the connection comes from a proxy explicitly included in
+`TIDINGS_TRUSTED_PROXIES`; the first untrusted hop determines the client. With
+an empty trust list, clients behind a proxy share its attempt budget. A local
+proxy normally uses `127.0.0.1/32,::1/128`.
 Password recovery uses the local host command; there is no email service.
 
 Feeds must use public HTTP(S) URLs on port 80 or 443. DNS results are checked and
@@ -204,7 +293,7 @@ scrape full articles beyond the supplied feed; open the original when needed.
 
 ```sh
 make check             # formatting, vet, race tests, deliberate mutations
-make fuzz-smoke        # feed and OPML parser fuzzing
+make fuzz-smoke        # feed, OPML, and JSON restore parser fuzzing
 make test-browser      # after installing the browser development tools below
 ```
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"github.com/airencracken/tidings/internal/reader"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,5 +64,53 @@ func TestCommandsAndConfiguration(t *testing.T) {
 	os.Args = []string{"tidings", "unknown"}
 	if err := run(); err == nil {
 		t.Fatal("unknown command accepted")
+	}
+}
+
+func TestBackupRestoreAndProxyCommands(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TIDINGS_DATA_DIR", filepath.Join(dir, "data"))
+	t.Setenv("TIDINGS_BACKUP_INTERVAL", "0")
+	args := os.Args
+	t.Cleanup(func() { os.Args = args })
+	s, err := reader.OpenStore(os.Getenv("TIDINGS_DATA_DIR"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.CreateOwner(context.Background(), "host", "quiet mornings and books"); err != nil {
+		t.Fatal(err)
+	}
+	s.Close()
+	destination := filepath.Join(dir, "copies")
+	os.Args = []string{"tidings", "backup", "--destination", destination}
+	if err = run(); err != nil {
+		t.Fatal(err)
+	}
+	copies, err := os.ReadDir(destination)
+	if err != nil || len(copies) != 1 {
+		t.Fatal(copies, err)
+	}
+	restored := filepath.Join(dir, "restored")
+	os.Args = []string{"tidings", "restore", "--archive", filepath.Join(destination, copies[0].Name()), "--destination", restored}
+	if err = run(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = reader.OpenStore(restored)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.Login(context.Background(), "host", "quiet mornings and books"); err != nil {
+		t.Fatal(err)
+	}
+	s.Close()
+	t.Setenv("TIDINGS_DATA_DIR", filepath.Join(dir, "never-created"))
+	for _, proxy := range []string{"caddy", "nginx", "apache"} {
+		os.Args = []string{"tidings", "proxy-config", proxy, "--domain", "reader.example.net"}
+		if err = run(); err != nil {
+			t.Fatal(proxy, err)
+		}
+	}
+	if _, err = os.Stat(os.Getenv("TIDINGS_DATA_DIR")); !os.IsNotExist(err) {
+		t.Fatal("proxy config opened the database", err)
 	}
 }

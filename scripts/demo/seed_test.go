@@ -22,7 +22,7 @@ func seededStore(t *testing.T) *reader.Store {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { s.DB.Close() })
+	t.Cleanup(func() { s.Close() })
 	if err = seed(context.Background(), s); err != nil {
 		t.Fatal(err)
 	}

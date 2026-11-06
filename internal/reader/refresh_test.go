@@ -68,9 +68,9 @@ func TestOnlyOneRefreshRuns(t *testing.T) {
 		t.Fatal("refresh not started")
 	}
 	<-started
-	if h.app.StartRefresh(2, false) {
+	if !h.app.StartRefresh(2, false) {
 		close(release)
-		t.Fatal("duplicate refresh was launched")
+		t.Fatal("duplicate refresh was not coalesced")
 	}
 	close(release)
 	h.app.Wait()

@@ -7,12 +7,12 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"net/url"
 	"strings"
 	"time"
 
-	"golang.org/x/net/html"
 	"golang.org/x/net/html/charset"
 )
 
@@ -48,6 +48,16 @@ func (t xmlText) value() string {
 		return plainText(t.Inner, 64000)
 	}
 	return plainText(t.Text, 64000)
+}
+
+func (t xmlText) raw() string {
+	if strings.EqualFold(t.Type, "text") {
+		return html.EscapeString(t.Text)
+	}
+	if strings.EqualFold(t.Type, "xhtml") {
+		return t.Inner
+	}
+	return t.Text
 }
 
 type xmlLink struct {
@@ -90,47 +100,7 @@ func WebURL(raw string) (string, error) {
 	return u.String(), nil
 }
 
-func plainText(s string, limit int) string {
-	z := html.NewTokenizer(strings.NewReader(s))
-	var b strings.Builder
-	suppressed := 0
-	for {
-		tt := z.Next()
-		if tt == html.ErrorToken {
-			break
-		}
-		t := z.Token()
-		switch tt {
-		case html.StartTagToken:
-			if t.Data == "script" || t.Data == "style" || t.Data == "iframe" {
-				suppressed++
-			}
-			if suppressed == 0 {
-				b.WriteByte(' ')
-			}
-		case html.EndTagToken:
-			if (t.Data == "script" || t.Data == "style" || t.Data == "iframe") && suppressed > 0 {
-				suppressed--
-			}
-			if suppressed == 0 {
-				b.WriteByte(' ')
-			}
-		case html.TextToken:
-			if suppressed == 0 {
-				b.WriteString(t.Data)
-			}
-		}
-		if b.Len() > limit*4 {
-			break
-		}
-	}
-	s = strings.Join(strings.Fields(b.String()), " ")
-	r := []rune(s)
-	if len(r) > limit {
-		s = string(r[:limit])
-	}
-	return s
-}
+func plainText(s string, limit int) string { return extractText(s, limit, false) }
 
 func ParseFeed(data []byte, base string, now time.Time) (ParsedFeed, error) {
 	var result ParsedFeed
@@ -244,13 +214,13 @@ func normalizeEntry(x xmlEntry, base string, now time.Time) (Entry, bool) {
 	}
 	body := x.Encoded
 	if body == "" {
-		body = x.Content.value()
+		body = x.Content.raw()
 	}
 	if body == "" {
 		body = x.Description
 	}
 	if body == "" {
-		body = x.Summary.value()
+		body = x.Summary.raw()
 	}
 	stamp := now
 	for _, rawDate := range []string{x.Published, x.PubDate, x.Date, x.Updated} {
@@ -277,5 +247,5 @@ func normalizeEntry(x xmlEntry, base string, now time.Time) (Entry, bool) {
 		key = link
 	}
 	sum := sha256.Sum256([]byte(key))
-	return Entry{Key: hex.EncodeToString(sum[:]), Title: title, URL: link, Body: plainText(body, 64000), Published: stamp.Unix()}, true
+	return Entry{Key: hex.EncodeToString(sum[:]), Title: title, URL: link, Body: readerText(body, 64000), Published: stamp.Unix()}, true
 }

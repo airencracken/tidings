@@ -9,6 +9,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const { chromium } = await import(process.env.TIDINGS_PLAYWRIGHT_PATH
   ? pathToFileURL(process.env.TIDINGS_PLAYWRIGHT_PATH).href : 'playwright');
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const moduleDir = spawnSync('go',['list','-m','-f','{{.Dir}}','github.com/airencracken/comfylib'],{cwd:root,encoding:'utf8'});
+assert.equal(moduleDir.status,0,moduleDir.stderr);
+const { accountLayout,accountWidths } = await import(pathToFileURL(path.join(moduleDir.stdout.trim(),'ui/uitest/layout.mjs')).href);
 const temporary = await mkdtemp(path.join(tmpdir(), 'tidings-browser-'));
 const password = 'quiet mornings and books';
 const passwordFile = path.join(temporary, 'password');
@@ -111,11 +114,40 @@ db.commit()
   await member.locator('.story-row').getByRole('button',{name:'Mark read',exact:true}).click();
   await page.goto(origin+'/?view=group');
   assert.equal(await page.getByRole('button',{name:'Mark read',exact:true}).count(),1);
-  await newcomer.close();
+
 
   const exported=await context.request.get(origin+'/api/v1/export');
   const data=await exported.json();
   assert.equal(data.username,'host');assert.equal(data.version,1);assert.equal(data.stories.length,1);assert.equal(data.feed_groups[0].name,'AI research');
+  await member.goto(origin+'/account');
+  await member.getByLabel('Tidings JSON file, up to 16 MiB').setInputFiles({name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+  await member.getByLabel('Merge this file into my personal reading data').check();
+  await member.getByRole('button',{name:'Merge reading data',exact:true}).click();
+  await member.goto(origin+'/?view=saved');
+  assert.equal(await member.locator('.story-row').count(),1);
+  await member.goto(origin+'/account');
+  assert.equal(await member.getByRole('heading',{name:'Instance backups',exact:true}).count(),0);
+  await page.goto(origin+'/account');
+  let alice=page.locator('details.admin-row').filter({has:page.locator('summary').filter({hasText:'alice'})});
+  await alice.locator('summary').click();
+  await alice.getByLabel('Your current password',{exact:true}).fill(password);
+  await alice.getByRole('button',{name:'Apply member action',exact:true}).click();
+  await member.goto(origin+'/');
+  assert.equal(new URL(member.url()).pathname,'/login');
+  alice=page.locator('details.admin-row').filter({has:page.locator('summary').filter({hasText:'alice'})});
+  await alice.locator('summary').click();
+  await alice.getByLabel('Your current password',{exact:true}).fill(password);
+  await alice.getByRole('button',{name:'Apply member action',exact:true}).click();
+  await signIn(member,origin,'alice');
+  await newcomer.close();
+  await page.goto(origin+'/sources');
+  await page.getByLabel('Search suggested sources',{exact:true}).fill('zzzzabsent');
+  await page.getByRole('button',{name:'Find sources',exact:true}).click();
+  assert.equal(await page.locator('.catalog-card').count(),0);
+  await page.locator('summary').filter({hasText:'Edit tags and topic'}).first().click();
+  await page.getByLabel('Topic',{exact:true}).last().fill('Research');
+  await page.getByRole('button',{name:'Save topic',exact:true}).click();
+  assert.equal(await page.locator('.source-row .eyebrow').first().textContent(),'Research');
   const screenshotDir = process.env.TIDINGS_SCREENSHOT_DIR;
   if(screenshotDir) await mkdir(screenshotDir,{recursive:true});
   const welcomeContext=await browser.newContext();
@@ -131,6 +163,7 @@ db.commit()
       if(screenshotDir) await welcome.screenshot({path:path.join(screenshotDir,`welcome-${theme}-${width}.png`),fullPage:true});
     }
   }
+  for(const width of accountWidths){await welcome.setViewportSize({width,height:1000});assert.ok(await welcome.evaluate(accountLayout),`shared account layout at ${width}`);}
   await welcomeContext.close();
   for (const theme of ['light','dark']) {
     await page.goto(origin+'/');
@@ -140,6 +173,7 @@ db.commit()
       for(const route of ['/','/sources','/groups','/account','/story/1']) {
         await page.goto(origin+route);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth<=innerWidth+1),`${route} overflows at ${width} in ${theme}`);
+        if(screenshotDir && route==='/account' && [375,1440].includes(width))await page.screenshot({path:path.join(screenshotDir,`account-${theme}-${width}.png`),fullPage:true});
       }
       if(screenshotDir && (width===375 || width===1440)) {
         await page.goto(origin+'/');await page.screenshot({path:path.join(screenshotDir,`reader-${theme}-${width}.png`),fullPage:false});
@@ -147,7 +181,9 @@ db.commit()
     }
   }
   const plainContext=await browser.newContext({javaScriptEnabled:false});
-  const plain=await plainContext.newPage();await signIn(plain,origin);
+  const plain=await plainContext.newPage();
+  await plain.goto(origin+'/login');for(const width of accountWidths){await plain.setViewportSize({width,height:1000});assert.ok(await plain.evaluate(accountLayout),`shared account layout without JavaScript at ${width}`);}
+  await signIn(plain,origin);
   assert.equal(await plain.getByRole('heading',{name:'Your reading table',exact:true}).count(),1);
   await plain.goto(origin+'/groups');
   await plain.getByLabel('Name',{exact:true}).fill('Without JavaScript');
@@ -156,6 +192,11 @@ db.commit()
   await plain.getByRole('button',{name:'Save chosen feeds',exact:true}).click();
   await plain.getByRole('link',{name:'Read this group',exact:true}).click();
   assert.equal(await plain.locator('.story-row').count(),30);
+  await plain.goto(origin+'/groups');
+  await plain.getByRole('link',{name:'Without JavaScript',exact:true}).click();
+  await plain.getByLabel('Name',{exact:true}).fill('Quiet reading');
+  await plain.getByRole('button',{name:'Save group name',exact:true}).click();
+  assert.equal(await plain.getByRole('link',{name:'Quiet reading',exact:true}).count(),1);
   await plainContext.close();
   assert.deepEqual(errors,[]);
   assert.ok([...observed].every(address => address.startsWith(origin+'/')),'browser contacted a third party');
