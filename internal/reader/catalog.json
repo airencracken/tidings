@@ -1,0 +1,261 @@
+[
+  {
+    "Title": "Simon Willison",
+    "URL": "https://simonwillison.net/atom/everything/",
+    "Category": "AI",
+    "Description": "Hands-on notes on language models, tools, and software. An independent practitioner.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Hugging Face",
+    "URL": "https://huggingface.co/blog/feed.xml",
+    "Category": "AI",
+    "Description": "Open models, datasets, and practical machine learning. From the platform itself.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Google Research",
+    "URL": "https://research.google/blog/rss/",
+    "Category": "AI",
+    "Description": "Research papers and projects from Google researchers. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Google DeepMind",
+    "URL": "https://deepmind.google/blog/rss.xml",
+    "Category": "AI",
+    "Description": "Model releases, research, and applications from DeepMind. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "OpenAI",
+    "URL": "https://openai.com/news/rss.xml",
+    "Category": "AI",
+    "Description": "Model releases, research, and company announcements. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Berkeley AI Research",
+    "URL": "https://bair.berkeley.edu/blog/feed.xml",
+    "Category": "AI",
+    "Description": "Research explanations from Berkeley students and faculty.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Machine Learning at CMU",
+    "URL": "https://blog.ml.cmu.edu/feed/",
+    "Category": "AI",
+    "Description": "Machine learning research and explanations from Carnegie Mellon.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Lilian Weng",
+    "URL": "https://lilianweng.github.io/index.xml",
+    "Category": "AI",
+    "Description": "Long-form technical explanations of machine learning research. Infrequent deep reads.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Ahead of AI",
+    "URL": "https://magazine.sebastianraschka.com/feed",
+    "Category": "AI",
+    "Description": "Research and practical model-building notes from Sebastian Raschka. Some posts may be paid.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Interconnects",
+    "URL": "https://www.interconnects.ai/feed",
+    "Category": "AI",
+    "Description": "Nathan Lambert on open models, reinforcement learning, and AI research. Some posts may be paid.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Latent Space",
+    "URL": "https://www.latent.space/feed",
+    "Category": "AI",
+    "Description": "AI engineering interviews, tools, and practitioner perspectives. Some posts may be paid.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Import AI",
+    "URL": "https://importai.substack.com/feed",
+    "Category": "AI",
+    "Description": "Jack Clark’s selection of AI research and its wider implications.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "The Gradient",
+    "URL": "https://thegradient.pub/rss/",
+    "Category": "AI",
+    "Description": "Essays and analysis about AI research and its effects.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Chip Huyen",
+    "URL": "https://huyenchip.com/feed.xml",
+    "Category": "AI",
+    "Description": "Practical writing about machine learning systems and AI engineering.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Microsoft Research",
+    "URL": "https://www.microsoft.com/en-us/research/feed/",
+    "Category": "AI",
+    "Description": "Research news and technical perspectives from Microsoft. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Ars Technica",
+    "URL": "https://feeds.arstechnica.com/arstechnica/index",
+    "Category": "Tech",
+    "Description": "Technology reporting, science, policy, and detailed features. A broad, busy feed.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "The Verge",
+    "URL": "https://www.theverge.com/rss/index.xml",
+    "Category": "Tech",
+    "Description": "Technology, products, and the businesses behind them. A broad, busy feed.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "TechCrunch",
+    "URL": "https://techcrunch.com/feed/",
+    "Category": "Tech",
+    "Description": "Startups, funding, and the technology industry. A high-volume news feed.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "404 Media",
+    "URL": "https://www.404media.co/rss/",
+    "Category": "Tech",
+    "Description": "Independent reporting on technology and the internet. Some stories need a subscription.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "LWN.net",
+    "URL": "https://lwn.net/headlines/rss",
+    "Category": "Tech",
+    "Description": "Linux, free software, and kernel development. Some recent articles are subscriber-only.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Phoronix",
+    "URL": "https://www.phoronix.com/rss.php",
+    "Category": "Tech",
+    "Description": "Linux hardware, benchmarks, and open-source development. A busy specialist feed.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Julia Evans",
+    "URL": "https://jvns.ca/atom.xml",
+    "Category": "Tech",
+    "Description": "Clear explorations of debugging, Linux, networking, and everyday programming tools.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Mozilla",
+    "URL": "https://blog.mozilla.org/feed/",
+    "Category": "Tech",
+    "Description": "Browser, web, and organization news from Mozilla. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Cloudflare",
+    "URL": "https://blog.cloudflare.com/rss/",
+    "Category": "Tech",
+    "Description": "Networking, distributed systems, and security engineering. From the vendor itself.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "GitHub",
+    "URL": "https://github.blog/feed/",
+    "Category": "Tech",
+    "Description": "Developer tools, engineering, and product announcements. From the platform itself.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Krebs on Security",
+    "URL": "https://krebsonsecurity.com/feed/",
+    "Category": "Infosec",
+    "Description": "Independent investigative reporting on cybercrime, fraud, and breaches.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Schneier on Security",
+    "URL": "https://www.schneier.com/feed/atom/",
+    "Category": "Infosec",
+    "Description": "Security, privacy, and policy commentary from Bruce Schneier.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "SANS Internet Storm Center",
+    "URL": "https://isc.sans.edu/rssfeed.xml",
+    "Category": "Infosec",
+    "Description": "Practical incident diaries and observations from security handlers.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Google Project Zero",
+    "URL": "https://projectzero.google/feed.xml",
+    "Category": "Infosec",
+    "Description": "Detailed vulnerability research and exploitation analysis. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Google Security Blog",
+    "URL": "https://security.googleblog.com/feeds/posts/default",
+    "Category": "Infosec",
+    "Description": "Security research and defensive engineering from Google. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Cisco Talos",
+    "URL": "https://blog.talosintelligence.com/rss/",
+    "Category": "Infosec",
+    "Description": "Threat intelligence, malware research, and incident findings. From Cisco researchers.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "The DFIR Report",
+    "URL": "https://thedfirreport.com/feed/",
+    "Category": "Infosec",
+    "Description": "Detailed accounts of real intrusions and the evidence investigators followed.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Trail of Bits",
+    "URL": "https://blog.trailofbits.com/feed/",
+    "Category": "Infosec",
+    "Description": "Technical security research, audits, and software assurance. From the consultancy itself.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "PortSwigger Research",
+    "URL": "https://portswigger.net/research/rss",
+    "Category": "Infosec",
+    "Description": "Web security research, techniques, and tools. A primary source.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "BleepingComputer",
+    "URL": "https://www.bleepingcomputer.com/feed/",
+    "Category": "Infosec",
+    "Description": "Security incidents, malware, vulnerabilities, and practical reporting. A busy feed.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "The Hacker News",
+    "URL": "https://feeds.feedburner.com/TheHackersNews",
+    "Category": "Infosec",
+    "Description": "Frequent reporting on vulnerabilities, attacks, and enterprise security.",
+    "verified": "2026-11-06"
+  },
+  {
+    "Title": "Microsoft Security",
+    "URL": "https://www.microsoft.com/en-us/security/blog/feed/",
+    "Category": "Infosec",
+    "Description": "Threat research, incident findings, and product news. From Microsoft itself.",
+    "verified": "2026-11-06"
+  }
+]

@@ -1,0 +1,6 @@
+/data/
+/bin/
+/artifacts/
+/go.work
+/go.work.sum
+/scripts/browser/node_modules/

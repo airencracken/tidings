@@ -1,0 +1,7 @@
+.git
+data
+bin
+artifacts
+scripts/browser/node_modules
+go.work
+go.work.sum

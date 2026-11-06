@@ -1,0 +1,22 @@
+# Third-party components
+
+Tidings uses Comfylib v0.1.7 for opaque tokens and session-bound CSRF tokens,
+under AGPL-3.0-or-later. `scripts/mutate.py` is copied from Comfylib's mutation
+runner under the same license. The interface follows the Comfyware family palette
+and server-rendered form conventions used by Witmoot.
+
+Go dependencies and their transitive versions are recorded in `go.mod` and
+`go.sum`. Principal runtime dependencies are:
+
+| Component | Use | License |
+| --- | --- | --- |
+| Comfylib | Session and CSRF tokens | AGPL-3.0-or-later |
+| Go x/crypto | bcrypt passwords | BSD-3-Clause |
+| Go x/net | HTML text extraction and XML charset support | BSD-3-Clause |
+| Go x/term | Hidden terminal password input | BSD-3-Clause |
+| Modernc SQLite | SQLite without cgo | BSD-3-Clause; SQLite public domain |
+
+Playwright is an Apache-2.0 development dependency, pinned in
+`scripts/browser/package-lock.json`. No frontend package is served to readers.
+Publisher names and feed addresses identify their respective publishers; no
+affiliation is implied. Story text remains the publisher's material.

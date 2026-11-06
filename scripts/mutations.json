@@ -1,0 +1,90 @@
+[
+  {
+    "name": "household opt-in guard",
+    "file": "internal/reader/store.go",
+    "before": "WHERE u.group_optin=1 AND g.feed_id=e.feed_id))",
+    "after": "WHERE 1=1 AND g.feed_id=e.feed_id))",
+    "package": "./internal/reader",
+    "run": "^TestHouseholdOptInAndIsolation$"
+  },
+  {
+    "name": "saved-story filter",
+    "file": "internal/reader/store.go",
+    "before": "where = \"(coalesce(st.saved,0)=1)\"",
+    "after": "where = \"(coalesce(st.saved,0)>=0)\"",
+    "package": "./internal/reader",
+    "run": "^TestHouseholdOptInAndIsolation$"
+  },
+  {
+    "name": "session expiry",
+    "file": "internal/reader/auth.go",
+    "before": "AND s.expires>?",
+    "after": "AND s.expires<?",
+    "package": "./internal/reader",
+    "run": "^TestAuthAndSessionExpiry$"
+  },
+  {
+    "name": "CSRF verification",
+    "file": "internal/reader/app.go",
+    "before": "if !token.Equal(r.PostFormValue(\"csrf\"), rc.CSRF) {",
+    "after": "if false && !token.Equal(r.PostFormValue(\"csrf\"), rc.CSRF) {",
+    "package": "./internal/reader",
+    "run": "^TestAllMutationRoutesRequireCSRF$"
+  },
+  {
+    "name": "public-only fetching",
+    "file": "internal/reader/fetch.go",
+    "before": "!ip.IsGlobalUnicast() || ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsUnspecified()",
+    "after": "!ip.IsGlobalUnicast() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsUnspecified()",
+    "package": "./internal/reader",
+    "run": "^TestPublicIP$"
+  },
+  {
+    "name": "stable publication dates",
+    "file": "internal/reader/store.go",
+    "before": "body=excluded.body`",
+    "after": "body=excluded.body,published=excluded.published`",
+    "package": "./internal/reader",
+    "run": "^TestRefreshIdempotentAndDatesStable$"
+  },
+  {
+    "name": "atomic subscription rollback",
+    "file": "internal/reader/store.go",
+    "before": "\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\t\tvar fid int64",
+    "after": "\t\tif err != nil {\n            _ = tx.Commit()\n\t\t\treturn err\n\t\t}\n\t\tvar fid int64",
+    "package": "./internal/reader",
+    "run": "^TestSubscriptionAtomicity$"
+  },
+  {
+    "name": "single-use invitations",
+    "file": "internal/reader/auth.go",
+    "before": "WHERE token=? AND used=0 AND expires>?",
+    "after": "WHERE token=? AND expires>?",
+    "package": "./internal/reader",
+    "run": "^TestInvitationAtomicityAndRace$"
+  },
+  {
+    "name": "scoped tags",
+    "file": "internal/reader/groups.go",
+    "before": "t.user_id=fg.user_id AND t.feed_id=e.feed_id",
+    "after": "t.user_id<=fg.user_id AND t.feed_id=e.feed_id",
+    "package": "./internal/reader",
+    "run": "^TestTagsAreScopedAndLiteral$"
+  },
+  {
+    "name": "atomic bulk state rollback",
+    "file": "internal/reader/store.go",
+    "before": "\t\tif n == 0 {\n\t\t\treturn sql.ErrNoRows\n\t\t}",
+    "after": "\t\tif n == 0 {\n            _ = tx.Commit()\n\t\t\treturn sql.ErrNoRows\n\t\t}",
+    "package": "./internal/reader",
+    "run": "^TestMarkPageAtomicity$"
+  },
+  {
+    "name": "scoped tags in the other account direction",
+    "file": "internal/reader/groups.go",
+    "before": "t.user_id=fg.user_id AND t.feed_id=e.feed_id",
+    "after": "t.user_id>=fg.user_id AND t.feed_id=e.feed_id",
+    "package": "./internal/reader",
+    "run": "^TestTagsAreScopedAndLiteral$"
+  }
+]
