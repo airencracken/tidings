@@ -337,3 +337,9 @@ Support helps maintain Tidings and the other [Comfyware projects](https://comfyw
 
 Licensed under AGPL-3.0-or-later. Copyright 2026 Marcus J. Hildum.
 See [LICENSE](LICENSE) and [third-party components](THIRD_PARTY.md).
+
+## Common setup
+
+New source builds share [browser and command-line setup](docs/setup.md) with the
+other Comfyware apps: `tidings setup` authorizes the first-owner browser page,
+and `tidings create-owner --username NAME` prompts privately by default.

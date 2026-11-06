@@ -278,5 +278,13 @@
     "after": "u.Scheme != \"http\" || ip == nil",
     "package": "./internal/reader",
     "run": "^TestPublicOriginAdversarialInputs$"
+  },
+  {
+    "name": "browser setup refuses a second owner",
+    "file": "internal/reader/setup.go",
+    "before": "if present {",
+    "after": "if false && present {",
+    "package": "./internal/reader",
+    "run": "^TestBrowserFirstOwnerContract$"
   }
 ]

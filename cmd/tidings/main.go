@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"flag"
@@ -12,7 +11,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -26,12 +24,11 @@ import (
 	"github.com/airencracken/tidings/deploy"
 	"github.com/airencracken/tidings/internal/reader"
 	"github.com/gofrs/flock"
-	"golang.org/x/term"
 )
 
 var version = "0.2.0"
 
-var instanceCommands = map[string]bool{"create-owner": true, "set-password": true, "backup": true, "restore": true}
+var instanceCommands = map[string]bool{"setup": true, "create-owner": true, "set-password": true, "backup": true, "restore": true}
 var serviceSettings = []string{"TIDINGS_BASE_URL", "TIDINGS_ADDR", "TIDINGS_SECURE_COOKIES", "TIDINGS_TRUSTED_PROXIES", "TIDINGS_BACKUP_INTERVAL", "TIDINGS_BACKUP_KEEP", "TIDINGS_BACKUP_MAX_BYTES", "TIDINGS_BACKUP_COPY_MAX_BYTES"}
 
 func main() {
@@ -49,12 +46,18 @@ func main() {
 	}
 }
 func run() error {
+	if len(os.Args) > 1 && (os.Args[1] == "setup" || os.Args[1] == "create-owner" || os.Args[1] == "set-password") {
+		return accountCommand(os.Args[1], os.Args[2:], os.Stdin, os.Stdout, svcconfig.Detect("tidings", "/var/lib/tidings"))
+	}
+	if len(os.Args) > 2 && os.Args[1] == "help" && (os.Args[2] == "setup" || os.Args[2] == "create-owner" || os.Args[2] == "set-password") {
+		return accountCommand(os.Args[2], []string{"--help"}, os.Stdin, os.Stdout, svcconfig.Detect("tidings", "/var/lib/tidings"))
+	}
 	if len(os.Args) > 1 && (os.Args[1] == "version" || os.Args[1] == "--version") {
 		fmt.Println("tidings", version)
 		return nil
 	}
 	if len(os.Args) > 1 && (os.Args[1] == "--help" || os.Args[1] == "-h" || os.Args[1] == "help") {
-		fmt.Println("Tidings — a quiet RSS and Atom reader for you and your people.\n\nUsage:\n  tidings serve\n  tidings create-owner --username NAME [--password-file PATH]\n  tidings set-password --username NAME [--password-file PATH]\n  tidings backup --destination PRIVATE_DIRECTORY\n  tidings restore --archive BACKUP_DIRECTORY --destination NEW_DATA_DIRECTORY\n  tidings proxy-config caddy|nginx|apache --domain YOUR_DOMAIN\n\nEnvironment:\n  TIDINGS_ADDR       Listen address (127.0.0.1:8085)\n  TIDINGS_DATA_DIR   Private SQLite data directory (./data)\n  TIDINGS_BASE_URL   Public HTTPS origin for shared invitations\n  TIDINGS_SECURE_COOKIES  true behind an HTTPS proxy\n  TIDINGS_TRUSTED_PROXIES Explicit trusted proxy IPs or CIDRs\n  TIDINGS_BACKUP_INTERVAL 24h (0 disables); KEEP=7\n  TIDINGS_BACKUP_MAX_BYTES 10 GiB retained; COPY_MAX_BYTES 5 GiB per snapshot\n\nPasswords are read twice with terminal echo disabled, or from a private file.\nVerified automatic backups are stored in the private backups directory. Restore into a new directory, then switch your service configuration.")
+		fmt.Println("Tidings — a quiet RSS and Atom reader for you and your people.\n\nUsage:\n  tidings setup\n  tidings serve\n  tidings create-owner --username NAME [--password-prompt | --password-stdin | --password-file PATH]\n  tidings set-password --username NAME [--password-prompt | --password-stdin | --password-file PATH]\n  tidings backup --destination PRIVATE_DIRECTORY\n  tidings restore --archive BACKUP_DIRECTORY --destination NEW_DATA_DIRECTORY\n  tidings proxy-config caddy|nginx|apache --domain YOUR_DOMAIN\n\nEnvironment:\n  TIDINGS_ADDR       Listen address (127.0.0.1:8085)\n  TIDINGS_DATA_DIR   Private SQLite data directory (./data)\n  TIDINGS_BASE_URL   Public HTTPS origin for shared invitations\n  TIDINGS_SECURE_COOKIES  true behind an HTTPS proxy\n  TIDINGS_TRUSTED_PROXIES Explicit trusted proxy IPs or CIDRs\n  TIDINGS_BACKUP_INTERVAL 24h (0 disables); KEEP=7\n  TIDINGS_BACKUP_MAX_BYTES 10 GiB retained; COPY_MAX_BYTES 5 GiB per snapshot\n\nPasswords are read twice with terminal echo disabled, or from a private file.\nVerified automatic backups are stored in the private backups directory. Restore into a new directory, then switch your service configuration.")
 		return nil
 	}
 	if len(os.Args) > 1 && os.Args[1] == "proxy-config" {
@@ -144,31 +147,7 @@ func run() error {
 		}
 		return err
 	}
-	if command != "serve" {
-		fs := flag.NewFlagSet(command, flag.ContinueOnError)
-		username := fs.String("username", "", "account username")
-		passwordFile := fs.String("password-file", "", "read password from a private file instead of a terminal")
-		if err = fs.Parse(os.Args[2:]); err != nil {
-			return err
-		}
-		if fs.NArg() != 0 {
-			return errors.New("unexpected positional arguments")
-		}
-		password, err := readPassword(*passwordFile)
-		if err != nil {
-			return err
-		}
-		if command == "create-owner" {
-			err = s.CreateOwner(context.Background(), *username, password)
-		} else {
-			err = s.SetPassword(context.Background(), *username, password)
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Println("Account updated.")
-		return nil
-	}
+
 	base := lookup("TIDINGS_BASE_URL")
 	secure := lookup("TIDINGS_SECURE_COOKIES") == "true"
 	if base != "" {
@@ -189,13 +168,7 @@ func run() error {
 	if ip := net.ParseIP(host); (ip == nil || !ip.IsLoopback()) && (!secure || base == "") {
 		return errors.New("listening beyond loopback requires TIDINGS_BASE_URL and secure cookies; put Tidings behind an HTTPS reverse proxy")
 	}
-	var count int
-	if err = s.DB.QueryRow("SELECT count(*) FROM users WHERE owner=1").Scan(&count); err != nil {
-		return err
-	}
-	if count == 0 {
-		return errors.New("create your first owner with: tidings create-owner --username NAME")
-	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 	serverLock := flock.New(filepath.Join(dir, ".server.lock"), flock.SetPermissions(0600))
@@ -219,14 +192,23 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	server := &http.Server{Addr: addr, Handler: app, ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 64 << 10}
+	wizard, err := firstSetup(s, dir, base, addr)
+	if err != nil {
+		return err
+	}
+	server := &http.Server{Addr: addr, Handler: wizard.Wrap(app), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 64 << 10}
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
 	pollDone := make(chan struct{})
 	backupDone := make(chan struct{})
-	go func() { defer close(backupDone); backups.Run(ctx) }()
+	go func() {
+		defer close(backupDone)
+		if wizard.Wait(ctx) == nil {
+			backups.Run(ctx)
+		}
+	}()
 	go func() { defer close(pollDone); app.Poll(ctx, 30*time.Minute) }()
 	stopped := make(chan error, 1)
 	go func() { stopped <- server.Serve(listener) }()
@@ -250,36 +232,7 @@ func run() error {
 }
 
 func readPassword(file string) (string, error) {
-	if file != "" {
-		f, err := os.Open(file)
-		if err != nil {
-			return "", err
-		}
-		defer f.Close()
-		info, err := f.Stat()
-		if err != nil {
-			return "", err
-		}
-		if !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > 1024 {
-			return "", errors.New("password file must be a regular file, at most 1024 bytes, accessible only by its owner")
-		}
-		line, err := bufio.NewReader(f).ReadString('\n')
-		if err != nil && len(line) == 0 {
-			return "", err
-		}
-		return strings.TrimSuffix(strings.TrimSuffix(line, "\n"), "\r"), nil
-	}
-	fd := int(os.Stdin.Fd())
-	if !term.IsTerminal(fd) {
-		return "", errors.New("use a terminal for hidden password entry, or supply --password-file")
-	}
-	confirm := func() (string, error) {
-		return password.Confirm(os.Stderr, "Password: ", "Repeat password: ", func() ([]byte, error) { return term.ReadPassword(fd) })
-	}
-	if runtime.GOOS == "linux" {
-		return password.WithHiddenInput(fd, confirm)
-	}
-	return confirm()
+	return (password.Source{File: file}).Read(os.Stdin, os.Stderr)
 }
 
 // Service managers and root administrative re-execution already supply the
