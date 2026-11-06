@@ -1,5 +1,7 @@
 # Tidings
 
+<img src="docs/images/town-crier.png" alt="Tidings’ town crier with a bell and scroll" width="144" height="152" align="right">
+
 A quiet RSS and Atom reader for you and your people. Follow the writers and
 sites you choose, read a finite page, save something worthwhile, and put it down.
 
@@ -7,6 +9,12 @@ Tidings is Comfyware: a self-hosted Go application with SQLite, embedded assets,
 ordinary HTML forms, and no frontend build or third-party requests in the reader.
 One installation serves one household or small community. Each member has their
 own subscriptions, tags, feed groups, saved stories, and reading state.
+
+<br clear="right">
+
+[Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
+
+This is an early development build. There are no published release packages or container images yet.
 
 ## Try the demo
 
@@ -225,6 +233,11 @@ Run a live catalog check explicitly; ordinary tests need no network:
 ```sh
 TIDINGS_LIVE_FEEDS=1 go test ./internal/reader -run '^TestLiveCatalog$' -v -count=1 -timeout=300s
 ```
+
+## Support
+
+You can [support Tidings on Ko-fi](https://ko-fi.com/airencracken).
+Support helps maintain Tidings and the other [Comfyware projects](https://comfyware.org/).
 
 Licensed under AGPL-3.0-or-later. Copyright 2026 Marcus J. Hildum.
 See [LICENSE](LICENSE) and [third-party components](THIRD_PARTY.md).
