@@ -14,7 +14,7 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.3.0](https://github.com/airencracken/tidings/releases/tag/v0.3.0)**.
+Current release: **[0.3.1](https://github.com/airencracken/tidings/releases/tag/v0.3.1)**.
 
 ## Install
 

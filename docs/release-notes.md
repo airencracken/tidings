@@ -1,3 +1,11 @@
+# Tidings 0.3.1
+
+- When feed images are enabled, fetch full feed bodies to populate image
+  addresses on stories imported by older parser versions. Previously, publisher
+  validators could return “not modified” and leave those addresses empty.
+- Start the fetch immediately and show its progress using the live indicator.
+  Permission checks, setting changes, and validator resets remain atomic.
+
 # Tidings 0.3.0
 
 - Add browser first-owner setup through `tidings setup`, with a private host key,

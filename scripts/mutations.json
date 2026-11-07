@@ -358,5 +358,29 @@
     "after": "images_enabled IN(0,1,2)",
     "package": "./internal/reader",
     "run": "^TestImagesRequireOptInAndStoryAuthorization$"
+  },
+  {
+    "name": "enabling images refreshes old publisher metadata",
+    "file": "internal/reader/images.go",
+    "before": "if enabled && !before {",
+    "after": "if false && enabled && !before {",
+    "package": "./internal/reader",
+    "run": "^TestEnablingImagesRefreshesOlderFeedMetadata$"
+  },
+  {
+    "name": "image metadata backfill survives an in-flight conditional fetch",
+    "file": "internal/reader/images.go",
+    "before": "a.queueRefresh(0, true, true, true)",
+    "after": "a.queueRefresh(0, true, false, true)",
+    "package": "./internal/reader",
+    "run": "^TestEnablingImagesRefreshesOlderFeedMetadata$"
+  },
+  {
+    "name": "image metadata backfill queues behind an active forced fetch",
+    "file": "internal/reader/images.go",
+    "before": "a.queueRefresh(0, true, true, true)",
+    "after": "a.queueRefresh(0, true, true, false)",
+    "package": "./internal/reader",
+    "run": "^TestEnablingImagesRefreshesOlderFeedMetadata$"
   }
 ]

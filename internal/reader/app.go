@@ -818,13 +818,19 @@ func (a *App) StartRefresh(uid int64, all bool) bool {
 }
 
 func (a *App) startRefresh(uid int64, all, force bool) bool {
+	return a.queueRefresh(uid, all, force, false)
+}
+
+// recheck schedules a follow-up even if a forced fetch is already running.
+// Image metadata backfill needs this after invalidating older validators.
+func (a *App) queueRefresh(uid int64, all, force, recheck bool) bool {
 	a.refreshMu.Lock()
 	defer a.refreshMu.Unlock()
 	if a.ctx.Err() != nil || (!all && uid <= 0) {
 		return false
 	}
 	if all {
-		if force && a.refreshCurrentAll && a.refreshCurrentForce {
+		if force && a.refreshCurrentAll && a.refreshCurrentForce && !recheck {
 			return true
 		}
 		a.refreshAll = true

@@ -169,6 +169,9 @@ func TestImagesRequireOptInAndStoryAuthorization(t *testing.T) {
 	var calls atomic.Int32
 	data := imageFixture(t, 20, 10)
 	h.app.Fetcher = &Fetcher{Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		if r.URL.String() == f.URL {
+			return &http.Response{StatusCode: 304, Header: http.Header{}, Body: io.NopCloser(strings.NewReader("")), Request: r}, nil
+		}
 		calls.Add(1)
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader(data)), Request: r}, nil
 	})}}
@@ -189,6 +192,7 @@ func TestImagesRequireOptInAndStoryAuthorization(t *testing.T) {
 			t.Fatal("image setting permissions", tc, w.Code)
 		}
 	}
+	h.app.Wait()
 	if w := h.request(3, "GET", path, nil); w.Code != 404 || calls.Load() != 0 {
 		t.Fatal("image bypassed story isolation", w.Code, calls.Load())
 	}
@@ -212,6 +216,59 @@ func TestImagesRequireOptInAndStoryAuthorization(t *testing.T) {
 	}
 	if _, err := h.store.DB.Exec("UPDATE instance_options SET images_enabled=2"); err == nil {
 		t.Fatal("image setting schema accepts non-booleans")
+	}
+}
+
+func TestEnablingImagesRefreshesOlderFeedMetadata(t *testing.T) {
+	h := webHarness(t)
+	f := testSource(t, h.store, 2, "older-parser", false)
+	previousID := entryID(t, h.store, f)
+	if _, err := h.store.DB.Exec("UPDATE entries SET image_url='' WHERE feed_id=?", f.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.store.DB.Exec("UPDATE feeds SET etag='old-validator',modified='old-date',checked=? WHERE id=?", int64(0), f.ID); err != nil {
+		t.Fatal(err)
+	}
+	started, release := make(chan struct{}), make(chan struct{})
+	var signalStart sync.Once
+	var calls atomic.Int32
+	h.app.Fetcher = &Fetcher{Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		calls.Add(1)
+		if r.Header.Get("If-None-Match") == "old-validator" {
+			signalStart.Do(func() { close(started) })
+			select {
+			case <-release:
+			case <-r.Context().Done():
+				return nil, context.Canceled
+			}
+			return &http.Response{StatusCode: 304, Header: http.Header{}, Body: io.NopCloser(strings.NewReader("")), Request: r}, nil
+		}
+		if r.Header.Get("If-None-Match") != "" || r.Header.Get("If-Modified-Since") != "" {
+			t.Error("older metadata was refreshed conditionally")
+		}
+		body := `<rss><channel><title>Pictures</title><item><guid>first</guid><link>https://example.org/story</link><description><![CDATA[<p>A fresh story.</p><img src="/preview.png">]]></description></item></channel></rss>`
+		return &http.Response{StatusCode: 200, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}}
+	h.app.startRefresh(0, true, true)
+	select {
+	case <-started:
+	case <-time.After(time.Second):
+		t.Fatal("initial fetch did not start")
+	}
+	if w := h.request(1, "POST", "/account/images", url.Values{"enabled": {"true"}}); w.Code != 303 {
+		t.Fatal(w.Code, w.Body)
+	}
+	close(release)
+	h.app.Wait()
+	items, _, err := h.store.Entries(t.Context(), 2, Filter{View: "all"})
+	found := false
+	for _, item := range items {
+		if item.ID == previousID && item.ImageURL == "https://example.org/preview.png" {
+			found = true
+		}
+	}
+	if err != nil || !found || len(items) != 1 || calls.Load() != 2 {
+		t.Fatal("enabling images did not backfill publisher metadata", found, calls.Load(), err)
 	}
 }
 

@@ -16,7 +16,16 @@ func (s *Store) ImagesEnabled(ctx context.Context) (bool, error) {
 }
 
 func (s *Store) SetImagesEnabled(ctx context.Context, actor int64, enabled bool) error {
-	result, err := s.DB.ExecContext(ctx, `UPDATE instance_options SET images_enabled=? WHERE id=1 AND EXISTS(SELECT 1 FROM users WHERE id=? AND owner=1 AND suspended=0)`, enabled, actor)
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var before bool
+	if err = tx.QueryRowContext(ctx, "SELECT images_enabled FROM instance_options WHERE id=1").Scan(&before); err != nil {
+		return err
+	}
+	result, err := tx.ExecContext(ctx, `UPDATE instance_options SET images_enabled=? WHERE id=1 AND EXISTS(SELECT 1 FROM users WHERE id=? AND owner=1 AND suspended=0)`, enabled, actor)
 	if err != nil {
 		return err
 	}
@@ -24,7 +33,17 @@ func (s *Store) SetImagesEnabled(ctx context.Context, actor int64, enabled bool)
 	if err == nil && n != 1 {
 		return sql.ErrNoRows
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	// Older parser versions did not store image addresses. A conditional 304
+	// cannot fill those fields; request full feed bodies when images turn on.
+	if enabled && !before {
+		if _, err = tx.ExecContext(ctx, "UPDATE feeds SET etag='',modified='',checked=0"); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 func (a *App) saveImages(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +59,9 @@ func (a *App) saveImages(w http.ResponseWriter, r *http.Request) {
 	if err := a.Store.SetImagesEnabled(r.Context(), current(r).User.ID, len(values) == 1); err != nil {
 		a.fail(w, r, err)
 		return
+	}
+	if len(values) == 1 {
+		a.queueRefresh(0, true, true, true)
 	}
 	http.Redirect(w, r, "/account?notice=images#feed-images", http.StatusSeeOther)
 }
