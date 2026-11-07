@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	_ "image/png"
+	"strings"
 	"testing"
 )
 
@@ -69,5 +70,15 @@ func TestComfylibStylesAndDemoBanner(t *testing.T) {
 	w = h.request(0, "GET", "/login", nil)
 	if bytes.Contains(w.Body.Bytes(), []byte("demo-password")) {
 		t.Fatal("demo credentials appear in a normal instance")
+	}
+}
+
+func TestHeaderUsesTownCrier(t *testing.T) {
+	h := webHarness(t)
+	for _, path := range []string{"/", "/account", "/sources", "/groups"} {
+		body := h.request(2, "GET", path, nil).Body.String()
+		if !strings.Contains(body, `<img class="brand-mark" src="/static/town-crier.png"`) || strings.Contains(body, `<svg class="brand-mark"`) {
+			t.Fatal("header must use the town crier", path)
+		}
 	}
 }

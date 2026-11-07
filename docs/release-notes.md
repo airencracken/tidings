@@ -1,3 +1,21 @@
+# Tidings 0.4.1
+
+- Use the existing town crier for the favicon, touch icon, and header mark.
+  A mascot cache revision replaces the former bell in browser tabs.
+
+- Fix full-story downloads rejected by some publishers, including OpenAI's
+  Hacktron announcement. Use a compatible TLS group profile that retains
+  X25519MLKEM768 hybrid key exchange, TLS 1.2 or newer, certificate verification,
+  and the existing public-address-only connection and redirect checks.
+- Accept a broader range of publisher content-negotiation responses, fixing
+  HTTP 406 responses from SANS diary pages.
+- Show publisher HTTP errors, timeouts, size limits, and extraction failures
+  distinctly. Record bounded failure details in server logs without exposing
+  article query strings or publisher response bodies. Existing story text stays
+  available when a fetch fails.
+- Add TLS compatibility and certificate-verification regressions, plus an opt-in
+  live check for real article extraction. No database migration is needed.
+
 # Tidings 0.4.0
 
 - Preserve article headings, links, lists, quotations, tables, and code blocks.

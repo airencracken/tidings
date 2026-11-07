@@ -146,7 +146,7 @@
   {
     "name": "favicon declarations on every page",
     "file": "internal/reader/templates/pages.html",
-    "before": "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" sizes=\"any\">",
+    "before": "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg?v=town-crier\" sizes=\"any\">",
     "after": "",
     "package": "./internal/reader",
     "run": "^TestEveryPageDeclaresFavicons$"
@@ -494,5 +494,61 @@
     "after": "e.body,e.body_html",
     "package": "./internal/reader",
     "run": "^TestArticleExportRestoreAndAtomicity$"
+  },
+  {
+    "name": "publisher TLS profile remains compatible",
+    "file": "internal/reader/fetch.go",
+    "before": "CurvePreferences: []tls.CurveID{tls.X25519MLKEM768, tls.X25519, tls.CurveP256, tls.CurveP384},",
+    "after": "CurvePreferences: nil,",
+    "package": "./internal/reader",
+    "run": "^TestArticleTLSCompatibilityAndVerification$"
+  },
+  {
+    "name": "publisher compatibility retains certificate verification",
+    "file": "internal/reader/fetch.go",
+    "before": "MinVersion: tls.VersionTLS12,",
+    "after": "MinVersion: tls.VersionTLS12, InsecureSkipVerify: true,",
+    "package": "./internal/reader",
+    "run": "^TestArticleTLSCompatibilityAndVerification$"
+  },
+  {
+    "name": "article content negotiation accepts publisher responses",
+    "file": "internal/reader/articles.go",
+    "before": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "after": "text/html, application/xhtml+xml",
+    "package": "./internal/reader",
+    "run": "^TestArticleContentNegotiation$"
+  },
+  {
+    "name": "article publisher status reaches the reader",
+    "file": "internal/reader/article_errors.go",
+    "before": "The publisher refused this fetch (HTTP 403).",
+    "after": "Could not fetch the full story.",
+    "package": "./internal/reader",
+    "run": "^TestFullArticleFailuresAreSpecificAndPrivate$"
+  },
+  {
+    "name": "article diagnostic logs exclude signed URL values",
+    "file": "internal/reader/articles.go",
+    "before": "\"publisher\", publisher.Hostname()",
+    "after": "\"publisher\", publisher.String()",
+    "package": "./internal/reader",
+    "run": "^TestFullArticleFailuresAreSpecificAndPrivate$"
+  },
+  {
+    "name": "favicon reuses the established town crier",
+    "file": "internal/reader/static/favicon.svg",
+    "before": "href=\"data:image/png;base64,iVBORw0KGgo",
+    "after": "href=\"data:image/png;base64,jVBORw0KGgo",
+    "package": "./internal/reader",
+    "run": "^TestFaviconAssets$"
+  },
+  {
+    "name": "header uses the town crier",
+    "file": "internal/reader/templates/pages.html",
+    "before": "<img class=\"brand-mark\" src=\"/static/town-crier.png\"",
+    "after": "<img class=\"brand-mark\" src=\"/static/favicon-32.png\"",
+    "package": "./internal/reader",
+    "run": "^TestHeaderUsesTownCrier$"
   }
 ]

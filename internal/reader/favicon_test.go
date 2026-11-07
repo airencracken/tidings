@@ -2,6 +2,7 @@ package reader
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/xml"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -37,9 +40,23 @@ func TestFaviconAssets(t *testing.T) {
 		if alpha != 0 {
 			t.Errorf("%s corners must be transparent", name)
 		}
-		r, g, blue, a := img.At(size/2, size/2).RGBA()
-		if a != 65535 || r < 60000 || g < 60000 || blue < 60000 {
-			t.Errorf("%s bell is missing or not legible", name)
+		skin, green := 0, 0
+		for y := 0; y < size; y++ {
+			for x := 0; x < size; x++ {
+				r, g, b, a := img.At(x, y).RGBA()
+				if a < 0xe000 {
+					continue
+				}
+				if r > g+12*257 && g > b+8*257 && r > b+40*257 {
+					skin++
+				}
+				if g+10*257 >= r && g > b+15*257 && r < 190*257 && g < 190*257 {
+					green++
+				}
+			}
+		}
+		if skin < size*size/30 || green < size*size/30 {
+			t.Errorf("%s must depict the town crier's face and green hat", name)
 		}
 	}
 	b, err := assets.ReadFile("static/favicon.svg")
@@ -48,6 +65,7 @@ func TestFaviconAssets(t *testing.T) {
 	}
 	decoder := xml.NewDecoder(bytes.NewReader(b))
 	root := false
+	portraits := 0
 	for {
 		token, err := decoder.Token()
 		if err == io.EOF {
@@ -66,15 +84,32 @@ func TestFaviconAssets(t *testing.T) {
 					t.Fatal("invalid SVG root")
 				}
 			}
-			if element.Name.Local == "script" || element.Name.Local == "image" || element.Name.Local == "foreignObject" {
-				t.Fatal("favicon must be self-contained vector artwork")
+			if element.Name.Local == "script" || element.Name.Local == "foreignObject" {
+				t.Fatal("favicon must be self-contained artwork")
 			}
 			for _, attribute := range element.Attr {
-				if attribute.Name.Local == "href" || strings.HasPrefix(attribute.Name.Local, "on") {
-					t.Fatal("active or external SVG content")
+				if strings.HasPrefix(attribute.Name.Local, "on") {
+					t.Fatal("active SVG content")
+				}
+				if attribute.Name.Local == "href" {
+					if element.Name.Local != "image" || !strings.HasPrefix(attribute.Value, "data:image/png;base64,") {
+						t.Fatal("external SVG content")
+					}
+					source, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(attribute.Value, "data:image/png;base64,"))
+					if err != nil {
+						t.Fatal(err)
+					}
+					mascot, err := os.ReadFile("../../docs/images/town-crier.png")
+					if err != nil || !bytes.Equal(source, mascot) {
+						t.Fatal("favicon must reuse the established mascot", err)
+					}
+					portraits++
 				}
 			}
 		}
+	}
+	if portraits != 1 {
+		t.Fatal("favicon must contain one mascot portrait")
 	}
 }
 
@@ -171,7 +206,14 @@ func TestEveryPageDeclaresFavicons(t *testing.T) {
 					attrs[a.Key] = a.Val
 				}
 				if attrs["rel"] == "icon" || attrs["rel"] == "apple-touch-icon" {
-					icons[attrs["href"]] = attrs["rel"]
+					link, err := url.Parse(attrs["href"])
+					if err != nil {
+						t.Fatal(err)
+					}
+					if link.RawQuery != "v=town-crier" {
+						t.Fatal("new mascot icons need a cache revision", link)
+					}
+					icons[link.Path] = attrs["rel"]
 				}
 			}
 			for child := n.FirstChild; child != nil; child = child.NextSibling {

@@ -22,7 +22,12 @@ type Fetcher struct{ Client *http.Client }
 // Dial the validated IP itself, preventing a second DNS lookup from rebinding
 // the request to a private network. Redirects use this same transport.
 func NewFetcher() *Fetcher {
-	t := &http.Transport{TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}, ResponseHeaderTimeout: 15 * time.Second, MaxResponseHeaderBytes: 64 << 10, MaxIdleConns: 8, IdleConnTimeout: 30 * time.Second, ForceAttemptHTTP2: true}
+	t := &http.Transport{TLSClientConfig: &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		// Some publishers challenge Go 1.26's expanded TLS group profile. Keep
+		// the widely deployed hybrid exchange and modern classical groups.
+		CurvePreferences: []tls.CurveID{tls.X25519MLKEM768, tls.X25519, tls.CurveP256, tls.CurveP384},
+	}, ResponseHeaderTimeout: 15 * time.Second, MaxResponseHeaderBytes: 64 << 10, MaxIdleConns: 8, IdleConnTimeout: 30 * time.Second, ForceAttemptHTTP2: true}
 	t.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
 		host, port, err := net.SplitHostPort(address)
 		if err != nil {

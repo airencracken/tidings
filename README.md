@@ -14,7 +14,7 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.4.0](https://github.com/airencracken/tidings/releases/tag/v0.4.0)**.
+Current release: **[0.4.1](https://github.com/airencracken/tidings/releases/tag/v0.4.1)**.
 
 ## Inspiration
 
@@ -261,7 +261,8 @@ The little town crier welcomes readers on the sign-in screen and first empty
 reading table. The transparent illustration is embedded in the binary; its
 [generation prompt](docs/town-crier-prompt.txt) is kept with the source.
 
-A simple cream bell on Tidings green identifies browser tabs. Its
+The town crier identifies browser tabs and the app header. A close-up of the
+existing mascot makes the small icon readable. Its
 [SVG source](internal/reader/static/favicon.svg), 16/32/48-pixel ICO frames, and
 180-pixel Apple touch icon are embedded and available before sign-in. See
 [favicon artwork](docs/favicon.md) for regenerating the raster sizes.

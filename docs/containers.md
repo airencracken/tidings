@@ -1,7 +1,7 @@
 # Run Tidings with Docker Compose
 
 Published images are at [GHCR](https://github.com/airencracken/tidings/pkgs/container/tidings):
-`ghcr.io/airencracken/tidings:v0.4.0`. The exact version tag contains **linux/amd64**
+`ghcr.io/airencracken/tidings:v0.4.1`. The exact version tag contains **linux/amd64**
 and **linux/arm64**. Docker selects your host architecture automatically. There
 is no moving `latest` tag; old release tags are not replaced.
 

@@ -82,9 +82,10 @@ db.commit()
   const cacheDirectory=path.join(env.TIDINGS_DATA_DIR,'cache','images');await mkdir(cacheDirectory,{recursive:true,mode:0o700});
   await writeFile(path.join(cacheDirectory,createHash('sha256').update('https://example.org/preview.png').digest('hex')+'.jpg'),Buffer.from(preview,'base64'),{mode:0o600});
   await signIn(page,origin);
-  assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg');
-  assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png');
-  await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg';await icon.decode();if(!icon.naturalWidth)throw new Error('SVG favicon did not render');});
+  assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg?v=town-crier');
+  assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png?v=town-crier');
+  await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg?v=town-crier';await icon.decode();const canvas=document.createElement('canvas');canvas.width=32;canvas.height=32;const context=canvas.getContext('2d');context.drawImage(icon,0,0,32,32);const pixels=context.getImageData(0,0,32,32).data;if(!pixels.some((value,index)=>index%4===3&&value>200))throw new Error('Mascot favicon did not render under the content security policy');});
+  assert.ok(await page.locator('.brand-mark').evaluate(image=>image.tagName==='IMG'&&image.complete&&image.naturalWidth>0));
 
   // A saved theme must be applied before the body is parsed, even when the
   // operating-system preference is the opposite and script delivery is slow.

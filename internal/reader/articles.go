@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -28,25 +30,25 @@ func (f *Fetcher) Article(ctx context.Context, raw string) (string, string, erro
 		return "", "", err
 	}
 	req.Header.Set("User-Agent", "Tidings (+https://github.com/airencracken/tidings)")
-	req.Header.Set("Accept", "text/html, application/xhtml+xml")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	res, err := f.Client.Do(req)
 	if err != nil {
 		return "", "", err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return "", "", fmt.Errorf("publisher returned HTTP %d", res.StatusCode)
+		return "", "", &publisherError{Status: res.StatusCode}
 	}
 	kind, _, _ := mime.ParseMediaType(res.Header.Get("Content-Type"))
 	if kind != "text/html" && kind != "application/xhtml+xml" {
-		return "", "", errors.New("publisher did not return an article page")
+		return "", "", errArticleType
 	}
 	data, err := io.ReadAll(io.LimitReader(res.Body, maxArticleBytes+1))
 	if err != nil {
 		return "", "", err
 	}
 	if len(data) > maxArticleBytes {
-		return "", "", errors.New("article page exceeds 2 MiB")
+		return "", "", errArticleTooLarge
 	}
 	reader, err := charset.NewReader(bytes.NewReader(data), res.Header.Get("Content-Type"))
 	if err != nil {
@@ -56,19 +58,19 @@ func (f *Fetcher) Article(ctx context.Context, raw string) (string, string, erro
 	parser.MaxElemsToParse = 12000
 	article, err := parser.Parse(reader, res.Request.URL)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("%w: %w", errArticleParse, err)
 	}
 	var rich bytes.Buffer
 	if err = article.RenderHTML(&rich); err != nil {
 		return "", "", err
 	}
 	if rich.Len() > maxArticleHTML {
-		return "", "", errors.New("article is too long")
+		return "", "", errArticleTooLarge
 	}
 	markup := articleHTML(rich.String(), res.Request.URL.String(), func(address string) string { return address })
 	text := readerText(markup, 64000)
 	if strings.TrimSpace(text) == "" {
-		return "", "", errors.New("no readable story found")
+		return "", "", errArticleEmpty
 	}
 	return text, markup, nil
 }
@@ -117,7 +119,10 @@ func (a *App) fetchArticle(w http.ResponseWriter, r *http.Request) {
 	}
 	body, rich, err := a.Fetcher.Article(ctx, entry.URL)
 	if err != nil {
-		a.render(w, r, page{Title: entry.Title, Kind: "story", Story: entry, Error: "Could not fetch the full story. You can still read the original."}, http.StatusBadGateway)
+		message, reason, upstreamStatus := articleFailure(err)
+		publisher, _ := url.Parse(entry.URL)
+		slog.Warn("full-story fetch failed", "story_id", id, "publisher", publisher.Hostname(), "reason", reason, "upstream_status", upstreamStatus)
+		a.render(w, r, page{Title: entry.Title, Kind: "story", Story: entry, Error: message}, http.StatusBadGateway)
 		return
 	}
 	if err = a.Store.saveArticle(ctx, current(r).User.ID, id, body, rich); errors.Is(err, sql.ErrNoRows) {
