@@ -1,13 +1,17 @@
 # Install Tidings
 
+For first-run accounts, use [browser or command-line setup](setup.md). Run
+`tidings setup` for the browser key, or `tidings create-owner --username NAME`
+for a hidden terminal prompt.
+
 The [GitHub releases](https://github.com/airencracken/tidings/releases) provide
 versioned Linux amd64 and arm64 archives, Debian packages, a source archive,
-and a SHA-256 checksum manifest. The current release is **0.2.0**.
+and a SHA-256 checksum manifest. The current release is **0.3.0**.
 
 ## Linux archive
 
 Choose your architecture, download the archive and matching checksum manifest,
-and run `sha256sum -c tidings_0.2.0_checksums.txt --ignore-missing` in that directory.
+and run `sha256sum -c tidings_0.3.0_checksums.txt --ignore-missing` in that directory.
 Each archive contains the executable, license and dependency notices, README,
 maintained guides, and service/proxy examples under `deploy/`.
 
@@ -18,7 +22,7 @@ create a private data directory and set `TIDINGS_DATA_DIR` explicitly. Run
 ## Debian or Ubuntu
 
 ```sh
-sudo apt install ./tidings_0.2.0_amd64.deb
+sudo apt install ./tidings_0.3.0_amd64.deb
 sudo tidings create-owner --username owner
 sudo systemctl enable --now tidings
 ```
@@ -37,7 +41,7 @@ and systemd units, and offline Go dependencies. Configure `/etc/conf.d/tidings`
 for OpenRC or `/etc/tidings/tidings.env` for systemd. Run `tidings create-owner --username owner` as root after
 installation; the administrative command re-executes as the service account.
 
-For OpenRC, initialize the owner before running `rc-service tidings start`.
+For OpenRC, start the service for browser setup with `rc-service tidings start`.
 Add the configured service to a runlevel with `rc-update add tidings default`.
 
 ## Containers and source

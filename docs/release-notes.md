@@ -1,3 +1,21 @@
+# Tidings 0.3.0
+
+- Add browser first-owner setup through `tidings setup`, with a private host key,
+  confirmed passwords, and setup closing once an owner exists.
+- Align `create-owner` and `set-password` across Comfyware: hidden confirmed input
+  by default, plus `--password-prompt`, `--password-stdin`, `--password-file`,
+  and `--data-dir`. Password changes end earlier signed-in sessions.
+- Use published Comfylib v0.1.8 and retain existing account command aliases.
+- Fetch newly followed and imported sources immediately; show live waiting,
+  fetching, completed, and failed states with the next scheduled check.
+- Use roomier story cards and clearer type, and remove repeated reading caveats.
+- Add an owner-controlled option for feed-supplied pictures. Previews are served
+  through Tidings and share a private, bounded local cache with seven-day expiry.
+- Migrate transactionally to schema 4 with images disabled on upgrade. Backups
+  preserve image settings and addresses; cached image files are rebuildable.
+- Exercise every bundled publisher using the production fetcher in an opt-in
+  live-source check, alongside deterministic browser and security tests.
+
 # Tidings 0.2.0
 
 - Fix OpenRC configuration inheritance for plain assignments, including the

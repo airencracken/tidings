@@ -50,6 +50,6 @@ weekly logs. Logs and backups may contain private data; protect them.
 
 A normal SIGTERM closes the listener, waits for background work, and closes the
 database. Check `/healthz` for readiness. Do not use process existence as the
-only readiness signal. Provision the first owner before starting the service.
+only readiness signal. Start the service and use browser setup, or create the first owner through the CLI.
 
 See [backup and recovery](automatic-backups.md) and [installation/upgrades](releases.md).
