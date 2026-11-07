@@ -1,3 +1,20 @@
+# Tidings 0.4.0
+
+- Preserve article headings, links, lists, quotations, tables, and code blocks.
+  Inline images use the existing optional local cache.
+- Add Get full story, using a local Readability parser and the existing public-only
+  HTTP client. Downloaded copies belong to each reader and travel with marked
+  stories in exports and backups.
+- Remove known tracking fields from article links while preserving functional
+  query values, anchors, signed URLs, feed addresses, and media addresses.
+- Add optional per-reader keyboard shortcuts, off by default. Editing fields and
+  browser extension key combinations keep their normal behavior.
+- Adapt feed checks between five minutes and 24 hours; back off on failures,
+  respect publisher cache/retry timing, and allow one refresh per host at a time.
+- Apply saved themes before page content appears to prevent flashes on navigation.
+- Migrate transactionally to schema 5. Fetch full feed bodies once on upgrade to
+  populate article formatting without changing reading state.
+
 # Tidings 0.3.1
 
 - When feed images are enabled, fetch full feed bodies to populate image

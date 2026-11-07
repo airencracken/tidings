@@ -39,7 +39,7 @@ func (s *Store) SetImagesEnabled(ctx context.Context, actor int64, enabled bool)
 	// Older parser versions did not store image addresses. A conditional 304
 	// cannot fill those fields; request full feed bodies when images turn on.
 	if enabled && !before {
-		if _, err = tx.ExecContext(ctx, "UPDATE feeds SET etag='',modified='',checked=0"); err != nil {
+		if _, err = tx.ExecContext(ctx, "UPDATE feeds SET etag='',modified='',checked=0,next_check=0"); err != nil {
 			return err
 		}
 	}
@@ -82,7 +82,7 @@ func (a *App) storyImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	entry, err := a.Store.Entry(r.Context(), current(r).User.ID, id)
-	if errors.Is(err, sql.ErrNoRows) || err == nil && entry.ImageURL == "" {
+	if errors.Is(err, sql.ErrNoRows) {
 		http.NotFound(w, r)
 		return
 	}
@@ -90,9 +90,17 @@ func (a *App) storyImage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Image unavailable", http.StatusServiceUnavailable)
 		return
 	}
+	address := entry.ImageURL
+	if key := r.PathValue("key"); key != "" {
+		address = inlineImages(entry.BodyHTML, entry.URL)[key]
+	}
+	if address == "" {
+		http.NotFound(w, r)
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 25*time.Second)
 	defer cancel()
-	data, err := a.images.get(ctx, entry.ImageURL, a.Fetcher.Client)
+	data, err := a.images.get(ctx, address, a.Fetcher.Client)
 	if err != nil {
 		http.Error(w, "Image unavailable", http.StatusBadGateway)
 		return

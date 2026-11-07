@@ -11,15 +11,16 @@ import (
 type fetchSummary struct {
 	Sources, Waiting, Failed int
 	Checked                  int64
+	NextCheck                int64
 }
 
 // Count only feeds this reader can fetch; other people's subscriptions and
 // household feeds the reader has not opted into remain private.
 func (s *Store) fetchSummary(ctx context.Context, uid int64) (fetchSummary, error) {
 	var out fetchSummary
-	err := s.DB.QueryRowContext(ctx, `SELECT count(*),coalesce(sum(f.checked=0),0),coalesce(sum(f.error<>''),0),coalesce(max(f.checked),0)
+	err := s.DB.QueryRowContext(ctx, `SELECT count(*),coalesce(sum(f.checked=0),0),coalesce(sum(f.error<>''),0),coalesce(max(f.checked),0),coalesce(min(CASE WHEN f.checked=0 THEN 0 ELSE max(f.next_check,f.checked+300) END),0)
 	FROM feeds f WHERE EXISTS(SELECT 1 FROM subscriptions s WHERE s.feed_id=f.id AND s.user_id=?)
-	OR EXISTS(SELECT 1 FROM group_feeds g JOIN users u ON u.id=? WHERE g.feed_id=f.id AND (u.owner=1 OR u.group_optin=1))`, uid, uid).Scan(&out.Sources, &out.Waiting, &out.Failed, &out.Checked)
+	OR EXISTS(SELECT 1 FROM group_feeds g JOIN users u ON u.id=? WHERE g.feed_id=f.id AND (u.owner=1 OR u.group_optin=1))`, uid, uid).Scan(&out.Sources, &out.Waiting, &out.Failed, &out.Checked, &out.NextCheck)
 	return out, err
 }
 
@@ -38,7 +39,9 @@ func (a *App) fetchOverview(ctx context.Context, uid int64) (fetchOverview, erro
 	}
 	status := a.RefreshStatus(uid)
 	out := fetchOverview{State: "idle", Checked: summary.Checked}
-	if !status.NextCheck.IsZero() {
+	if summary.NextCheck > 0 {
+		out.NextCheck = "Next automatic check at " + time.Unix(summary.NextCheck, 0).UTC().Format("15:04 UTC") + "."
+	} else if !status.NextCheck.IsZero() {
 		out.NextCheck = "Next automatic check at " + status.NextCheck.UTC().Format("15:04 UTC") + "."
 	}
 	switch {

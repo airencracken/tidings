@@ -130,7 +130,7 @@ func TestAutomaticFetchScheduleIsVisible(t *testing.T) {
 		}
 	}
 	next := h.app.RefreshStatus(2).NextCheck
-	if time.Until(next) < 59*time.Minute || time.Until(next) > time.Hour {
+	if time.Until(next) < 59*time.Second || time.Until(next) > time.Minute {
 		t.Fatal("incorrect next check", next)
 	}
 }

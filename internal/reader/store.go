@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/gofrs/flock"
 	_ "modernc.org/sqlite"
@@ -29,6 +28,9 @@ var migrationV3 string
 //go:embed migration_v4.sql
 var migrationV4 string
 
+//go:embed migration_v5.sql
+var migrationV5 string
+
 type Store struct {
 	DB        *sql.DB
 	lock      *flock.Flock
@@ -42,18 +44,20 @@ type User struct {
 	Username          string
 	Owner, GroupOptin bool
 	Suspended         bool
+	KeyboardShortcuts bool
 }
 type Feed struct {
-	ID       int64    `json:"id"`
-	URL      string   `json:"url"`
-	Title    string   `json:"title"`
-	Category string   `json:"category"`
-	ETag     string   `json:"-"`
-	Modified string   `json:"-"`
-	Checked  int64    `json:"checked"`
-	Error    string   `json:"error,omitempty"`
-	Group    bool     `json:"group"`
-	Tags     []string `json:"tags"`
+	ID        int64    `json:"id"`
+	URL       string   `json:"url"`
+	Title     string   `json:"title"`
+	Category  string   `json:"category"`
+	ETag      string   `json:"-"`
+	Modified  string   `json:"-"`
+	Checked   int64    `json:"checked"`
+	NextCheck int64    `json:"next_check,omitempty"`
+	Error     string   `json:"error,omitempty"`
+	Group     bool     `json:"group"`
+	Tags      []string `json:"tags"`
 }
 type Filter struct {
 	View, Query, Category string
@@ -115,7 +119,7 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 4 {
+	if version > 5 {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
@@ -129,7 +133,12 @@ func OpenStore(dir string) (store *Store, failure error) {
 		_, err = tx.Exec(migrationV4)
 	}
 	if err == nil {
-		_, err = tx.Exec("PRAGMA user_version=4")
+		if version < 5 {
+			_, err = tx.Exec(migrationV5)
+		}
+	}
+	if err == nil {
+		_, err = tx.Exec("PRAGMA user_version=5")
 	}
 	if err == nil {
 		err = tx.Commit()
@@ -251,10 +260,10 @@ func (s *Store) Feeds(ctx context.Context, uid int64, group bool) ([]Feed, error
 }
 
 func feedList(ctx context.Context, db queryer, uid int64, group bool) ([]Feed, error) {
-	q := "SELECT f.id,f.url,f.title,s.category,f.etag,f.modified,f.checked,f.error,(SELECT json_group_array(tag) FROM subscription_tags t WHERE t.user_id=s.user_id AND t.feed_id=f.id) FROM feeds f JOIN subscriptions s ON s.feed_id=f.id WHERE s.user_id=? ORDER BY s.category,f.title"
+	q := "SELECT f.id,f.url,f.title,s.category,f.etag,f.modified,f.checked,f.next_check,f.error,(SELECT json_group_array(tag) FROM subscription_tags t WHERE t.user_id=s.user_id AND t.feed_id=f.id) FROM feeds f JOIN subscriptions s ON s.feed_id=f.id WHERE s.user_id=? ORDER BY s.category,f.title"
 	args := []any{uid}
 	if group {
-		q = "SELECT f.id,f.url,f.title,g.category,f.etag,f.modified,f.checked,f.error,(SELECT json_group_array(tag) FROM household_tags t WHERE t.feed_id=f.id) FROM feeds f JOIN group_feeds g ON g.feed_id=f.id ORDER BY g.category,f.title"
+		q = "SELECT f.id,f.url,f.title,g.category,f.etag,f.modified,f.checked,f.next_check,f.error,(SELECT json_group_array(tag) FROM household_tags t WHERE t.feed_id=f.id) FROM feeds f JOIN group_feeds g ON g.feed_id=f.id ORDER BY g.category,f.title"
 		args = nil
 	}
 	rows, err := db.QueryContext(ctx, q, args...)
@@ -267,7 +276,7 @@ func feedList(ctx context.Context, db queryer, uid int64, group bool) ([]Feed, e
 		var f Feed
 		f.Group = group
 		var tags string
-		if err = rows.Scan(&f.ID, &f.URL, &f.Title, &f.Category, &f.ETag, &f.Modified, &f.Checked, &f.Error, &tags); err != nil {
+		if err = rows.Scan(&f.ID, &f.URL, &f.Title, &f.Category, &f.ETag, &f.Modified, &f.Checked, &f.NextCheck, &f.Error, &tags); err != nil {
 			return nil, err
 		}
 		if err = json.Unmarshal([]byte(tags), &f.Tags); err != nil {
@@ -317,7 +326,7 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 
 func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool, error) {
 	where, args := entryWhere(uid, f)
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
 	params := []any{uid, uid}
 	params = append(params, args...)
 	params = append(params, f.Page*30)
@@ -329,7 +338,7 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 	out := []Entry{}
 	for rows.Next() {
 		var e Entry
-		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source, &e.Category); err != nil {
+		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source, &e.Category); err != nil {
 			return nil, false, err
 		}
 		out = append(out, e)
@@ -343,8 +352,18 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 
 func (s *Store) Entry(ctx context.Context, uid, id int64) (Entry, error) {
 	var e Entry
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
-	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source)
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
+	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source)
+	if err == nil {
+		var body, rich string
+		copyErr := s.DB.QueryRowContext(ctx, "SELECT body,body_html FROM article_copies WHERE user_id=? AND entry_id=?", uid, id).Scan(&body, &rich)
+		if copyErr == nil {
+			e.Body, e.BodyHTML, e.FullStory = body, rich, true
+		} else if copyErr != sql.ErrNoRows {
+			return Entry{}, copyErr
+		}
+		e.URL = CleanArticleURL(e.URL)
+	}
 	return e, err
 }
 
@@ -396,9 +415,17 @@ func (s *Store) ApplyFetch(ctx context.Context, f Feed, r FetchResult) error {
 		return err
 	}
 	defer tx.Rollback()
+	added := 0
 	if !r.Unchanged {
 		for _, e := range r.Feed.Entries {
-			_, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,title,url,body,image_url,published) VALUES(?,?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO UPDATE SET title=excluded.title,url=excluded.url,body=excluded.body,image_url=excluded.image_url WHERE entries.import_owner IS NULL`, f.ID, e.Key, e.Title, e.URL, e.Body, e.ImageURL, e.Published)
+			var exists int
+			if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM entries WHERE feed_id=? AND key=?", f.ID, e.Key).Scan(&exists); err != nil {
+				return err
+			}
+			if exists == 0 {
+				added++
+			}
+			_, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,title,url,body,body_html,image_url,published) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO UPDATE SET title=excluded.title,url=excluded.url,body=excluded.body,body_html=excluded.body_html,image_url=excluded.image_url WHERE entries.import_owner IS NULL`, f.ID, e.Key, e.Title, e.URL, e.Body, e.BodyHTML, e.ImageURL, e.Published)
 			if err != nil {
 				return err
 			}
@@ -423,7 +450,7 @@ func (s *Store) ApplyFetch(ctx context.Context, f Feed, r FetchResult) error {
 			return err
 		}
 	}
-	_, err = tx.ExecContext(ctx, "UPDATE feeds SET checked=?,error='' WHERE id=?", time.Now().Unix(), f.ID)
+	err = saveSchedule(ctx, tx, f.ID, added, r.NotBefore)
 	if err != nil {
 		return err
 	}
@@ -502,14 +529,14 @@ func (s *Store) Export(ctx context.Context, u User) (Export, error) {
 		return out, err
 	}
 	// The export includes only personally marked stories and subscribed sources.
-	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.image_url,e.published,st.read,st.saved,f.title FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
+	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,coalesce(c.body,e.body),coalesce(c.body_html,e.body_html),e.image_url,e.published,st.read,st.saved,f.title,c.entry_id IS NOT NULL FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id LEFT JOIN article_copies c ON c.entry_id=e.id AND c.user_id=st.user_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
 	if err != nil {
 		return out, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var e Entry
-		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source); err != nil {
+		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source, &e.FullStory); err != nil {
 			return out, err
 		}
 		out.Stories = append(out.Stories, e)

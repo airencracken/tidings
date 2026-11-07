@@ -26,6 +26,8 @@ type Entry struct {
 	Title     string `json:"title"`
 	URL       string `json:"url"`
 	Body      string `json:"body"`
+	BodyHTML  string `json:"body_html,omitempty"`
+	FullStory bool   `json:"full_story,omitempty"`
 	ImageURL  string `json:"image_url,omitempty"`
 	Published int64  `json:"published"`
 	Read      bool   `json:"read"`
@@ -262,5 +264,5 @@ func normalizeEntry(x xmlEntry, base string, now time.Time) (Entry, bool) {
 		key = link
 	}
 	sum := sha256.Sum256([]byte(key))
-	return Entry{Key: hex.EncodeToString(sum[:]), Title: title, URL: link, Body: readerText(body, 64000), ImageURL: entryImage(x, body, base), Published: stamp.Unix()}, true
+	return Entry{Key: hex.EncodeToString(sum[:]), Title: title, URL: CleanArticleURL(link), BodyHTML: articleHTML(body, link, func(address string) string { return address }), Body: readerText(body, 64000), ImageURL: entryImage(x, body, base), Published: stamp.Unix()}, true
 }

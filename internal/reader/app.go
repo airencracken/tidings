@@ -38,6 +38,7 @@ type App struct {
 	Store               *Store
 	Fetcher             *Fetcher
 	images              *imageCache
+	articleSlots        chan struct{}
 	config              Config
 	templates           *template.Template
 	mux                 *http.ServeMux
@@ -94,9 +95,11 @@ type page struct {
 }
 
 func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
-	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), config: c, ctx: ctx, mux: http.NewServeMux()}
+	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), config: c, ctx: ctx, mux: http.NewServeMux()}
 	funcs := template.FuncMap{
-		"date": func(n int64) string { return time.Unix(n, 0).UTC().Format("Jan 2, 2006") },
+		"article":   renderArticle,
+		"cleanLink": CleanArticleURL,
+		"date":      func(n int64) string { return time.Unix(n, 0).UTC().Format("Jan 2, 2006") },
 		"checked": func(n int64) string {
 			if n == 0 {
 				return "Not fetched yet"
@@ -239,6 +242,9 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) routes() {
+	a.mux.HandleFunc("POST /account/keyboard", a.saveKeyboard)
+	a.mux.HandleFunc("POST /story/{id}/fetch", a.fetchArticle)
+	a.mux.HandleFunc("GET /story/{id}/image/{key}", a.storyImage)
 	a.mux.HandleFunc("GET /api/v1/fetch-status", a.fetchStatus)
 	a.mux.HandleFunc("GET /story/{id}/image", a.storyImage)
 	a.mux.HandleFunc("POST /account/images", a.saveImages)
@@ -332,7 +338,7 @@ func back(r *http.Request) string {
 	return u.RequestURI()
 }
 func notice(r *http.Request) string {
-	return map[string]string{"images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
+	return map[string]string{"keyboard": "Your reading preferences were saved.", "images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
 }
 func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
@@ -901,6 +907,14 @@ func (a *App) refreshFeeds(uid int64, all, force bool) {
 		}
 		return
 	}
+	feeds = fairFeedOrder(feeds)
+	gates := map[string]chan struct{}{}
+	for _, f := range feeds {
+		u, _ := url.Parse(f.URL)
+		if gates[u.Hostname()] == nil {
+			gates[u.Hostname()] = make(chan struct{}, 1)
+		}
+	}
 	jobs := make(chan Feed)
 	var workers sync.WaitGroup
 	for range 4 {
@@ -908,22 +922,8 @@ func (a *App) refreshFeeds(uid int64, all, force bool) {
 		go func() {
 			defer workers.Done()
 			for f := range jobs {
-				var checked int64
-				if err := a.Store.DB.QueryRowContext(a.ctx, "SELECT checked FROM feeds WHERE id=?", f.ID).Scan(&checked); err != nil {
-					continue
-				}
-				if !force && time.Since(time.Unix(checked, 0)) < 5*time.Minute {
-					continue
-				}
-				result, err := a.Fetcher.Fetch(a.ctx, f.URL, f.ETag, f.Modified)
-				if err == nil {
-					err = a.Store.ApplyFetch(a.ctx, f, result)
-				}
-				if err != nil && !errors.Is(err, context.Canceled) {
-					if _, e := a.Store.DB.ExecContext(a.ctx, "UPDATE feeds SET checked=?,error=? WHERE id=?", time.Now().Unix(), plainText(err.Error(), 300), f.ID); e != nil && !errors.Is(e, context.Canceled) {
-						slog.Error("record refresh failure", "error", e)
-					}
-				}
+				u, _ := url.Parse(f.URL)
+				a.refreshSource(f, all, force, gates[u.Hostname()])
 			}
 		}()
 	}
@@ -941,6 +941,10 @@ func (a *App) refreshFeeds(uid int64, all, force bool) {
 }
 func (a *App) Wait() { a.wg.Wait() }
 func (a *App) Poll(ctx context.Context, interval time.Duration) {
+	interval = min(interval, time.Minute)
+	if interval <= 0 {
+		interval = time.Minute
+	}
 	a.refreshMu.Lock()
 	a.refreshNextCheck = time.Now().Add(interval)
 	a.refreshMu.Unlock()

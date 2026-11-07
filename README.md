@@ -14,7 +14,17 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.3.1](https://github.com/airencracken/tidings/releases/tag/v0.3.1)**.
+Current release: **[0.4.0](https://github.com/airencracken/tidings/releases/tag/v0.4.0)**.
+
+## Inspiration
+
+[Miniflux](https://miniflux.app/) is an inspiration for Tidings' reading features:
+full-story extraction, cleaner article links, keyboard navigation, and thoughtful
+feed fetching. Its quiet, readable approach is a useful reference.
+
+Tidings is built around SQLite and a household or small community. Simple hosting,
+personal subscriptions and reading state, overlapping interest groups, and an
+opt-in household table shape the application from the start.
 
 ## Install
 
@@ -59,7 +69,10 @@ Open **http://127.0.0.1:8085** and sign in. Your first reading table is empty.
 Under **Sources**, paste a direct RSS/Atom address or follow a source from the
 catalog. New follows fetch immediately. Fetching runs in the background;
 reload when you want to see the results. The running server also checks feeds
-every 30 minutes, with a five-minute minimum between checks of any one source.
+on a schedule that adapts to each source, from five minutes to 24 hours. Quiet
+sources are checked less often; active ones more often. Failed requests back off,
+and publisher cache and retry timing are respected. Manual refresh has a
+five-minute cooldown; the host can force an immediate check.
 
 For scripted provisioning, `--password-file PATH` reads a private, owner-only
 file. Passwords are never accepted as command-line arguments. Passwords must be
@@ -130,6 +143,29 @@ Import an OPML bundle under **Sources → Import subscriptions**, or use **House
 sources** to add it to the opt-in shared table. Imports are transactional and keep
 existing subscriptions, topics, and tags.
 
+## Reading stories
+
+Stories retain their headings, links, lists, quotations, and code formatting.
+Choose **Get full story** to download and extract an article when its feed supplies
+an excerpt. This copy belongs to you; other readers keep their own view. A failed
+download leaves the existing story available. Full stories you mark are included
+in your personal JSON export and verified instance backups.
+
+Known tracking fields such as `utm_source`, `fbclid`, and `gclid` are removed from
+article links, including links inside stories. Other query values, anchors, and
+signed URLs are preserved. Feed addresses and image download addresses keep their
+original query strings.
+
+Under **Your account → Reading preferences**, you can enable keyboard shortcuts.
+They are **off by default**, including after an upgrade, so browser extensions
+such as Tridactyl can keep their keys. When enabled: `j`/`k` select the next or
+previous story, Enter opens it, `m` toggles read state, `s` toggles set aside,
+`/` focuses search, and `?` opens a shortcut guide. Shortcuts leave typing fields,
+interactive controls, modifier keys, and composition alone.
+
+Feed images remain optional under **Your account → Feed images**. When enabled,
+inline article images and previews load through Tidings' private local cache.
+
 ## Owner feed controls
 
 Under **Your account → Feed fetching**, choose **Fetch all feeds now** to fetch
@@ -194,7 +230,7 @@ restored instance on a separate loopback port, then stop both servers and switch
 `TIDINGS_DATA_DIR` in your service configuration to the restored directory.
 Keep the original directory until you have checked the restored reader. When
 using the supplied systemd unit, also update `WorkingDirectory` and
-`ReadWritePaths` for a custom location. Existing databases migrate transactionally to schema 4 on
+`ReadWritePaths` for a custom location. Existing databases migrate transactionally to schema 5 on
 open; take a stopped copy of the entire original directory before upgrading if
 you need to return to an older binary.
 
@@ -213,11 +249,13 @@ you need to return to an older binary.
 | `TIDINGS_BACKUP_COPY_MAX_BYTES` | `5368709120` | Uncompressed snapshot cap |
 
 The executable serves its own CSS, JavaScript, and templates. Reading, managing
-sources, and all account forms work with JavaScript disabled. JavaScript only
-adds a saved light/dark/system theme preference. Dates use UTC. Refresh requests
+sources, and all account forms work with JavaScript disabled. JavaScript adds live fetch status, saved theme preferences, and keyboard shortcuts
+for readers who enable them. Saved themes apply before page content appears. Dates use UTC. Refresh requests
 from different readers queue without being dropped; repeated requests coalesce,
 and sources keep a five-minute fetch cooldown. The fetch indicator updates as work progresses and shows the next automatic check.
-The reader preserves feed paragraphs, lists, and code indentation as escaped text.
+The reader preserves headings, links, lists, quotations, tables, and code blocks.
+Feed markup is sanitised before display; inline images use the same optional local
+cache as story previews.
 
 The little town crier welcomes readers on the sign-in screen and first empty
 reading table. The transparent illustration is embedded in the binary; its
@@ -228,7 +266,7 @@ A simple cream bell on Tidings green identifies browser tabs. Its
 180-pixel Apple touch icon are embedded and available before sign-in. See
 [favicon artwork](docs/favicon.md) for regenerating the raster sizes.
 
-Comfylib v0.1.7 supplies opaque session/invitation tokens, session-bound CSRF
+Comfylib v0.1.8 supplies opaque session/invitation tokens, session-bound CSRF
 tokens, confirmed terminal password prompting (with echo disabled before the
 first Linux prompt), trusted proxy resolution, backup scheduling and archives,
 service configuration resolution, administrative privilege dropping, reverse

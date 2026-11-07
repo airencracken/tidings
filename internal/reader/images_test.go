@@ -288,7 +288,7 @@ func TestImageSchemaUpgradeIsAtomicAndDisabledByDefault(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if _, err = st.DB.Exec("INSERT INTO users(username,password,owner) VALUES('existing','unchanged',1);ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;PRAGMA user_version=3"); err != nil {
+			if _, err = st.DB.Exec("INSERT INTO users(username,password,owner) VALUES('existing','unchanged',1);DROP TABLE article_copies;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;PRAGMA user_version=3"); err != nil {
 				t.Fatal(err)
 			}
 			if conflict {

@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -76,7 +77,7 @@ func validateExport(data Export) error {
 		if _, err := WebURL(e.URL); err != nil {
 			return err
 		}
-		if e.Key == "" || len(e.Key) > 4096 || len(e.Title) > 2000 || len([]rune(e.Body)) > 64000 || !utf8.ValidString(e.Body) || (e.Published < -62135596800 || e.Published > 253402300799) {
+		if e.Key == "" || len(e.Key) > 4096 || len(e.Title) > 2000 || len([]rune(e.Body)) > 64000 || !utf8.ValidString(e.Body) || len(e.BodyHTML) > maxArticleHTML || !utf8.ValidString(e.BodyHTML) || (e.Published < -62135596800 || e.Published > 253402300799) {
 			return errors.New("invalid or oversized story")
 		}
 		key := fmt.Sprintf("%d:%s", e.FeedID, e.Key)
@@ -172,7 +173,7 @@ func (s *Store) RestorePersonal(ctx context.Context, u User, data Export) error 
 		err = tx.QueryRowContext(ctx, "SELECT id FROM entries WHERE feed_id=? AND key=? AND url=? AND import_owner IS NULL", fid, e.Key, e.URL).Scan(&id)
 		if err == sql.ErrNoRows {
 			key := fmt.Sprintf("restore:%d:%x", u.ID, sha256.Sum256([]byte(e.Key)))
-			if _, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,original_key,import_owner,title,url,body,published) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO NOTHING`, fid, key, e.Key, u.ID, plainText(e.Title, 500), e.URL, e.Body, e.Published); err != nil {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO entries(feed_id,key,original_key,import_owner,title,url,body,body_html,published) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(feed_id,key) DO NOTHING`, fid, key, e.Key, u.ID, plainText(e.Title, 500), e.URL, e.Body, articleHTML(e.BodyHTML, e.URL, func(address string) string { return address }), e.Published); err != nil {
 				return err
 			}
 			if err = tx.QueryRowContext(ctx, "SELECT id FROM entries WHERE feed_id=? AND key=? AND import_owner=?", fid, key, u.ID).Scan(&id); err != nil {
@@ -181,8 +182,19 @@ func (s *Store) RestorePersonal(ctx context.Context, u User, data Export) error 
 		} else if err != nil {
 			return err
 		}
-		if _, err = tx.ExecContext(ctx, "INSERT INTO states(user_id,entry_id,read,saved) VALUES(?,?,?,?) ON CONFLICT(user_id,entry_id) DO NOTHING", u.ID, id, e.Read, e.Saved); err != nil {
+		state, err := tx.ExecContext(ctx, "INSERT INTO states(user_id,entry_id,read,saved) VALUES(?,?,?,?) ON CONFLICT(user_id,entry_id) DO NOTHING", u.ID, id, e.Read, e.Saved)
+		if err != nil {
 			return err
+		}
+		inserted, err := state.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if inserted > 0 && e.FullStory {
+			_, err = tx.ExecContext(ctx, "INSERT INTO article_copies(user_id,entry_id,body,body_html,fetched) VALUES(?,?,?,?,?) ON CONFLICT(user_id,entry_id) DO NOTHING", u.ID, id, e.Body, articleHTML(e.BodyHTML, e.URL, func(address string) string { return address }), time.Now().Unix())
+			if err != nil {
+				return err
+			}
 		}
 	}
 	for _, g := range data.Groups {

@@ -30,6 +30,9 @@ fuzz-smoke:
 	go test ./internal/reader -run '^$$' -fuzz '^FuzzParseFeed$$' -fuzztime 3s -parallel 2
 	go test ./internal/reader -run '^$$' -fuzz '^FuzzOPML$$' -fuzztime 3s -parallel 2
 	go test ./internal/reader -run '^$$' -fuzz '^FuzzDecodeExport$$' -fuzztime 3s -parallel 2
+	go test ./internal/reader -run '^$$' -fuzz '^FuzzArticleMarkup$$' -fuzztime 3s -parallel 2
+	go test ./internal/reader -run '^$$' -fuzz '^FuzzCleanArticleURL$$' -fuzztime 3s -parallel 2
+	go test ./internal/reader -run '^$$' -fuzz '^FuzzAdaptiveScheduleBounds$$' -fuzztime 3s -parallel 2
 
 PREFIX ?= /usr/local
 DESTDIR ?=

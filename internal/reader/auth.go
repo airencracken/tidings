@@ -105,7 +105,7 @@ func (s *Store) Session(ctx context.Context, raw string) (User, error) {
 	if len(raw) != 64 {
 		return u, sql.ErrNoRows
 	}
-	err := s.DB.QueryRowContext(ctx, "SELECT u.id,u.username,u.owner,u.group_optin FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token=? AND s.expires>? AND u.suspended=0", token.Hash(raw), time.Now().Unix()).Scan(&u.ID, &u.Username, &u.Owner, &u.GroupOptin)
+	err := s.DB.QueryRowContext(ctx, "SELECT u.id,u.username,u.owner,u.group_optin,u.keyboard_shortcuts FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token=? AND s.expires>? AND u.suspended=0", token.Hash(raw), time.Now().Unix()).Scan(&u.ID, &u.Username, &u.Owner, &u.GroupOptin, &u.KeyboardShortcuts)
 	return u, err
 }
 

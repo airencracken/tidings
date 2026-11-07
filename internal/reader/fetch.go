@@ -4,12 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/netip"
-	"strconv"
 	"time"
 )
 
@@ -17,6 +15,7 @@ type FetchResult struct {
 	Feed           ParsedFeed
 	ETag, Modified string
 	Unchanged      bool
+	NotBefore      time.Time
 }
 type Fetcher struct{ Client *http.Client }
 
@@ -97,12 +96,17 @@ func (f *Fetcher) Fetch(ctx context.Context, raw, etag, modified string) (FetchR
 		return out, err
 	}
 	defer res.Body.Close()
+	out.NotBefore = publisherDelay(res.Header, time.Now())
 	if res.StatusCode == http.StatusNotModified {
 		out.Unchanged = true
 		return out, nil
 	}
 	if res.StatusCode != http.StatusOK {
-		return out, fmt.Errorf("publisher returned HTTP %s", strconv.Itoa(res.StatusCode))
+		failure := &publisherError{Status: res.StatusCode}
+		if res.StatusCode == http.StatusTooManyRequests || res.StatusCode == http.StatusServiceUnavailable {
+			failure.Retry = retryAfter(res.Header.Get("Retry-After"), time.Now())
+		}
+		return out, failure
 	}
 	body, err := io.ReadAll(io.LimitReader(res.Body, MaxFeedBytes+1))
 	if err != nil {

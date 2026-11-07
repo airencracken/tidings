@@ -49,6 +49,7 @@ db.execute("INSERT INTO household_tags(feed_id,tag) VALUES(2,'security')")
 for i in range(35):
  db.execute("INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(1,?,?,?,?,?)",(str(i),'Test story %02d: understanding our tools'%i,'https://example.org/story/'+str(i),'A closer look at the tools we use, the ideas behind them, and the small discoveries that make everyday work more interesting.',now-i))
 db.execute("INSERT INTO entries(feed_id,key,title,url,body,published) VALUES(2,'shared','A shared test story','https://example.org/shared-story','A household browser-test fixture.',?)",(now,))
+db.execute("UPDATE entries SET body_html=? WHERE id=1",('<h2>Useful details</h2><p>An article with a <a href="https://example.org/reference?utm_source=feed&amp;id=4">reference</a>.</p><ul><li>A list item</li></ul><blockquote>A useful quotation.</blockquote><pre><code>  indented code</code></pre><img src="https://example.org/preview.png" alt="A cached illustration"><script>throw new Error("Publisher script ran")</script>',))
 db.execute("UPDATE entries SET image_url='https://example.org/preview.png' WHERE id=1")
 db.commit()
 `, path.join(env.TIDINGS_DATA_DIR,'reader.db')], { encoding:'utf8' });
@@ -85,6 +86,25 @@ db.commit()
   assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png');
   await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg';await icon.decode();if(!icon.naturalWidth)throw new Error('SVG favicon did not render');});
 
+  // A saved theme must be applied before the body is parsed, even when the
+  // operating-system preference is the opposite and script delivery is slow.
+  for (const [saved,system] of [['dark','light'],['light','dark']]) {
+    const firstPaintContext=await browser.newContext({colorScheme:system});
+    await firstPaintContext.addInitScript(value=>{
+      localStorage.setItem('tidings-theme',value);
+      new MutationObserver((_,observer)=>{
+        if(document.body){window.firstBodyTheme=document.documentElement.dataset.theme;observer.disconnect();}
+      }).observe(document,{childList:true,subtree:true});
+    },saved);
+    const firstPaint=await firstPaintContext.newPage();
+    await firstPaint.route('**/static/theme.js',async route=>{await new Promise(resolve=>setTimeout(resolve,150));await route.continue();});
+    for(const route of ['/login','/join','/login']) {
+      await firstPaint.goto(origin+route);
+      assert.equal(await firstPaint.evaluate(()=>window.firstBodyTheme),saved,'theme changed after body parsing on '+route);
+      assert.equal(await firstPaint.locator('html').getAttribute('data-theme'),saved);
+    }
+    await firstPaintContext.close();
+  }
   assert.ok(await page.locator('[data-fetch-status]').isVisible());
   const statusResponse=await context.request.get(origin+'/api/v1/fetch-status');assert.equal(statusResponse.status(),200);
   assert.ok((await statusResponse.json()).next_check.startsWith('Next automatic check'));
@@ -104,9 +124,17 @@ db.commit()
   await page.locator('[data-feed-image]').first().evaluate(image=>image.decode());
   assert.equal((await context.request.get(origin+'/story/1/image')).status(),200);
   await page.goto(origin+'/story/1');assert.equal(await page.locator('.story-hero img').count(),1);
+  assert.equal(await page.locator('.reader-body h2').textContent(),'Useful details');
+  assert.equal(await page.locator('.reader-body pre code').textContent(),'  indented code');
+  assert.equal(await page.locator('.reader-body a').getAttribute('href'),'https://example.org/reference?id=4');
+  await page.locator('.reader-body img').evaluate(image=>image.decode());
+  assert.ok((await page.locator('.reader-body img').getAttribute('src')).startsWith('/story/1/image/'));
+  assert.equal(await page.locator('.reader-body script').count(),0);
   assert.ok(!(await page.locator('body').innerText()).includes('The text supplied by this feed'));
   await page.goto(origin+'/account');await page.getByLabel('Show feed images',{exact:true}).uncheck();await page.getByRole('button',{name:'Save image settings',exact:true}).click();
   assert.equal((await context.request.get(origin+'/story/1/image')).status(),404);
+  await page.goto(origin+'/story/1');assert.equal(await page.locator('.reader-body img').count(),0);
+  assert.equal(await page.getByRole('button',{name:'Get full story',exact:true}).count(),1);
   await page.goto(origin+'/');
   assert.equal(await page.locator('.story-row').count(),30);
   await page.getByRole('link',{name:'Next page',exact:true}).click();
@@ -203,6 +231,37 @@ db.commit()
   await alice.getByRole('button',{name:'Apply member action',exact:true}).click();
   await signIn(member,origin,'alice');
   await newcomer.close();
+  await page.goto(origin+'/');
+  assert.equal(await page.locator('script[src="/static/keyboard.js"]').count(),0);
+  await page.keyboard.press('j');assert.equal(await page.locator('.keyboard-selected').count(),0);
+  await page.goto(origin+'/account');
+  assert.equal(await page.getByLabel('Enable keyboard shortcuts',{exact:true}).isChecked(),false);
+  await page.getByLabel('Enable keyboard shortcuts',{exact:true}).check();
+  await page.getByRole('button',{name:'Save reading preferences',exact:true}).click();
+  await page.goto(origin+'/');
+  await page.keyboard.press('j');assert.equal(await page.locator('.keyboard-selected').count(),1);
+  const firstStory=await page.locator('.keyboard-selected [data-story-open]').getAttribute('href');
+  await page.keyboard.press('j');assert.notEqual(await page.locator('.keyboard-selected [data-story-open]').getAttribute('href'),firstStory);
+  await page.keyboard.press('k');assert.equal(await page.locator('.keyboard-selected [data-story-open]').getAttribute('href'),firstStory);
+  await page.keyboard.press('?');assert.equal(await page.locator('#keyboard-help').evaluate(dialog=>dialog.open),true);
+  await page.keyboard.press('Escape');assert.equal(await page.locator('#keyboard-help').evaluate(dialog=>dialog.open),false);
+  await page.keyboard.press('/');assert.equal(await page.locator('#search').evaluate(input=>input===document.activeElement),true);
+  await page.keyboard.type('jkms');assert.equal(await page.locator('#search').inputValue(),'jkms');
+  await page.locator('#search').fill('');await page.locator('#search').blur();
+  const modifiers=await page.evaluate(()=>['ctrlKey','altKey','metaKey','isComposing'].map(flag=>{const event=new KeyboardEvent('keydown',{key:'j',bubbles:true,cancelable:true,[flag]:true});document.body.dispatchEvent(event);return event.defaultPrevented;}));
+  assert.deepEqual(modifiers,[false,false,false,false]);
+  await page.keyboard.press('j');
+  const selectedStory=await page.locator('.keyboard-selected [data-story-open]').getAttribute('href');
+  await Promise.all([page.waitForURL(origin+selectedStory),page.keyboard.press('Enter')]);
+  await Promise.all([page.waitForNavigation(),page.keyboard.press('m')]);
+  assert.equal(await page.getByRole('button',{name:'Mark unread',exact:true}).count(),1);
+  await page.locator('body').click({position:{x:5,y:5}});
+  await Promise.all([page.waitForNavigation(),page.keyboard.press('s')]);
+  assert.equal(await page.getByRole('button',{name:'Remove from set aside',exact:true}).count(),1);
+  await page.goto(origin+'/account');await page.getByLabel('Enable keyboard shortcuts',{exact:true}).uncheck();
+  await page.getByRole('button',{name:'Save reading preferences',exact:true}).click();await page.goto(origin+'/');
+  assert.equal(await page.locator('script[src="/static/keyboard.js"]').count(),0);
+  await page.keyboard.press('j');assert.equal(await page.locator('.keyboard-selected').count(),0);
   await page.goto(origin+'/sources');
   await page.getByLabel('Search suggested sources',{exact:true}).fill('zzzzabsent');
   await page.getByRole('button',{name:'Find sources',exact:true}).click();
@@ -264,7 +323,7 @@ db.commit()
   await plainContext.close();
   assert.deepEqual(errors,[]);
   assert.ok([...observed].every(address => address.startsWith(origin+'/')),'browser contacted a third party');
-  console.log('Browser checks passed: live fetch status, cached feed images, accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, both themes, and five routes at four widths.');
+  console.log('Browser checks passed: optional keyboard shortcuts, rich articles, tracking cleanup, cached inline images, live fetch status, cached feed images, accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, both themes, and five routes at four widths.');
 } finally {
   if(browser) await browser.close();
   if(server && server.exitCode===null){server.kill('SIGTERM');await Promise.race([once(server,'exit'),new Promise(resolve=>setTimeout(resolve,5000))]);if(server.exitCode===null)server.kill('SIGKILL');}

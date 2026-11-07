@@ -42,8 +42,8 @@
   {
     "name": "stable publication dates",
     "file": "internal/reader/store.go",
-    "before": "body=excluded.body,image_url=excluded.image_url WHERE entries.import_owner IS NULL`",
-    "after": "body=excluded.body,image_url=excluded.image_url,published=excluded.published WHERE entries.import_owner IS NULL`",
+    "before": "body=excluded.body,body_html=excluded.body_html,image_url=excluded.image_url WHERE entries.import_owner IS NULL`",
+    "after": "body=excluded.body,body_html=excluded.body_html,image_url=excluded.image_url,published=excluded.published WHERE entries.import_owner IS NULL`",
     "package": "./internal/reader",
     "run": "^TestRefreshIdempotentAndDatesStable$"
   },
@@ -382,5 +382,117 @@
     "after": "a.queueRefresh(0, true, true, false)",
     "package": "./internal/reader",
     "run": "^TestEnablingImagesRefreshesOlderFeedMetadata$"
+  },
+  {
+    "name": "tracking fields removed",
+    "file": "internal/reader/links.go",
+    "before": "if tracking {",
+    "after": "if false && tracking {",
+    "package": "./internal/reader",
+    "run": "^TestTrackingCleanup$"
+  },
+  {
+    "name": "functional signed URLs preserved",
+    "file": "internal/reader/links.go",
+    "before": "case \"signature\", \"sig\", \"x-amz-signature\", \"x-goog-signature\", \"policy\", \"key-pair-id\":",
+    "after": "case \"not-a-real-signature\":",
+    "package": "./internal/reader",
+    "run": "^TestTrackingCleanup$"
+  },
+  {
+    "name": "article links reject scripts",
+    "file": "internal/reader/article_html.go",
+    "before": "articleLink(attrs[\"href\"], base)",
+    "after": "attrs[\"href\"]",
+    "package": "./internal/reader",
+    "run": "^TestArticleMarkup$"
+  },
+  {
+    "name": "inline images require opt-in",
+    "file": "internal/reader/article_html.go",
+    "before": "if images {",
+    "after": "if true {",
+    "package": "./internal/reader",
+    "run": "^TestArticleMarkup$"
+  },
+  {
+    "name": "inline image keys come from the article",
+    "file": "internal/reader/images.go",
+    "before": "address = inlineImages(entry.BodyHTML, entry.URL)[key]",
+    "after": "address = \"https://example.org/arbitrary.jpg\"",
+    "package": "./internal/reader",
+    "run": "^TestInlineImageAuthorization$"
+  },
+  {
+    "name": "full story copies use reader scope",
+    "file": "internal/reader/store.go",
+    "before": "FROM article_copies WHERE user_id=? AND entry_id=?",
+    "after": "FROM article_copies WHERE user_id<=? AND entry_id=?",
+    "package": "./internal/reader",
+    "run": "^TestFullArticleIsolationAndRoutes$"
+  },
+  {
+    "name": "downloaded article page byte cap",
+    "file": "internal/reader/articles.go",
+    "before": "if len(data) > maxArticleBytes {",
+    "after": "if false && len(data) > maxArticleBytes {",
+    "package": "./internal/reader",
+    "run": "^TestArticleDownloadLimits$"
+  },
+  {
+    "name": "keyboard shortcuts are opt-in",
+    "file": "internal/reader/templates/pages.html",
+    "before": "{{if .User.KeyboardShortcuts}}<script",
+    "after": "{{if .User.ID}}<script",
+    "package": "./internal/reader",
+    "run": "^TestKeyboardPreference$"
+  },
+  {
+    "name": "adaptive polling respects due time",
+    "file": "internal/reader/scheduling.go",
+    "before": "if all && !force && next > time.Now().Unix() {",
+    "after": "if false && all && !force && next > time.Now().Unix() {",
+    "package": "./internal/reader",
+    "run": "^TestScheduledDueAndManualRefresh$"
+  },
+  {
+    "name": "polled hosts have one request in flight",
+    "file": "internal/reader/app.go",
+    "before": "gates[u.Hostname()] = make(chan struct{}, 1)",
+    "after": "gates[u.Hostname()] = make(chan struct{}, 2)",
+    "package": "./internal/reader",
+    "run": "^TestRefreshHostConcurrency$"
+  },
+  {
+    "name": "publisher retry requests survive backoff",
+    "file": "internal/reader/scheduling.go",
+    "before": "upstream.Retry.After(next)",
+    "after": "upstream.Retry.Before(next)",
+    "package": "./internal/reader",
+    "run": "^TestSchedulePersistenceAndAtomicity$"
+  },
+  {
+    "name": "successful fetch resets failure count",
+    "file": "internal/reader/scheduling.go",
+    "before": "error='',failures=0,poll_interval=",
+    "after": "error='',failures=failures,poll_interval=",
+    "package": "./internal/reader",
+    "run": "^TestSchedulePersistenceAndAtomicity$"
+  },
+  {
+    "name": "theme applies before the body is parsed",
+    "file": "internal/reader/templates/pages.html",
+    "before": "<script src=\"/static/theme.js\"></script>",
+    "after": "<script src=\"/static/theme.js\" defer></script>",
+    "package": "./internal/reader",
+    "run": "^TestThemeBootstrapPrecedesPagePaint$"
+  },
+  {
+    "name": "export includes private full-story copies",
+    "file": "internal/reader/store.go",
+    "before": "coalesce(c.body,e.body),coalesce(c.body_html,e.body_html)",
+    "after": "e.body,e.body_html",
+    "package": "./internal/reader",
+    "run": "^TestArticleExportRestoreAndAtomicity$"
   }
 ]

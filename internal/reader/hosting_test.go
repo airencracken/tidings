@@ -250,7 +250,7 @@ func TestV2MigrationPreservesDataAndStartsSuggestionsDisabled(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := s.DB.Exec("ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;DROP TABLE catalog_categories; PRAGMA user_version=2; INSERT INTO users(username,password,owner) VALUES('existing','hash',1)"); err != nil {
+	if _, err := s.DB.Exec("DROP TABLE article_copies;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;DROP TABLE catalog_categories; PRAGMA user_version=2; INSERT INTO users(username,password,owner) VALUES('existing','hash',1)"); err != nil {
 		t.Fatal(err)
 	}
 	if err := s.Close(); err != nil {
@@ -262,7 +262,7 @@ func TestV2MigrationPreservesDataAndStartsSuggestionsDisabled(t *testing.T) {
 	}
 	defer s.Close()
 	var version, users int
-	if err := s.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 4 {
+	if err := s.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 5 {
 		t.Fatal(version, err)
 	}
 	if err := s.DB.QueryRow("SELECT count(*) FROM users WHERE username='existing'").Scan(&users); err != nil || users != 1 {
