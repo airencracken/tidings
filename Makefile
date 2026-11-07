@@ -14,7 +14,7 @@ run:
 	go run ./cmd/tidings serve
 test:
 	go test -race ./...
-check: test-cli
+check: test-config test-cli
 	python3 -m unittest discover -s scripts/containers -p "test_*.py"
 	python3 scripts/release/test_config.py
 	python3 scripts/test_project.py
@@ -62,3 +62,7 @@ test-container-registry:
 test-cli: build
 	python3 "$$(go list -m -f '{{.Dir}}' github.com/airencracken/comfylib)/tools/check_password_cli.py" --binary bin/tidings --command create-owner --data-env TIDINGS_DATA_DIR --prompt "Password: " --confirmation "Confirm password: "
 	python3 "$$(go list -m -f '{{.Dir}}' github.com/airencracken/comfylib)/tools/check_setup.py" --binary bin/tidings --app tidings
+
+.PHONY: test-config
+test-config:
+	python3 scripts/test_service_config.py

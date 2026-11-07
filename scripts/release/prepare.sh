@@ -8,10 +8,7 @@ mkdir -p "$out" || exit 1
 sed -e "s|/usr/local/bin/$app|/usr/bin/$app|g" \
 	"deploy/systemd/$app.service" > "$out/$app.service" || exit 1
 # Package defaults bind only to loopback. Existing conffiles remain dpkg-managed.
-{
-	printf '%s\n' '# Debian package defaults.' 'TIDINGS_ADDR=127.0.0.1:8085'
-	cat "deploy/systemd/$app.env" || exit 1
-} > "$out/$app.env" || exit 1
+cp "deploy/systemd/$app.env" "$out/$app.env" || exit 1
 
 # Include notices from the modules actually linked on either supported platform.
 : > "$out/modules.unsorted" || exit 1

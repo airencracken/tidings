@@ -8,8 +8,8 @@ Do not serve the data directory from your reverse proxy.
 Configure the public HTTPS origin before inviting members:
 
 ```sh
-TIDINGS_BASE_URL=https://tidings.example.org
-TIDINGS_TRUSTED_PROXIES=127.0.0.1/32,::1/128
+TIDINGS_BASE_URL="https://tidings.example.org"
+TIDINGS_TRUSTED_PROXIES="127.0.0.1/32,::1/128"
 ```
 
 Only trust proxies that you control. Examples for Caddy, nginx, and Apache are
@@ -53,3 +53,21 @@ database. Check `/healthz` for readiness. Do not use process existence as the
 only readiness signal. Start the service and use browser setup, or create the first owner through the CLI.
 
 See [backup and recovery](automatic-backups.md) and [installation/upgrades](releases.md).
+
+## Configuration format
+
+Use double quotes for every value, including numbers and booleans. No `export`
+prefix is needed in service configuration files:
+
+```sh
+TIDINGS_BASE_URL="https://tidings.example.org"
+TIDINGS_BACKUP_KEEP="7"
+```
+
+OpenRC reads `/etc/conf.d/tidings`; systemd reads
+`/etc/tidings/tidings.env`. Edit the file for the service manager you run,
+then restart the service. The other manager's file is independent. Existing
+bare or single-quoted values remain valid, and upgrades preserve local settings.
+
+The [shared configuration convention](https://github.com/airencracken/comfylib/blob/master/docs/configuration.md)
+covers quoting, escaping, and how the examples are checked.

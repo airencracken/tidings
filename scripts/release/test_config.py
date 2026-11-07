@@ -30,7 +30,7 @@ class ReleaseTests(unittest.TestCase):
         for required in ('User='+APP, 'Group='+APP, 'StateDirectoryMode=0700', 'UMask=0077', 'NoNewPrivileges=true', 'ExecStart=/usr/local/bin/'+APP+' serve'):
             self.assertIn(required,unit)
         conf=(ROOT/'deploy/openrc'/f'{APP}.conf').read_text()
-        self.assertIn(APP.upper()+'_DATA_DIR=/var/lib/'+APP,conf)
+        self.assertIn(APP.upper()+'_DATA_DIR="/var/lib/'+APP+'"',conf)
         self.assertIn('127.0.0.1:'+('8084' if APP=='folkweave' else '8085'),conf)
         self.assertIn('checkpath --directory --mode 0700',(ROOT/'deploy/openrc'/APP).read_text())
         for script in (ROOT/'deploy/debian').iterdir():
