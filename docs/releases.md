@@ -47,7 +47,7 @@ Add the configured service to a runlevel with `rc-update add tidings default`.
 ## Containers and source
 
 The [container guide](containers.md) covers pinned multi-platform images and
-Docker Compose. Source builds require Go 1.26 or newer; `make build` resolves
+Docker Compose. Source builds require Go 1.26.11 or newer; `make build` resolves
 only the modules pinned in `go.mod` and `go.sum`. There is no frontend build.
 
 ## Upgrades

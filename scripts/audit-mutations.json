@@ -1,0 +1,18 @@
+[
+  {
+    "name": "preserve dangling config symlink $(DESTDIR)/etc/tidings/tidings.env",
+    "file": "Makefile",
+    "before": " || [ -L \"$(DESTDIR)/etc/tidings/tidings.env\" ]",
+    "after": "",
+    "package": "./deploy",
+    "run": "^TestServiceInstallPreservesConfigurationSymlinks$"
+  },
+  {
+    "name": "preserve dangling config symlink $(DESTDIR)/etc/conf.d/tidings",
+    "file": "Makefile",
+    "before": " || [ -L \"$(DESTDIR)/etc/conf.d/tidings\" ]",
+    "after": "",
+    "package": "./deploy",
+    "run": "^TestServiceInstallPreservesConfigurationSymlinks$"
+  }
+]
