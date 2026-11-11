@@ -14,7 +14,7 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.5.0](https://github.com/airencracken/tidings/releases/tag/v0.5.0)**.
+Current release: **[0.5.1](https://github.com/airencracken/tidings/releases/tag/v0.5.1)**.
 
 Use a current Go security patch when building: Go 1.26.11 or later on the
 1.26 series, or Go 1.27.4 or later on the 1.27 series.

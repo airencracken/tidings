@@ -1,4 +1,5 @@
 #!/sbin/openrc-run
+export TIDINGS_APPS TIDINGS_SHARED_ISSUER TIDINGS_SHARED_CLIENT_ID TIDINGS_SHARED_CLIENT_SECRET
 name="Tidings"
 description="A quiet household feed reader"
 command="/usr/local/bin/tidings"
