@@ -19,7 +19,7 @@ import (
 
 const testPassword = "quiet mornings and books"
 
-func testStore(t *testing.T) *Store {
+func testStore(t testing.TB) *Store {
 	t.Helper()
 	s, err := OpenStore(filepath.Join(t.TempDir(), "data"))
 	if err != nil {

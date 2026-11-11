@@ -14,16 +14,16 @@ run:
 	go run ./cmd/tidings serve
 test:
 	go test -race ./...
-check: test-config test-cli
+check: test-suite-assets test-config test-cli
 	python3 -m unittest discover -s scripts/containers -p "test_*.py"
 	python3 scripts/release/test_config.py
 	python3 scripts/test_project.py
 	test -z "$$(gofmt -l cmd internal deploy scripts/demo)"
 	go vet ./...
 	go test -race ./...
-	python3 scripts/mutate.py scripts/mutations.json scripts/audit-mutations.json
+	python3 scripts/mutate.py scripts/mutations.json scripts/audit-mutations.json scripts/suite-mutations.json
 test-mutations:
-	python3 scripts/mutate.py scripts/mutations.json scripts/audit-mutations.json
+	python3 scripts/mutate.py scripts/mutations.json scripts/audit-mutations.json scripts/suite-mutations.json
 test-browser: build
 	node scripts/browser/check.mjs
 fuzz-smoke:
@@ -70,3 +70,7 @@ test-cli: build
 .PHONY: test-config
 test-config:
 	python3 scripts/test_service_config.py
+
+.PHONY: test-suite-assets
+test-suite-assets: ## Verify synchronized suite source and assets
+	python3 scripts/verify_suite.py

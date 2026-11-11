@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/airencracken/tidings/internal/suite"
 	"html/template"
 	"io"
 	"log/slog"
@@ -95,6 +96,10 @@ type page struct {
 }
 
 func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
+	suiteFuncs, suiteErr := suite.TemplateFuncs("TIDINGS_")
+	if suiteErr != nil {
+		return nil, suiteErr
+	}
 	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), config: c, ctx: ctx, mux: http.NewServeMux()}
 	funcs := template.FuncMap{
 		"article":   renderArticle,
@@ -132,7 +137,7 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		},
 	}
 	var err error
-	a.templates, err = template.New("pages").Funcs(funcs).ParseFS(assets, "templates/*.html")
+	a.templates, err = template.New("pages").Funcs(suiteFuncs).Funcs(funcs).ParseFS(assets, "templates/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +149,9 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		return nil, err
 	}
 	a.routes()
+	if err = a.registerSharedSignIn(a.mux); err != nil {
+		return nil, err
+	}
 	return a, nil
 }
 
@@ -198,7 +206,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			rc.Session = c.Value
 		}
 	}
-	public := r.URL.Path == "/login" || r.URL.Path == "/join"
+	public := r.URL.Path == "/login" || r.URL.Path == "/join" || r.URL.Path == "/auth/shared/start" || r.URL.Path == "/auth/shared/callback"
 	if rc.User.ID == 0 && !public {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -375,6 +383,34 @@ func parseFilter(r *http.Request) (Filter, error) {
 		}
 		f.GroupID = n
 	}
+	if raw := q.Get("cursor"); raw != "" {
+		if len(q["cursor"]) != 1 || len(raw) > 45 {
+			return f, errors.New("invalid cursor")
+		}
+		parts := strings.Split(raw, ":")
+		if len(parts) != 2 {
+			return f, errors.New("invalid cursor")
+		}
+		var e error
+		f.CursorPublished, e = strconv.ParseInt(parts[0], 10, 64)
+		if e != nil {
+			return f, errors.New("invalid cursor")
+		}
+		f.CursorID, e = strconv.ParseInt(parts[1], 10, 64)
+		if e != nil || f.CursorID <= 0 {
+			return f, errors.New("invalid cursor")
+		}
+		if len(q["direction"]) != 1 {
+			return f, errors.New("invalid cursor direction")
+		}
+		direction := q.Get("direction")
+		if direction != "older" && direction != "newer" {
+			return f, errors.New("invalid cursor direction")
+		}
+		f.Reverse = direction == "newer"
+	} else if q.Get("direction") != "" {
+		return f, errors.New("cursor required")
+	}
 	return f, nil
 }
 
@@ -448,8 +484,18 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	query := r.URL.Query()
+	if len(p.Entries) > 0 {
+		last := p.Entries[len(p.Entries)-1]
+		query.Set("cursor", fmt.Sprintf("%d:%d", last.Published, last.ID))
+		query.Set("direction", "older")
+	}
 	query.Set("page", strconv.Itoa(f.Page+1))
 	p.Next = "/?" + query.Encode()
+	if len(p.Entries) > 0 {
+		first := p.Entries[0]
+		query.Set("cursor", fmt.Sprintf("%d:%d", first.Published, first.ID))
+		query.Set("direction", "newer")
+	}
 	query.Set("page", strconv.Itoa(f.Page-1))
 	p.Previous = "/?" + query.Encode()
 	a.render(w, r, p, 200)

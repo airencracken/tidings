@@ -411,3 +411,6 @@ Check the bundled sources with the production fetcher before a release:
 ```sh
 TIDINGS_LIVE_FETCH_TEST=1 go test ./internal/reader -run TestLiveCatalogFetch -v -parallel 4
 ```
+
+Optional app navigation, shared sign-in and discussion returns are described in
+[Comfyware connections](docs/suite.md).

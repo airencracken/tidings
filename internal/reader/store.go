@@ -60,11 +60,13 @@ type Feed struct {
 	Tags      []string `json:"tags"`
 }
 type Filter struct {
-	View, Query, Category string
-	FeedID                int64
-	Page                  int
-	Before                int64
-	GroupID               int64
+	View, Query, Category     string
+	FeedID                    int64
+	Page                      int
+	Before                    int64
+	GroupID                   int64
+	CursorID, CursorPublished int64
+	Reverse                   bool
 }
 
 func OpenStore(dir string) (store *Store, failure error) {
@@ -321,15 +323,31 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 		where += " AND e.id<=?"
 		args = append(args, f.Before)
 	}
+	if f.CursorID > 0 {
+		op := "<"
+		if f.Reverse {
+			op = ">"
+		}
+		where += " AND (e.published,e.id)" + op + "(?,?)"
+		args = append(args, f.CursorPublished, f.CursorID)
+	}
 	return where, args
 }
 
 func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool, error) {
 	where, args := entryWhere(uid, f)
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published DESC,e.id DESC LIMIT 31 OFFSET ?`
+	order := "DESC"
+	offset := f.Page * 30
+	if f.CursorID > 0 {
+		offset = 0
+		if f.Reverse {
+			order = "ASC"
+		}
+	}
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published ` + order + `,e.id ` + order + ` LIMIT 31 OFFSET ?`
 	params := []any{uid, uid}
 	params = append(params, args...)
-	params = append(params, f.Page*30)
+	params = append(params, offset)
 	rows, err := s.DB.QueryContext(ctx, q, params...)
 	if err != nil {
 		return nil, false, err
@@ -346,6 +364,14 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 	more := len(out) > 30
 	if more {
 		out = out[:30]
+	}
+	if f.Reverse && f.CursorID > 0 {
+		for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
+			out[i], out[j] = out[j], out[i]
+		}
+		// There are older stories beyond a reverse cursor's result: the page
+		// from which the reader followed Previous.
+		more = len(out) > 0
 	}
 	return out, more, rows.Err()
 }

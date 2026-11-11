@@ -1,3 +1,4 @@
+import { act, checkSuiteControls } from '../browser-controls.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
@@ -23,15 +24,15 @@ await new Promise(resolve=>reservation.listen(0,'127.0.0.1',resolve));
 const port=reservation.address().port;
 await new Promise(resolve=>reservation.close(resolve));
 const localOrigin='http://127.0.0.1:'+port;
-const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:'+port, TIDINGS_BASE_URL: localOrigin, TIDINGS_SECURE_COOKIES: '' };
+const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:'+port, TIDINGS_BASE_URL: localOrigin, TIDINGS_SECURE_COOKIES: '', TIDINGS_APPS: '[{"id":"witmoot","url":"https://suite.example.org"}]' };
 const binary = path.join(root, 'bin/tidings');
 let server, browser;
 const errors = [];
 const observed = new Set();
 async function signIn(page, origin, username='host') {
   await page.goto(origin + '/login');
-  await page.getByLabel('Username', { exact:true }).fill(username);
-  await page.getByLabel('Password', { exact:true }).fill(password);
+  await act(page.getByLabel('Username', { exact:true }), 'fill', username);
+  await act(page.getByLabel('Password', { exact:true }), 'fill', password);
   await Promise.all([page.waitForURL(origin + '/'), page.getByRole('button', { name:'Sign in',exact:true }).click()]);
 }
 try {
@@ -82,6 +83,7 @@ db.commit()
   const cacheDirectory=path.join(env.TIDINGS_DATA_DIR,'cache','images');await mkdir(cacheDirectory,{recursive:true,mode:0o700});
   await writeFile(path.join(cacheDirectory,createHash('sha256').update('https://example.org/preview.png').digest('hex')+'.jpg'),Buffer.from(preview,'base64'),{mode:0o600});
   await signIn(page,origin);
+  await checkSuiteControls(page, { apps: true, density: true });
   assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg?v=town-crier');
   assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png?v=town-crier');
   await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg?v=town-crier';await icon.decode();const canvas=document.createElement('canvas');canvas.width=32;canvas.height=32;const context=canvas.getContext('2d');context.drawImage(icon,0,0,32,32);const pixels=context.getImageData(0,0,32,32).data;if(!pixels.some((value,index)=>index%4===3&&value>200))throw new Error('Mascot favicon did not render under the content security policy');});
@@ -120,7 +122,7 @@ db.commit()
   await page.unroute('**/api/v1/fetch-status');
   await page.goto(origin+'/account');
   assert.equal(await page.getByLabel('Show feed images',{exact:true}).isChecked(),false);
-  await page.getByLabel('Show feed images',{exact:true}).check();await page.getByRole('button',{name:'Save image settings',exact:true}).click();
+  await page.getByLabel('Show feed images',{exact:true}).check();await act(page.getByRole('button',{name:'Save image settings',exact:true}), 'click');
   await page.goto(origin+'/');
   await page.locator('[data-feed-image]').first().evaluate(image=>image.decode());
   assert.equal((await context.request.get(origin+'/story/1/image')).status(),200);
@@ -132,32 +134,32 @@ db.commit()
   assert.ok((await page.locator('.reader-body img').getAttribute('src')).startsWith('/story/1/image/'));
   assert.equal(await page.locator('.reader-body script').count(),0);
   assert.ok(!(await page.locator('body').innerText()).includes('The text supplied by this feed'));
-  await page.goto(origin+'/account');await page.getByLabel('Show feed images',{exact:true}).uncheck();await page.getByRole('button',{name:'Save image settings',exact:true}).click();
+  await page.goto(origin+'/account');await page.getByLabel('Show feed images',{exact:true}).uncheck();await act(page.getByRole('button',{name:'Save image settings',exact:true}), 'click');
   assert.equal((await context.request.get(origin+'/story/1/image')).status(),404);
   await page.goto(origin+'/story/1');assert.equal(await page.locator('.reader-body img').count(),0);
   assert.equal(await page.getByRole('button',{name:'Get full story',exact:true}).count(),1);
   await page.goto(origin+'/');
   assert.equal(await page.locator('.story-row').count(),30);
-  await page.getByRole('link',{name:'Next page',exact:true}).click();
+  await act(page.getByRole('link',{name:'Next page',exact:true}), 'click');
   assert.equal(await page.locator('.story-row').count(),5);
   await page.goto(origin+'/');
-  await page.locator('.story-row').first().getByRole('button',{name:'Set aside',exact:true}).click();
-  await page.getByRole('link',{name:'Set aside',exact:true}).click();
+  await act(page.locator('.story-row').first().getByRole('button',{name:'Set aside',exact:true}), 'click');
+  await act(page.getByRole('link',{name:'Set aside',exact:true}), 'click');
   assert.equal(await page.locator('.story-row').count(),1);
-  await page.locator('.story-row h2 a').first().click();
-  await page.getByRole('button',{name:'Mark read and return',exact:true}).click();
+  await act(page.locator('.story-row h2 a').first(), 'click');
+  await act(page.getByRole('button',{name:'Mark read and return',exact:true}), 'click');
   assert.equal(await page.locator('.story-row').count(),30);
-  await page.getByRole('link',{name:'Feed groups',exact:true}).click();
-  await page.getByLabel('Name',{exact:true}).fill('AI research');
-  await page.getByLabel('How it gathers feeds').selectOption('tag');
-  await page.getByLabel('Tag to match, for a tag-based group').fill('research');
-  await page.getByRole('button',{name:'Create feed group',exact:true}).click();
-  await page.getByRole('link',{name:'Read this group',exact:true}).click();
+  await act(page.getByRole('link',{name:'Feed groups',exact:true}), 'click');
+  await act(page.getByLabel('Name',{exact:true}), 'fill', 'AI research');
+  await act(page.getByLabel('How it gathers feeds'), 'selectOption', 'tag');
+  await act(page.getByLabel('Tag to match, for a tag-based group'), 'fill', 'research');
+  await act(page.getByRole('button',{name:'Create feed group',exact:true}), 'click');
+  await act(page.getByRole('link',{name:'Read this group',exact:true}), 'click');
   assert.equal(await page.locator('.story-row').count(),30);
-  await page.getByRole('link',{name:'Your account',exact:true}).click();
+  await act(page.getByRole('link',{name:'Your account',exact:true}), 'click');
   assert.equal(await page.getByLabel('Follow the household table').isChecked(),false);
   await page.getByLabel('Follow the household table').check();
-  await page.getByRole('button',{name:'Save your choice',exact:true}).click();
+  await act(page.getByRole('button',{name:'Save your choice',exact:true}), 'click');
   await page.goto(origin+'/?view=group');
   assert.equal(await page.getByRole('heading',{name:'A shared test story',exact:true}).count(),1);
 
@@ -166,13 +168,13 @@ db.commit()
   assert.equal(await page.locator('.catalog-card').count(),0);
   await page.goto(origin+'/account');
   for(const category of ['Tech','Science']) await page.locator(`input[name="category"][value="${category}"]`).check();
-  await page.getByRole('button',{name:'Save suggested categories',exact:true}).click();
+  await act(page.getByRole('button',{name:'Save suggested categories',exact:true}), 'click');
   await page.goto(origin+'/sources');
   assert.ok(await page.locator('.catalog-card').count()>0);
   assert.equal(await page.getByRole('heading',{name:'Simon Willison',exact:true}).count(),0);
   await page.goto(origin+'/account/invitations');
   for(const theme of ['light','dark']) {
-    await page.getByLabel('Theme',{exact:true}).selectOption(theme);
+    await act(page.getByLabel('Theme',{exact:true}), 'selectOption', theme);
     for(const width of invitationWidths) {
       await page.setViewportSize({width,height:1000});
       assertInvitationLayout(await page.evaluate(invitationLayout),width,theme+' invitations');
@@ -182,15 +184,15 @@ db.commit()
 
   // An invitation is redeemed in a genuinely separate browser context.
   await page.goto(origin+'/account');
-  await page.getByRole('button',{name:'Create an invitation',exact:true}).click();
+  await act(page.getByRole('button',{name:'Create an invitation',exact:true}), 'click');
   const invitation = await page.locator('#invitation').inputValue();
   const newcomer=await browser.newContext();
   const member=await newcomer.newPage();
   assert.ok(invitation.startsWith(origin+"/join?code="));
   await member.goto(invitation);
-  await member.getByLabel('Choose a username').fill('alice');
-  await member.getByLabel('Choose a password').fill(password);
-  await member.getByRole('button',{name:'Make yourself at home',exact:true}).click();
+  await act(member.getByLabel('Choose a username'), 'fill', 'alice');
+  await act(member.getByLabel('Choose a password'), 'fill', password);
+  await act(member.getByRole('button',{name:'Make yourself at home',exact:true}), 'click');
   await signIn(member,origin,'alice');
   assert.equal(await member.locator('.story-row').count(),0);
   await member.goto(origin+'/?view=saved');
@@ -198,10 +200,10 @@ db.commit()
   await member.goto(origin+'/account');
   assert.equal(await member.getByLabel('Follow the household table').isChecked(),false);
   await member.getByLabel('Follow the household table').check();
-  await member.getByRole('button',{name:'Save your choice',exact:true}).click();
+  await act(member.getByRole('button',{name:'Save your choice',exact:true}), 'click');
   await member.goto(origin+'/?view=group');
   assert.equal(await member.locator('.story-row').count(),1);
-  await member.locator('.story-row').getByRole('button',{name:'Mark read',exact:true}).click();
+  await act(member.locator('.story-row').getByRole('button',{name:'Mark read',exact:true}), 'click');
   await page.goto(origin+'/?view=group');
   assert.equal(await page.getByRole('button',{name:'Mark read',exact:true}).count(),1);
 
@@ -210,9 +212,9 @@ db.commit()
   const data=await exported.json();
   assert.equal(data.username,'host');assert.equal(data.version,1);assert.equal(data.stories.length,1);assert.equal(data.feed_groups[0].name,'AI research');
   await member.goto(origin+'/account');
-  await member.getByLabel('Tidings JSON file, up to 16 MiB').setInputFiles({name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+  await act(member.getByLabel('Tidings JSON file, up to 16 MiB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
   await member.getByLabel('Merge this file into my personal reading data').check();
-  await member.getByRole('button',{name:'Merge reading data',exact:true}).click();
+  await act(member.getByRole('button',{name:'Merge reading data',exact:true}), 'click');
   await member.goto(origin+'/?view=saved');
   assert.equal(await member.locator('.story-row').count(),1);
   await member.goto(origin+'/account');
@@ -221,15 +223,15 @@ db.commit()
   assert.equal(await member.getByRole('button',{name:'Save suggested categories',exact:true}).count(),0);
   await page.goto(origin+'/account');
   let alice=page.locator('details.admin-row').filter({has:page.locator('summary').filter({hasText:'alice'})});
-  await alice.locator('summary').click();
-  await alice.getByLabel('Your current password',{exact:true}).fill(password);
-  await alice.getByRole('button',{name:'Apply member action',exact:true}).click();
+  await act(alice.locator('summary'), 'click');
+  await act(alice.getByLabel('Your current password',{exact:true}), 'fill', password);
+  await act(alice.getByRole('button',{name:'Apply member action',exact:true}), 'click');
   await member.goto(origin+'/');
   assert.equal(new URL(member.url()).pathname,'/login');
   alice=page.locator('details.admin-row').filter({has:page.locator('summary').filter({hasText:'alice'})});
-  await alice.locator('summary').click();
-  await alice.getByLabel('Your current password',{exact:true}).fill(password);
-  await alice.getByRole('button',{name:'Apply member action',exact:true}).click();
+  await act(alice.locator('summary'), 'click');
+  await act(alice.getByLabel('Your current password',{exact:true}), 'fill', password);
+  await act(alice.getByRole('button',{name:'Apply member action',exact:true}), 'click');
   await signIn(member,origin,'alice');
   await newcomer.close();
   await page.goto(origin+'/');
@@ -238,7 +240,7 @@ db.commit()
   await page.goto(origin+'/account');
   assert.equal(await page.getByLabel('Enable keyboard shortcuts',{exact:true}).isChecked(),false);
   await page.getByLabel('Enable keyboard shortcuts',{exact:true}).check();
-  await page.getByRole('button',{name:'Save reading preferences',exact:true}).click();
+  await act(page.getByRole('button',{name:'Save reading preferences',exact:true}), 'click');
   await page.goto(origin+'/');
   await page.keyboard.press('j');assert.equal(await page.locator('.keyboard-selected').count(),1);
   const firstStory=await page.locator('.keyboard-selected [data-story-open]').getAttribute('href');
@@ -248,7 +250,7 @@ db.commit()
   await page.keyboard.press('Escape');assert.equal(await page.locator('#keyboard-help').evaluate(dialog=>dialog.open),false);
   await page.keyboard.press('/');assert.equal(await page.locator('#search').evaluate(input=>input===document.activeElement),true);
   await page.keyboard.type('jkms');assert.equal(await page.locator('#search').inputValue(),'jkms');
-  await page.locator('#search').fill('');await page.locator('#search').blur();
+  await act(page.locator('#search'), 'fill', '');await page.locator('#search').blur();
   const modifiers=await page.evaluate(()=>['ctrlKey','altKey','metaKey','isComposing'].map(flag=>{const event=new KeyboardEvent('keydown',{key:'j',bubbles:true,cancelable:true,[flag]:true});document.body.dispatchEvent(event);return event.defaultPrevented;}));
   assert.deepEqual(modifiers,[false,false,false,false]);
   await page.keyboard.press('j');
@@ -256,20 +258,20 @@ db.commit()
   await Promise.all([page.waitForURL(origin+selectedStory),page.keyboard.press('Enter')]);
   await Promise.all([page.waitForNavigation(),page.keyboard.press('m')]);
   assert.equal(await page.getByRole('button',{name:'Mark unread',exact:true}).count(),1);
-  await page.locator('body').click({position:{x:5,y:5}});
+  await act(page.locator('body'), 'click', {position:{x:5,y:5}});
   await Promise.all([page.waitForNavigation(),page.keyboard.press('s')]);
   assert.equal(await page.getByRole('button',{name:'Remove from set aside',exact:true}).count(),1);
   await page.goto(origin+'/account');await page.getByLabel('Enable keyboard shortcuts',{exact:true}).uncheck();
-  await page.getByRole('button',{name:'Save reading preferences',exact:true}).click();await page.goto(origin+'/');
+  await act(page.getByRole('button',{name:'Save reading preferences',exact:true}), 'click');await page.goto(origin+'/');
   assert.equal(await page.locator('script[src="/static/keyboard.js"]').count(),0);
   await page.keyboard.press('j');assert.equal(await page.locator('.keyboard-selected').count(),0);
   await page.goto(origin+'/sources');
-  await page.getByLabel('Search suggested sources',{exact:true}).fill('zzzzabsent');
-  await page.getByRole('button',{name:'Find sources',exact:true}).click();
+  await act(page.getByLabel('Search suggested sources',{exact:true}), 'fill', 'zzzzabsent');
+  await act(page.getByRole('button',{name:'Find sources',exact:true}), 'click');
   assert.equal(await page.locator('.catalog-card').count(),0);
-  await page.locator('summary').filter({hasText:'Edit tags and topic'}).first().click();
-  await page.getByLabel('Topic',{exact:true}).last().fill('Research');
-  await page.getByRole('button',{name:'Save topic',exact:true}).click();
+  await act(page.locator('summary').filter({hasText:'Edit tags and topic'}).first(), 'click');
+  await act(page.getByLabel('Topic',{exact:true}).last(), 'fill', 'Research');
+  await act(page.getByRole('button',{name:'Save topic',exact:true}), 'click');
   assert.equal(await page.locator('.source-row .eyebrow').first().textContent(),'Research');
   const screenshotDir = process.env.TIDINGS_SCREENSHOT_DIR;
   if(screenshotDir) await mkdir(screenshotDir,{recursive:true});
@@ -278,7 +280,7 @@ db.commit()
   welcome.on('pageerror',error=>errors.push(String(error)));
   await welcome.goto(origin+'/login');
   for(const theme of ['light','dark']) {
-    await welcome.getByLabel('Theme',{exact:true}).selectOption(theme);
+    await act(welcome.getByLabel('Theme',{exact:true}), 'selectOption', theme);
     for(const width of [375,1440]) {
       await welcome.setViewportSize({width,height:1000});
       assert.ok(await welcome.locator('.welcome-mascot').evaluate(img=>img.complete&&img.naturalWidth>0),'mascot did not load');
@@ -290,7 +292,7 @@ db.commit()
   await welcomeContext.close();
   for (const theme of ['light','dark']) {
     await page.goto(origin+'/');
-    await page.getByLabel('Theme',{exact:true}).selectOption(theme);
+    await act(page.getByLabel('Theme',{exact:true}), 'selectOption', theme);
     for(const width of [375,768,1024,1440]) {
       await page.setViewportSize({width,height:1000});
       for(const route of ['/','/sources','/groups','/account','/account/invitations','/story/1']) {
@@ -310,16 +312,16 @@ db.commit()
   await signIn(plain,origin);
   assert.equal(await plain.getByRole('heading',{name:'Your reading table',exact:true}).count(),1);
   await plain.goto(origin+'/groups');
-  await plain.getByLabel('Name',{exact:true}).fill('Without JavaScript');
-  await plain.getByRole('button',{name:'Create feed group',exact:true}).click();
+  await act(plain.getByLabel('Name',{exact:true}), 'fill', 'Without JavaScript');
+  await act(plain.getByRole('button',{name:'Create feed group',exact:true}), 'click');
   await plain.getByLabel('Local test source',{exact:false}).check();
-  await plain.getByRole('button',{name:'Save chosen feeds',exact:true}).click();
-  await plain.getByRole('link',{name:'Read this group',exact:true}).click();
+  await act(plain.getByRole('button',{name:'Save chosen feeds',exact:true}), 'click');
+  await act(plain.getByRole('link',{name:'Read this group',exact:true}), 'click');
   assert.equal(await plain.locator('.story-row').count(),30);
   await plain.goto(origin+'/groups');
-  await plain.getByRole('link',{name:'Without JavaScript',exact:true}).click();
-  await plain.getByLabel('Name',{exact:true}).fill('Quiet reading');
-  await plain.getByRole('button',{name:'Save group name',exact:true}).click();
+  await act(plain.getByRole('link',{name:'Without JavaScript',exact:true}), 'click');
+  await act(plain.getByLabel('Name',{exact:true}), 'fill', 'Quiet reading');
+  await act(plain.getByRole('button',{name:'Save group name',exact:true}), 'click');
   assert.equal(await plain.getByRole('link',{name:'Quiet reading',exact:true}).count(),1);
   await plainContext.close();
   assert.deepEqual(errors,[]);
