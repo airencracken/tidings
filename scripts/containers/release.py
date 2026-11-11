@@ -148,7 +148,7 @@ def build(cfg, arch, dist, output, revision, root=ROOT):
             "-f", str(root / "Dockerfile.release"), "--build-arg", f"VERSION={release}",
             "--build-arg", f"REVISION={revision}", "-t", image, str(context))
         run("python3", str(root / "scripts/containers/lifecycle.py"), "--image", image,
-            "--version", release, "--binary", str(context / "bin" / cfg["app"]),
+            "--version", release, "--binary", str(context / "bin" / cfg["app"]), "--upgrade",
             timeout=600)
         archive = output / f"image-{arch}.tar"
         run("docker", "save", "-o", str(archive), image)

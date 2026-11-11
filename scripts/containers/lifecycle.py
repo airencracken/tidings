@@ -7,8 +7,22 @@ from pathlib import Path
 import re
 import subprocess
 import time
+import tempfile
+import urllib.request
 import uuid
-from release import config, run
+from release import config, run, stage, version
+
+
+def download_previous(cfg, arch, directory):
+    previous = version(cfg['previous'])
+    app = cfg['app']
+    base = f'https://github.com/airencracken/{app}/releases/download/v{previous}'
+    for name in (f'{app}_{previous}_linux_{arch}.tar.gz', f'{app}_{previous}_checksums.txt'):
+        with urllib.request.urlopen(f'{base}/{name}', timeout=120) as response:
+            (directory / name).write_bytes(response.read())
+    target = directory / 'previous'
+    stage(directory, target, app, arch)
+    return target / 'bin' / app
 
 
 class Lifecycle:
@@ -26,13 +40,14 @@ class Lifecycle:
                 '-e', self.prefix + '_BASE_URL=https://' + self.app + '.example.org',
                 '-e', self.prefix + '_BACKUP_INTERVAL=0']
 
-    def once(self, *args, stdin=None, shell=False):
+    def once(self, *args, stdin=None, shell=False, binary=None):
         return run('docker', 'run', '--rm', '-i', *self.options(),
-                   *(['--entrypoint', 'sh'] if shell else []), self.image, *args, input=stdin)
+                   *(['-v', str(binary) + ':/previous/app:ro', '--entrypoint', '/previous/app'] if binary else ['--entrypoint', 'sh'] if shell else []), self.image, *args, input=stdin)
 
-    def start(self, directory='/data'):
+    def start(self, directory='/data', binary=None):
         name = self.name + '-' + str(len(self.containers))
-        run('docker', 'run', '-d', '--name', name, *self.options(directory), self.image)
+        run('docker', 'run', '-d', '--name', name, *self.options(directory),
+            *(['-v', str(binary) + ':/previous/app:ro', '--entrypoint', '/previous/app'] if binary else []), self.image, *(['serve'] if binary else []))
         self.containers.append(name)
         for _ in range(100):
             state = json.loads(run('docker', 'inspect', name))[0]['State']
@@ -48,7 +63,22 @@ class Lifecycle:
         run('docker', 'stop', '--time', '20', name)
         assert json.loads(run('docker', 'inspect', name))[0]['State']['ExitCode'] == 0
 
-    def check(self, version, binary=None):
+    def prepare_owner(self, previous=None):
+        password = 'container-test-password-long-enough\n'
+        if previous:
+            self.once('create-owner', '--username', 'containerowner', '--password-stdin',
+                      stdin=password, binary=previous)
+            previous_server = self.start(binary=previous)
+            self.stop(previous_server)
+            # This command fails if the existing account was lost during migration.
+            self.once('set-password', '--username', 'containerowner', '--password-stdin', stdin=password)
+            return
+        if self.app == 'folkweave':
+            self.once('create-owner', '--username', 'containerowner', '--name', 'Owner', '--password-stdin', stdin='container-test-password-long-enough\n')
+        else:
+            self.once('-c', 'umask 077; cat > /tmp/password || exit 1; exec /usr/local/bin/tidings create-owner --username containerowner --password-file /tmp/password', shell=True, stdin='container-test-password-long-enough\n')
+
+    def check(self, version, binary=None, previous=None):
         info = json.loads(run('docker', 'image', 'inspect', self.image))[0]
         assert info['Config']['User'] == '10001:10001'
         assert info['Config']['Healthcheck']['Test'][0] == 'CMD-SHELL'
@@ -59,10 +89,7 @@ class Lifecycle:
             raw = subprocess.run(['docker', 'run', '--rm', '--entrypoint', 'cat', self.image,
                                   '/usr/local/bin/' + self.app], capture_output=True, check=True).stdout
             assert hashlib.sha256(raw).digest() == hashlib.sha256(binary.read_bytes()).digest()
-        if self.app == 'folkweave':
-            self.once('init', '--username', 'containerowner', '--name', 'Owner', '--password-stdin', stdin='container-test-password-long-enough\n')
-        else:
-            self.once('-c', 'umask 077; cat > /tmp/password || exit 1; exec /usr/local/bin/tidings create-owner --username containerowner --password-file /tmp/password', shell=True, stdin='container-test-password-long-enough\n')
+        self.prepare_owner(previous)
         first = self.start()
         run('docker', 'exec', first, 'sh', '-c', info['Config']['Healthcheck']['Test'][1])
         page = run('docker', 'exec', first, 'wget', '--header=Host: ' + self.app + '.example.org', '-qO-', 'http://127.0.0.1:8080/login')
@@ -96,10 +123,14 @@ def main():
     parser.add_argument('--image', required=True)
     parser.add_argument('--version', required=True)
     parser.add_argument('--binary', type=Path)
+    parser.add_argument('--upgrade', action='store_true')
     args = parser.parse_args()
     test = Lifecycle(config(), args.image)
     try:
-        test.check(args.version, args.binary)
+        with tempfile.TemporaryDirectory() as temporary:
+            arch = json.loads(run('docker', 'image', 'inspect', args.image))[0]['Architecture']
+            previous = download_previous(test.cfg, arch, Path(temporary)) if args.upgrade else None
+            test.check(args.version, args.binary, previous)
     except Exception:
         for name in test.containers:
             print(run('docker', 'logs', name))

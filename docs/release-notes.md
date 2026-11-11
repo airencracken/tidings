@@ -1,3 +1,24 @@
+# Tidings 0.5.0
+
+- Add an optional Apps menu and consistent keyboard, focus and account controls.
+- Add explicitly linked community sign-in using OpenID Connect, state, nonce and
+  PKCE. Existing local accounts and passwords remain available; accounts are never
+  created or linked by matching email addresses. Configure this only when wanted.
+- Use published Comfylib v0.2.0 and require Go 1.26.11 or newer for source builds.
+- Upgrade golang.org/x/crypto to v0.59.0 and scan the actual release executables
+  for vulnerable dependencies before publication.
+
+- Add comfortable and compact spacing with preferences kept per application.
+- Use stable published-time and ID cursors for efficient older/newer navigation;
+  existing offset links remain supported and visibility checks are preserved.
+- Upgrade golang.org/x/net and refuse unsafe dangling configuration symlinks.
+
+Read [Suite integration](suite.md) for configuration and security boundaries.
+Back up the stopped data directory before upgrading. Shared sign-in creates an
+additive identity-binding table when configured. Keep the pre-upgrade backup;
+use it when returning to older binaries rather than opening a migrated database
+with an older application. Publishing a release does not change running services.
+
 # Tidings 0.4.2
 
 - Standardize shipped service configs and documented environment examples on
