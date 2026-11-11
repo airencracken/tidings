@@ -56,3 +56,12 @@ Back up before replacing a binary or package. Stop the service, install the new
 version, and start it again. Startup applies schema changes. Never open a newer
 database with an older binary; restore a pre-upgrade snapshot into a new private
 directory when rolling back. Keep exact package/image version pins.
+
+## Rebuild an existing release tag
+
+Maintainers can dispatch the Release workflow on `master` with `release_tag` set
+to an existing version tag. The workflow validates the tag, exact commit, VERSION
+where present, and reachability from master. It uses Go 1.26.11 and runs the full
+native, package and container gates against that tag. Container revision labels
+identify the checked-out source commit. Published releases and image tags remain
+immutable; reruns may finish an unpublished draft.

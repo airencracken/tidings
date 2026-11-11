@@ -5,10 +5,17 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing release tag to rebuild with the current workflow'
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
 env:
   GOWORK: 'off'
+  RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
 defaults:
   run:
     shell: bash --noprofile --norc {0}
@@ -22,12 +29,31 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.release_tag || github.ref }}
+      - name: Validate requested release source
+        env:
+          RELEASE_REF: ${{ inputs.release_tag != '' && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+        run: |
+          # Validate an explicitly requested existing release tag.
+          if [ -n "$RELEASE_TAG_INPUT" ]; then
+            [[ "$RELEASE_TAG_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || exit 1
+            release_commit=$(git rev-parse --verify "refs/tags/$RELEASE_TAG_INPUT^{commit}") || exit 1
+            test "$release_commit" = "$(git rev-parse HEAD)" || exit 1
+          fi
+          case "$RELEASE_REF" in
+            refs/tags/v*)
+              git merge-base --is-ancestor HEAD origin/master || exit 1
+              if [ -f VERSION ]; then
+                test "$RELEASE_REF" = "refs/tags/v$(cat VERSION)" || exit 1
+              fi
+              ;;
+          esac
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
-          go-version: '1.26.x'
+          go-version: '1.26.11'
       - name: Validate release on master
         env:
-          RELEASE_REF: ${{ github.ref }}
+          RELEASE_REF: ${{ inputs.release_tag != '' && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
         run: |
           case "$RELEASE_REF" in
             refs/tags/v*)
@@ -44,7 +70,7 @@ jobs:
           install-only: true
       - name: Build native archives without publishing
         env:
-          RELEASE_REF: ${{ github.ref }}
+          RELEASE_REF: ${{ inputs.release_tag != '' && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
         run: |
           goreleaser check || exit 1
           case "$RELEASE_REF" in
@@ -81,6 +107,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: release-packages
@@ -97,10 +125,12 @@ jobs:
       contents: read
       packages: write
     with:
-      publish: ${{ startsWith(github.ref, 'refs/tags/v') && github.repository == 'airencracken/tidings' }}
+      source_ref: ${{ inputs.release_tag || github.ref }}
+      release_tag: ${{ inputs.release_tag || github.ref_name }}
+      publish: ${{ (startsWith(github.ref, 'refs/tags/v') || startsWith(inputs.release_tag, 'v')) && github.repository == 'airencracken/tidings' }}
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v') && github.repository == 'airencracken/tidings'
+    if: (startsWith(github.ref, 'refs/tags/v') || startsWith(inputs.release_tag, 'v')) && github.repository == 'airencracken/tidings'
     needs: [build, packages, containers]
     runs-on: ubuntu-24.04
     permissions:
@@ -114,7 +144,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
           if gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft > release-draft; then
             [ "$(cat release-draft)" = true ] || { echo 'Release already published; refusing to replace it.' >&2; exit 1; }
