@@ -4,7 +4,7 @@ go 1.26.11
 
 require (
 	codeberg.org/readeck/go-readability/v2 v2.1.3
-	github.com/airencracken/comfylib v0.3.0
+	github.com/airencracken/comfylib v0.4.0
 	github.com/airencracken/comfylib/oidc v0.1.0
 	github.com/gofrs/flock v0.13.1
 	golang.org/x/crypto v0.59.0
