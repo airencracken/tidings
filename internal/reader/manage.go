@@ -111,7 +111,7 @@ func (a *App) memberAction(w http.ResponseWriter, r *http.Request) {
 		a.bad(w, r, err.Error())
 		return
 	}
-	http.Redirect(w, r, "/account", 303)
+	http.Redirect(w, r, adminReturn(r, ""), 303)
 }
 func (a *App) revokeInvite(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {

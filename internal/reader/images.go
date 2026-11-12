@@ -63,7 +63,7 @@ func (a *App) saveImages(w http.ResponseWriter, r *http.Request) {
 	if len(values) == 1 {
 		a.queueRefresh(0, true, true, true)
 	}
-	http.Redirect(w, r, "/account?notice=images#feed-images", http.StatusSeeOther)
+	http.Redirect(w, r, adminReturn(r, "?notice=images#feed-images"), http.StatusSeeOther)
 }
 
 func (a *App) storyImage(w http.ResponseWriter, r *http.Request) {

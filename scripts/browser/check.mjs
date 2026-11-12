@@ -91,6 +91,8 @@ db.commit()
   for (const name of ['Suggested sources', 'Feed images', 'Feed fetching', 'Household members', 'Instance backups']) {
     assert.equal(await page.getByRole('heading', { name, exact: true }).isVisible(), true);
   }
+  await act(page.getByRole('button', { name: 'Save suggested categories', exact: true }), 'click');
+  assert.equal(new URL(page.url()).pathname, '/admin');
   await page.goto(origin + '/');
 
   assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg?v=town-crier');

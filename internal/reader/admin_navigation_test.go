@@ -1,6 +1,9 @@
 package reader
 
 import (
+	"math/rand"
+	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -39,5 +42,33 @@ func TestAdminNavigationAndOwnerOnlySettings(t *testing.T) {
 	}
 	if response := h.request(1, "GET", "/admin", nil); response.Code != 303 {
 		t.Fatal("suspended owner reached administration", response.Code)
+	}
+}
+
+func TestAdminActionsReturnToTheirPageWithoutOpenRedirects(t *testing.T) {
+	h := webHarness(t)
+	for _, target := range []string{"/admin", "/admin?notice=images"} {
+		response := h.request(1, "POST", "/account/images", url.Values{"return_to": {target}})
+		if response.Code != 303 || response.Header().Get("Location") != "/admin?notice=images#feed-images" {
+			t.Fatal("admin action lost its page", response.Code, response.Header())
+		}
+	}
+	random := rand.New(rand.NewSource(20261111))
+	targets := []string{"", "https://evil.example/admin", "//evil.example/admin", "javascript:alert(1)", "/admin\r\nLocation: https://evil.example", "/admin/../account", "/account", "/admin/extra"}
+	for range 100 {
+		targets = append(targets, string(rune(random.Intn(128)))+"/admin")
+	}
+	for _, target := range targets {
+		request := httptest.NewRequest("POST", "/account/images", strings.NewReader(url.Values{"return_to": {target}}.Encode()))
+		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		if err := request.ParseForm(); err != nil {
+			t.Fatal(err)
+		}
+		if actual := adminReturn(request, "?notice=images#feed-images"); actual != "/account?notice=images#feed-images" {
+			t.Fatal("unsafe administration return", target, actual)
+		}
+	}
+	if response := h.request(2, "POST", "/account/images", url.Values{"enabled": {"true"}, "return_to": {"/admin"}}); response.Code != 403 {
+		t.Fatal("member changed settings via admin return", response.Code)
 	}
 }

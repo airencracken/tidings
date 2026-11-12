@@ -721,6 +721,19 @@ func (a *App) account(w http.ResponseWriter, r *http.Request) {
 	a.accountPage(w, r, "account", "Your place here")
 }
 
+// Owner actions return to the page that supplied the form. Only these two
+// local destinations are allowed; no submitted URL is reflected in a redirect.
+func adminReturn(r *http.Request, suffix string) string {
+	values := r.PostForm["return_to"]
+	if len(values) == 1 {
+		target, err := url.Parse(values[0])
+		if err == nil && target.Scheme == "" && target.Host == "" && target.Path == "/admin" {
+			return "/admin" + suffix
+		}
+	}
+	return "/account" + suffix
+}
+
 func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
 		http.Error(w, "Only owners can administer this household", http.StatusForbidden)
@@ -863,7 +876,7 @@ func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The server is shutting down. Try again after it restarts.", http.StatusServiceUnavailable)
 		return
 	}
-	http.Redirect(w, r, "/account?notice=refresh-all", http.StatusSeeOther)
+	http.Redirect(w, r, adminReturn(r, "?notice=refresh-all"), http.StatusSeeOther)
 }
 
 type RefreshStatus struct {

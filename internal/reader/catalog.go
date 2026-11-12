@@ -101,5 +101,5 @@ func (a *App) saveSuggestions(w http.ResponseWriter, r *http.Request) {
 		a.bad(w, r, err.Error())
 		return
 	}
-	http.Redirect(w, r, "/account?notice=suggestions#suggestions", http.StatusSeeOther)
+	http.Redirect(w, r, adminReturn(r, "?notice=suggestions#suggestions"), http.StatusSeeOther)
 }
