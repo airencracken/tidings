@@ -15,15 +15,15 @@ run:
 test:
 	go test -race ./...
 check: test-suite-assets test-config test-cli
-	python3 -m unittest discover -s scripts/containers -p "test_*.py"
+	python3 scripts/comfy.py test-containers
 	python3 scripts/release/test_config.py
 	python3 scripts/test_project.py
 	test -z "$$(gofmt -l cmd internal deploy scripts/demo)"
 	go vet ./...
 	go test -race ./...
-	python3 scripts/mutate.py scripts/mutations.json scripts/audit-mutations.json scripts/suite-mutations.json
+	python3 scripts/comfy.py mutate scripts/mutations.json scripts/audit-mutations.json
 test-mutations:
-	python3 scripts/mutate.py scripts/mutations.json scripts/audit-mutations.json scripts/suite-mutations.json
+	python3 scripts/comfy.py mutate scripts/mutations.json scripts/audit-mutations.json
 test-browser: build
 	node scripts/browser/check.mjs
 fuzz-smoke:
@@ -58,9 +58,9 @@ install-openrc: install
 
 .PHONY: test-containers test-container-registry
 test-containers:
-	python3 -m unittest discover -s scripts/containers -p 'test_*.py'
+	python3 scripts/comfy.py test-containers
 test-container-registry:
-	python3 scripts/containers/check_registry.py
+	python3 scripts/comfy.py container-registry
 
 .PHONY: test-cli
 test-cli: build
@@ -69,10 +69,10 @@ test-cli: build
 
 .PHONY: test-config
 test-config:
-	python3 scripts/test_service_config.py
+	python3 scripts/comfy.py service-config
 
 .PHONY: test-suite-assets
-test-suite-assets: ## Verify synchronized suite source and assets
-	python3 scripts/verify_suite.py
-	python3 scripts/test_suite_deployment.py
-	python3 scripts/test_release_dispatch.py
+test-suite-assets: ## Verify shared module integration and deployment contracts
+	python3 scripts/comfy.py check
+	python3 scripts/comfy.py suite-deployment
+	python3 scripts/comfy.py release-dispatch

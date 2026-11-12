@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/airencracken/tidings/internal/suite"
+	"github.com/airencracken/comfylib/suite"
 	"html/template"
 	"io"
 	"log/slog"
@@ -261,6 +261,7 @@ func (a *App) routes() {
 		http.ServeFileFS(w, r, assets, "static/favicon.ico")
 	})
 	a.mux.Handle("GET /static/comfy/", http.StripPrefix("/static/comfy/", http.FileServerFS(ui.Assets())))
+	a.mux.Handle("GET /static/comfyware/", http.StripPrefix("/static/comfyware/", http.FileServerFS(ui.Assets())))
 	a.mux.Handle("GET /static/", http.FileServerFS(assets))
 	a.mux.HandleFunc("GET /{$}", a.home)
 	a.mux.HandleFunc("GET /story/{id}", a.story)

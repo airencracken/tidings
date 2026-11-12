@@ -1,11 +1,11 @@
 # Third-party components
 
-Tidings uses Comfylib v0.1.8 for opaque tokens, session-bound CSRF tokens,
+Tidings uses the pinned Comfylib release for opaque tokens, session-bound CSRF tokens,
 password confirmation and hidden input, proxy client resolution, backup scheduling,
 service configuration, administrative privilege dropping, proxy examples, and
 shared account-form styles and browser checks,
-under AGPL-3.0-or-later. `scripts/mutate.py` is copied from Comfylib's mutation
-runner under the same license. [Miniflux](https://miniflux.app/) is a design inspiration for article reading,
+under AGPL-3.0-or-later. The mutation runner executes directly from the pinned Comfylib module under
+the same license. [Miniflux](https://miniflux.app/) is a design inspiration for article reading,
 keyboard navigation, link cleanup, and adaptive feed fetching.
 The interface follows the Comfyware family palette
 and server-rendered form conventions used by Witmoot.

@@ -3,9 +3,9 @@ package reader
 
 import (
 	"fmt"
+	sharedoidc "github.com/airencracken/comfylib/oidc"
+	"github.com/airencracken/comfylib/suite"
 	"github.com/airencracken/comfylib/token"
-	"github.com/airencracken/tidings/internal/sharedoidc"
-	"github.com/airencracken/tidings/internal/suite"
 	"net/http"
 	"time"
 )
