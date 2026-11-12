@@ -14,5 +14,21 @@
     "after": "",
     "package": "./deploy",
     "run": "^TestServiceInstallPreservesConfigurationSymlinks$"
+  },
+  {
+    "name": "successful authentication is recorded",
+    "file": "internal/reader/auth.go",
+    "before": "analytics.RecordLogin(ctx, tx, analytics.MemberID(id), time.Now())",
+    "after": "analytics.Prune(ctx, tx, time.Now())",
+    "package": "./internal/reader",
+    "run": "^TestActivityCountsAuthorizedOpensAndSuccessfulLogins$"
+  },
+  {
+    "name": "story opens reach the shared collector",
+    "file": "internal/reader/app.go",
+    "before": "a.trackStory(a.story)",
+    "after": "a.story",
+    "package": "./internal/reader",
+    "run": "^TestActivityCountsAuthorizedOpensAndSuccessfulLogins$"
   }
 ]
