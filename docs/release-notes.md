@@ -1,6 +1,6 @@
 # Tidings releases
 
-## 0.5.2
+## 0.5.3
 
 - Import the suite helpers directly from published Comfylib 0.3.0 and use its
   embedded styles and browser controls.
