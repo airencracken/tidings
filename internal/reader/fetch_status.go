@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/airencracken/comfylib/displaytime"
 	"net/http"
 	"time"
 )
@@ -32,7 +33,12 @@ type fetchOverview struct {
 	NextCheck string `json:"next_check"`
 }
 
-func (a *App) fetchOverview(ctx context.Context, uid int64) (fetchOverview, error) {
+func (a *App) fetchOverview(ctx context.Context, uid int64, zones ...string) (fetchOverview, error) {
+	name := "UTC"
+	if len(zones) > 0 {
+		name = zones[0]
+	}
+	f := displaytime.New(name)
 	summary, err := a.Store.fetchSummary(ctx, uid)
 	if err != nil {
 		return fetchOverview{}, err
@@ -40,9 +46,9 @@ func (a *App) fetchOverview(ctx context.Context, uid int64) (fetchOverview, erro
 	status := a.RefreshStatus(uid)
 	out := fetchOverview{State: "idle", Checked: summary.Checked}
 	if summary.NextCheck > 0 {
-		out.NextCheck = "Next automatic check at " + time.Unix(summary.NextCheck, 0).UTC().Format("15:04 UTC") + "."
+		out.NextCheck = "Next automatic check at " + f.Clock(time.Unix(summary.NextCheck, 0)) + "."
 	} else if !status.NextCheck.IsZero() {
-		out.NextCheck = "Next automatic check at " + status.NextCheck.UTC().Format("15:04 UTC") + "."
+		out.NextCheck = "Next automatic check at " + f.Clock(status.NextCheck) + "."
 	}
 	switch {
 	case status.Queued:
@@ -59,13 +65,13 @@ func (a *App) fetchOverview(ctx context.Context, uid int64) (fetchOverview, erro
 		out.State, out.Message = "waiting", "Waiting for the first fetch."
 		out.Detail = fmt.Sprintf("%d sources waiting.", summary.Waiting)
 	case summary.Checked > 0:
-		out.Message = "Feeds checked at " + time.Unix(summary.Checked, 0).UTC().Format("15:04 UTC") + "."
+		out.Message = "Feeds checked at " + f.Clock(time.Unix(summary.Checked, 0)) + "."
 	}
 	return out, nil
 }
 
 func (a *App) fetchStatus(w http.ResponseWriter, r *http.Request) {
-	status, err := a.fetchOverview(r.Context(), current(r).User.ID)
+	status, err := a.fetchOverview(r.Context(), current(r).User.ID, preferredTimezone(r))
 	if err != nil {
 		http.Error(w, "Could not check fetch status", http.StatusServiceUnavailable)
 		return

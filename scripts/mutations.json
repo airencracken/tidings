@@ -574,5 +574,21 @@
     "after": "if false {",
     "package": "./internal/reader",
     "run": "^TestOwnerMetricsTotalsPermissionsAndFailure$"
+  },
+  {
+    "name": "reader timezone reaches native rendering",
+    "file": "internal/reader/display_timezone.go",
+    "before": "return displaytime.New(current(r).User.Timezone).Name()",
+    "after": "return \"UTC\"",
+    "package": "./internal/reader",
+    "run": "^TestDisplayTimezoneAccountRoutesAndRendering$"
+  },
+  {
+    "name": "inactive accounts cannot save display timezones",
+    "file": "internal/reader/timezone.go",
+    "before": "AND suspended=0",
+    "after": "AND suspended IN (0,1)",
+    "package": "./internal/reader",
+    "run": "^TestDisplayTimezoneAccountRoutesAndRendering$"
   }
 ]

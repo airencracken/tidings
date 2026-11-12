@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/airencracken/comfylib/admin"
 	"github.com/airencracken/comfylib/analytics"
+	"github.com/airencracken/comfylib/displaytime"
 	"github.com/airencracken/comfylib/suite"
 	"html/template"
 	"io"
@@ -45,7 +46,7 @@ type App struct {
 	images              *imageCache
 	articleSlots        chan struct{}
 	config              Config
-	templates           *template.Template
+	templates           *displaytime.Templates
 	mux                 *http.ServeMux
 	limit               limiter
 	refreshMu           sync.Mutex
@@ -71,6 +72,9 @@ type requestContext struct {
 }
 type contextKey struct{}
 type page struct {
+	TimezoneControl                                    displaytime.Preference
+	TimezoneInput                                      *string
+	TimezoneError, TimezoneNotice                      string
 	Overview                                           admin.View
 	Title, Kind, Error, Notice, CSRF, ReturnTo, Invite string
 	User                                               User
@@ -106,15 +110,14 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		return nil, suiteErr
 	}
 	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), config: c, ctx: ctx, mux: http.NewServeMux()}
-	funcs := template.FuncMap{"adminSummary": admin.Render,
+	funcs := template.FuncMap{"timezonePreference": displaytime.RenderPreference, "adminSummary": admin.Render,
 		"article":   renderArticle,
 		"cleanLink": CleanArticleURL,
-		"date":      func(n int64) string { return time.Unix(n, 0).UTC().Format("Jan 2, 2006") },
 		"checked": func(n int64) string {
 			if n == 0 {
 				return "Not fetched yet"
 			}
-			return time.Unix(n, 0).UTC().Format("Jan 2, 15:04 UTC")
+			return displaytime.New("UTC").Stamp(n)
 		},
 		"excerpt": func(s string) string {
 			r := []rune(s)
@@ -142,10 +145,28 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		},
 	}
 	var err error
-	a.templates, err = template.New("pages").Funcs(suiteFuncs).Funcs(funcs).ParseFS(assets, "templates/*.html")
+	for k, v := range displaytime.New("UTC").Funcs() {
+		funcs[k] = v
+	}
+	var parsed *template.Template
+	parsed, err = template.New("pages").Funcs(suiteFuncs).Funcs(funcs).ParseFS(assets, "templates/*.html")
 	if err != nil {
 		return nil, err
 	}
+	a.templates, err = displaytime.NewTemplates(parsed, func(f displaytime.Formatter) template.FuncMap {
+		m := f.Funcs()
+		m["checked"] = func(n int64) string {
+			if n == 0 {
+				return "Not fetched yet"
+			}
+			return f.Stamp(n)
+		}
+		return m
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	data, err := assets.ReadFile("catalog.json")
 	if err != nil {
 		return nil, err
@@ -209,6 +230,11 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err == nil {
+			rc.User.Timezone, err = a.Store.Timezone(r.Context(), rc.User.ID)
+			if err != nil {
+				a.fail(w, r, err)
+				return
+			}
 			rc.Session = c.Value
 		}
 	}
@@ -294,6 +320,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /subscriptions.opml", a.exportOPML)
 	a.mux.HandleFunc("GET /api/v1/export", a.export)
 	a.mux.HandleFunc("GET /account", a.account)
+	a.mux.HandleFunc("POST /account/timezone", a.saveTimezone)
 	a.mux.HandleFunc("GET /admin/metrics", a.metrics)
 	a.mux.HandleFunc("GET /admin", a.admin)
 	a.mux.HandleFunc("GET /account/invitations", a.invitations)
@@ -314,7 +341,7 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 	if current(r).User.ID > 0 && p.Kind != "metrics" {
 		p.ImagesEnabled, _ = a.Store.ImagesEnabled(r.Context())
 		var err error
-		p.Fetch, err = a.fetchOverview(r.Context(), current(r).User.ID)
+		p.Fetch, err = a.fetchOverview(r.Context(), current(r).User.ID, preferredTimezone(r))
 		if err != nil {
 			p.Fetch = fetchOverview{State: "unavailable", Message: "Fetch status is unavailable."}
 		}
@@ -327,13 +354,15 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 	}
 	rc := current(r)
 	p.User = rc.User
+	p.Overview.Timezone = preferredTimezone(r)
+	p.TimezoneControl = timezoneControl(r, p.TimezoneInput, p.TimezoneError, p.TimezoneNotice)
 	p.CSRF = rc.CSRF
-	p.Date = time.Now().Format("Monday, January 2")
+	p.Date = displaytime.New(preferredTimezone(r)).Format(time.Now(), "Monday, January 2")
 	if p.ReturnTo == "" {
 		p.ReturnTo = r.URL.RequestURI()
 	}
 	var b bytes.Buffer
-	if err := a.templates.ExecuteTemplate(&b, "layout", p); err != nil {
+	if err := a.templates.ExecuteTemplate(&b, preferredTimezone(r), "layout", p); err != nil {
 		slog.Error("render page", "error", err)
 		http.Error(w, "Could not display this page", 500)
 		return

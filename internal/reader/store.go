@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/airencracken/comfylib/analytics"
+	"github.com/airencracken/comfylib/displaytime"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -42,6 +43,7 @@ type Store struct {
 func (s *Store) Close() error { return errors.Join(s.DB.Close(), s.lock.Close()) }
 
 type User struct {
+	Timezone          string `json:"-"`
 	ID                int64
 	Username          string
 	Owner, GroupOptin bool
@@ -150,6 +152,9 @@ func OpenStore(dir string) (store *Store, failure error) {
 	if err != nil {
 		db.Close()
 		return nil, err
+	}
+	if err := displaytime.Initialize(context.Background(), db); err != nil {
+		return nil, errors.Join(err, db.Close())
 	}
 	if err := analytics.Initialize(context.Background(), db, time.Now()); err != nil {
 		db.Close()
