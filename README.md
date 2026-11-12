@@ -274,13 +274,14 @@ existing mascot makes the small icon readable. Its
 180-pixel Apple touch icon are embedded and available before sign-in. See
 [favicon artwork](docs/favicon.md) for regenerating the raster sizes.
 
-Comfylib v0.2.0 supplies opaque session/invitation tokens, session-bound CSRF
+Comfylib v0.3.0 supplies opaque session/invitation tokens, session-bound CSRF
 tokens, confirmed terminal password prompting (with echo disabled before the
 first Linux prompt), trusted proxy resolution, backup scheduling and archives,
 service configuration resolution, administrative privilege dropping, reverse
 proxy configuration generation, account-form styles, and shared browser layout
-assertions. These features use the existing release; no comfylib update is
-required.
+assertions. Suite helpers, shared interface assets, and maintenance checks use
+the same pinned module. Optional community sign-in uses the separately versioned
+Comfylib OIDC v0.1.0 adapter.
 Tidings owns the feed parser, fetching policy, SQLite schema, account policy,
 and templates.
 
