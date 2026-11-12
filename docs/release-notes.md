@@ -1,6 +1,11 @@
 # Tidings releases
 
-## 0.5.3
+## 0.5.4
+
+- Make administration visible in the main navigation for owners. Add a dedicated
+  Admin settings page for household sources, members and backup status.
+- Resolve shared tooling on fresh container CI runners and verify it with the
+  module proxy disabled before running the release gates.
 
 - Import the suite helpers directly from published Comfylib 0.3.0 and use its
   embedded styles and browser controls.

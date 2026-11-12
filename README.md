@@ -14,7 +14,7 @@ own subscriptions, tags, feed groups, saved stories, and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.5.3](https://github.com/airencracken/tidings/releases/tag/v0.5.3)**.
+Current release: **[0.5.4](https://github.com/airencracken/tidings/releases/tag/v0.5.4)**.
 
 Use a current Go security patch when building: Go 1.26.11 or later on the
 1.26 series, or Go 1.27.4 or later on the 1.27 series.
@@ -129,8 +129,7 @@ topic is an additional simple filter and sets the initial tag when none is given
 
 ## Suggested sources
 
-The owner chooses which categories are available under **Your account → Suggested
-sources**. Suggestions begin disabled on fresh installs and upgrades. Enable news,
+The owner chooses which categories are available under **Admin → Suggested sources**. Suggestions begin disabled on fresh installs and upgrades. Enable news,
 science, culture, food, sports, nature, AI, tech, or infosec to suit your household.
 Enabling a category never subscribes anyone; disabling it leaves existing
 subscriptions and reading state intact. Members can always enter their own feed
@@ -166,12 +165,18 @@ previous story, Enter opens it, `m` toggles read state, `s` toggles set aside,
 `/` focuses search, and `?` opens a shortcut guide. Shortcuts leave typing fields,
 interactive controls, modifier keys, and composition alone.
 
-Feed images remain optional under **Your account → Feed images**. When enabled,
+Feed images remain optional under **Admin → Feed images**. When enabled,
 inline article images and previews load through Tidings' private local cache.
+
+## Owner administration
+
+Owners have an **Admin** link in the main navigation. It opens household source
+settings, member management, invitation links and backup status. Personal account
+preferences remain under **Account**. Members cannot open the admin page.
 
 ## Owner feed controls
 
-Under **Your account → Feed fetching**, choose **Fetch all feeds now** to fetch
+Under **Admin → Feed fetching**, choose **Fetch all feeds now** to fetch
 all active personal and household sources immediately. This bypasses the normal
 five-minute cooldown, runs in the background, and coalesces repeated requests.
 Normal refresh and scheduled polling retain their cooldown. No reading state or
@@ -201,8 +206,7 @@ restored for sources included in your personal subscriptions.
 
 A personal export excludes credentials and is not a full instance backup.
 Verified full snapshots run daily by default, starting one minute after the
-server starts. The last success and any failure appear on the owner's account
-page. SQLite's online backup API holds a consistent read snapshot, enforces the
+server starts. The last success and any failure appear on the **Admin** page. SQLite's online backup API holds a consistent read snapshot, enforces the
 uncompressed byte cap before copying, and checks database integrity and foreign
 keys before publication. Comfylib compresses, checksums, publishes, and retains
 these archives in the private `backups` directory (seven copies, up to 10 GiB).

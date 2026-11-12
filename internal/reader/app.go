@@ -288,6 +288,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /subscriptions.opml", a.exportOPML)
 	a.mux.HandleFunc("GET /api/v1/export", a.export)
 	a.mux.HandleFunc("GET /account", a.account)
+	a.mux.HandleFunc("GET /admin", a.admin)
 	a.mux.HandleFunc("GET /account/invitations", a.invitations)
 	a.mux.HandleFunc("POST /account/restore", a.restorePersonal)
 	a.mux.HandleFunc("POST /account/household", a.groupOptin)
@@ -717,7 +718,19 @@ func (a *App) export(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) account(w http.ResponseWriter, r *http.Request) {
-	p := page{Title: "Your place here", Kind: "account", Notice: notice(r)}
+	a.accountPage(w, r, "account", "Your place here")
+}
+
+func (a *App) admin(w http.ResponseWriter, r *http.Request) {
+	if !current(r).User.Owner {
+		http.Error(w, "Only owners can administer this household", http.StatusForbidden)
+		return
+	}
+	a.accountPage(w, r, "admin", "Admin settings")
+}
+
+func (a *App) accountPage(w http.ResponseWriter, r *http.Request, kind, title string) {
+	p := page{Title: title, Kind: kind, Notice: notice(r)}
 	if current(r).User.Owner {
 		var err error
 		p.Members, err = a.Store.Members(r.Context())

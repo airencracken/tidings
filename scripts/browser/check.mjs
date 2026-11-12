@@ -84,6 +84,15 @@ db.commit()
   await writeFile(path.join(cacheDirectory,createHash('sha256').update('https://example.org/preview.png').digest('hex')+'.jpg'),Buffer.from(preview,'base64'),{mode:0o600});
   await signIn(page,origin);
   await checkSuiteControls(page, { apps: true, density: true });
+  const administration = page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link', { name: 'Admin', exact: true });
+  assert.equal(await administration.isVisible(), true);
+  await act(administration, 'click');
+  await page.getByRole('heading', { name: 'Admin settings', exact: true }).waitFor();
+  for (const name of ['Suggested sources', 'Feed images', 'Feed fetching', 'Household members', 'Instance backups']) {
+    assert.equal(await page.getByRole('heading', { name, exact: true }).isVisible(), true);
+  }
+  await page.goto(origin + '/');
+
   assert.equal(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'),'/static/favicon.svg?v=town-crier');
   assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'/static/apple-touch-icon.png?v=town-crier');
   await page.evaluate(async()=>{const icon=new Image();icon.src='/static/favicon.svg?v=town-crier';await icon.decode();const canvas=document.createElement('canvas');canvas.width=32;canvas.height=32;const context=canvas.getContext('2d');context.drawImage(icon,0,0,32,32);const pixels=context.getImageData(0,0,32,32).data;if(!pixels.some((value,index)=>index%4===3&&value>200))throw new Error('Mascot favicon did not render under the content security policy');});
@@ -219,6 +228,9 @@ db.commit()
   assert.equal(await member.locator('.story-row').count(),1);
   await member.goto(origin+'/account');
   assert.equal(await member.getByRole('heading',{name:'Instance backups',exact:true}).count(),0);
+  assert.equal(await member.getByRole('link', { name: 'Admin', exact: true }).count(), 0);
+  assert.equal((await member.context().request.get(origin + '/admin')).status(), 403);
+
   assert.equal(await member.getByRole('button',{name:'Fetch all feeds now',exact:true}).count(),0);
   assert.equal(await member.getByRole('button',{name:'Save suggested categories',exact:true}).count(),0);
   await page.goto(origin+'/account');
@@ -295,7 +307,7 @@ db.commit()
     await act(page.getByLabel('Theme',{exact:true}), 'selectOption', theme);
     for(const width of [375,768,1024,1440]) {
       await page.setViewportSize({width,height:1000});
-      for(const route of ['/','/sources','/groups','/account','/account/invitations','/story/1']) {
+      for(const route of ['/','/sources','/groups','/account','/admin','/account/invitations','/story/1']) {
         await page.goto(origin+route);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth<=innerWidth+1),`${route} overflows at ${width} in ${theme}`);
         if(screenshotDir && route==='/account/invitations' && [375,1440].includes(width))await page.screenshot({path:path.join(screenshotDir,`invitations-${theme}-${width}.png`),fullPage:true});
@@ -311,6 +323,15 @@ db.commit()
   await plain.goto(origin+'/login');for(const width of accountWidths){await plain.setViewportSize({width,height:1000});assert.ok(await plain.evaluate(accountLayout),`shared account layout without JavaScript at ${width}`);}
   await signIn(plain,origin);
   assert.equal(await plain.getByRole('heading',{name:'Your reading table',exact:true}).count(),1);
+  for (const width of [320, 1280]) {
+    await plain.setViewportSize({ width, height: 1000 });
+    await act(plain.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link', { name: 'Admin', exact: true }), 'click');
+    assert.equal(await plain.getByRole('heading', { name: 'Admin settings', exact: true }).isVisible(), true);
+    assert.equal(await plain.getByRole('button', { name: 'Save suggested categories', exact: true }).isVisible(), true);
+    assert.ok(await plain.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    await plain.goto(origin + '/');
+  }
+
   await plain.goto(origin+'/groups');
   await act(plain.getByLabel('Name',{exact:true}), 'fill', 'Without JavaScript');
   await act(plain.getByRole('button',{name:'Create feed group',exact:true}), 'click');
@@ -326,7 +347,7 @@ db.commit()
   await plainContext.close();
   assert.deepEqual(errors,[]);
   assert.ok([...observed].every(address => address.startsWith(origin+'/')),'browser contacted a third party');
-  console.log('Browser checks passed: optional keyboard shortcuts, rich articles, tracking cleanup, cached inline images, live fetch status, cached feed images, accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, both themes, and five routes at four widths.');
+  console.log('Browser checks passed: optional keyboard shortcuts, rich articles, tracking cleanup, cached inline images, live fetch status, cached feed images, accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, owner-only administration, both themes, and seven routes at four widths.');
 } finally {
   if(browser) await browser.close();
   if(server && server.exitCode===null){server.kill('SIGTERM');await Promise.race([once(server,'exit'),new Promise(resolve=>setTimeout(resolve,5000))]);if(server.exitCode===null)server.kill('SIGKILL');}

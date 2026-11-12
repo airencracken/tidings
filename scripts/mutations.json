@@ -550,5 +550,21 @@
     "after": "<img class=\"brand-mark\" src=\"/static/favicon-32.png\"",
     "package": "./internal/reader",
     "run": "^TestHeaderUsesTownCrier$"
+  },
+  {
+    "name": "owner administration remains discoverable",
+    "file": "internal/reader/templates/pages.html",
+    "before": ">Admin</a>",
+    "after": ">Hidden administration</a>",
+    "package": "./internal/reader",
+    "run": "^TestAdminNavigationAndOwnerOnlySettings$"
+  },
+  {
+    "name": "admin page refuses ordinary members",
+    "file": "internal/reader/app.go",
+    "before": "if !current(r).User.Owner {\n\t\thttp.Error(w, \"Only owners can administer this household\"",
+    "after": "if false && !current(r).User.Owner {\n\t\thttp.Error(w, \"Only owners can administer this household\"",
+    "package": "./internal/reader",
+    "run": "^TestAdminNavigationAndOwnerOnlySettings$"
   }
 ]
