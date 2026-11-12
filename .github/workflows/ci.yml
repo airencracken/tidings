@@ -22,6 +22,3 @@ jobs:
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./... || exit 1
       - run: make check
       - run: make fuzz-smoke
-      - run: npm --prefix scripts/browser ci
-      - run: npm --prefix scripts/browser exec -- playwright install --with-deps chromium
-      - run: make test-browser

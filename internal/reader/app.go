@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/airencracken/comfylib/admin"
 	"github.com/airencracken/comfylib/suite"
 	"html/template"
 	"io"
@@ -29,6 +30,7 @@ import (
 var assets embed.FS
 
 type Config struct {
+	Version        string
 	TrustedProxies clientip.Resolver
 	Backups        *autobackup.Runner
 	SecureCookies  bool
@@ -67,6 +69,7 @@ type requestContext struct {
 }
 type contextKey struct{}
 type page struct {
+	Overview                                           admin.View
 	Title, Kind, Error, Notice, CSRF, ReturnTo, Invite string
 	User                                               User
 	Feeds, GroupFeeds                                  []Feed
@@ -101,7 +104,7 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		return nil, suiteErr
 	}
 	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), config: c, ctx: ctx, mux: http.NewServeMux()}
-	funcs := template.FuncMap{
+	funcs := template.FuncMap{"adminSummary": admin.Render,
 		"article":   renderArticle,
 		"cleanLink": CleanArticleURL,
 		"date":      func(n int64) string { return time.Unix(n, 0).UTC().Format("Jan 2, 2006") },
@@ -288,6 +291,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /subscriptions.opml", a.exportOPML)
 	a.mux.HandleFunc("GET /api/v1/export", a.export)
 	a.mux.HandleFunc("GET /account", a.account)
+	a.mux.HandleFunc("GET /admin/metrics", a.metrics)
 	a.mux.HandleFunc("GET /admin", a.admin)
 	a.mux.HandleFunc("GET /account/invitations", a.invitations)
 	a.mux.HandleFunc("POST /account/restore", a.restorePersonal)
@@ -314,6 +318,11 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 	}
 	if current(r).User.Owner {
 		p.Backup = a.config.Backups.Status()
+		if p.Kind == "admin" || p.Kind == "metrics" {
+			metrics := p.Overview.Metrics
+			p.Overview = admin.WithSuite(admin.Runtime(a.config.Version, p.Backup), "TIDINGS_")
+			p.Overview.Metrics = metrics
+		}
 	}
 	rc := current(r)
 	p.User = rc.User

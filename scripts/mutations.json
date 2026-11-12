@@ -566,5 +566,13 @@
     "after": "if false && !current(r).User.Owner {\n\t\thttp.Error(w, \"Only owners can administer this household\"",
     "package": "./internal/reader",
     "run": "^TestAdminNavigationAndOwnerOnlySettings$"
+  },
+  {
+    "name": "instance metrics remain owner-only",
+    "file": "internal/reader/metrics_page.go",
+    "before": "if !current(r).User.Owner {",
+    "after": "if false {",
+    "package": "./internal/reader",
+    "run": "^TestOwnerMetricsTotalsPermissionsAndFailure$"
   }
 ]

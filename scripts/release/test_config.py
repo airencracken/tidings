@@ -61,7 +61,7 @@ class ReleaseTests(unittest.TestCase):
         for required in ('goarch: [amd64, arm64]', 'CGO_ENABLED=0', 'enabled: true', 'formats: [deb]', 'algorithm: sha256', 'THIRD_PARTY_NOTICES.txt', 'postinstall:', 'type: config'):
             self.assertIn(required,config)
         workflow=(ROOT/'.github/workflows/release.yml').read_text()
-        self.assertIn('needs: [build, packages, containers]',workflow)
+        self.assertIn('needs: [build, packages, containers, browser]',workflow)
         self.assertIn('git merge-base --is-ancestor HEAD origin/master',workflow)
         self.assertIn('--verify-tag',workflow)
         self.assertIn('refusing to replace it',workflow)

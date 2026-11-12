@@ -19,6 +19,14 @@ Current release: **[0.5.4](https://github.com/airencracken/tidings/releases/tag/
 Use a current Go security patch when building: Go 1.26.11 or later on the
 1.26 series, or Go 1.27.4 or later on the 1.27 series.
 
+## Tidings 0.6.0
+
+Native owner/admin metrics now show aggregate membership, content, storage and recent activity, with owner-only operational summaries for backups and configured suite connections. The pages work without JavaScript and follow the application's existing permissions.
+
+Rate limiting uses the bounded shared implementations while retaining the app's own budgets. Release preparation, artifact verification, browser fixtures and immutable CI workflows use Comfylib 0.4.1 directly. A release preflight verifies version metadata, cold module caches and the exact shared workflow revision before publication.
+
+No application database migration is added. Existing service configuration and account permissions remain supported.
+
 ## Inspiration
 
 [Miniflux](https://miniflux.app/) is an inspiration for Tidings' reading features:
@@ -274,7 +282,7 @@ existing mascot makes the small icon readable. Its
 180-pixel Apple touch icon are embedded and available before sign-in. See
 [favicon artwork](docs/favicon.md) for regenerating the raster sizes.
 
-Comfylib v0.3.0 supplies opaque session/invitation tokens, session-bound CSRF
+Comfylib v0.4.1 supplies opaque session/invitation tokens, session-bound CSRF
 tokens, confirmed terminal password prompting (with echo disabled before the
 first Linux prompt), trusted proxy resolution, backup scheduling and archives,
 service configuration resolution, administrative privilege dropping, reverse

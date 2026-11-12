@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/airencracken/comfylib/ratelimit"
 	"regexp"
 	"sync"
 	"time"
@@ -145,35 +146,15 @@ func (s *Store) Join(ctx context.Context, code, username, password string) error
 	return tx.Commit()
 }
 
-type attempt struct {
-	Count int
-	Until time.Time
-}
 type limiter struct {
-	mu       sync.Mutex
-	attempts map[string]attempt
+	once   sync.Once
+	shared *ratelimit.Window
 }
 
 func (l *limiter) allow(key string) bool {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if l.attempts == nil {
-		l.attempts = map[string]attempt{}
-	}
-	now := time.Now()
-	for k, a := range l.attempts {
-		if now.After(a.Until) {
-			delete(l.attempts, k)
-		}
-	}
-	a := l.attempts[key]
-	if a.Count == 0 {
-		a.Until = now.Add(15 * time.Minute)
-	}
-	if a.Count >= 20 || len(l.attempts) >= 4096 {
-		return false
-	}
-	a.Count++
-	l.attempts[key] = a
-	return true
+	l.once.Do(func() {
+		l.shared = ratelimit.NewWindow(ratelimit.WindowConfig{Attempts: 20, Interval: 15 * time.Minute, Capacity: 4096, RejectNew: true})
+	})
+	ok, _ := l.shared.Allow(key)
+	return ok
 }

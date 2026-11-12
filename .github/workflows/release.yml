@@ -77,6 +77,8 @@ jobs:
             refs/tags/v*) goreleaser release --clean --skip=publish || exit 1 ;;
             *) goreleaser release --snapshot --clean --skip=publish || exit 1 ;;
           esac
+      - name: Preflight immutable release source and shared workflows
+        run: make release-preflight || exit 1
       - name: Verify release archives and source documentation
         run: python3 scripts/release/check_artifacts.py
       - name: Scan release executable vulnerabilities
@@ -109,6 +111,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ inputs.release_tag || github.ref }}
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.26.11"
+      - name: Resolve shared package contracts
+        run: |
+          go mod download github.com/airencracken/comfylib || exit 1
+          go mod verify || exit 1
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: release-packages
@@ -129,9 +138,14 @@ jobs:
       release_tag: ${{ inputs.release_tag || github.ref_name }}
       publish: ${{ (startsWith(github.ref, 'refs/tags/v') || startsWith(inputs.release_tag, 'v')) && github.repository == 'airencracken/tidings' }}
 
+  browser:
+    uses: ./.github/workflows/browser.yml
+    with:
+      source_ref: ${{ inputs.release_tag || github.ref }}
+
   publish:
     if: (startsWith(github.ref, 'refs/tags/v') || startsWith(inputs.release_tag, 'v')) && github.repository == 'airencracken/tidings'
-    needs: [build, packages, containers]
+    needs: [build, packages, containers, browser]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

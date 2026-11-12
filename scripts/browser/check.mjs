@@ -1,3 +1,4 @@
+import { findBrowser, temporaryDirectory, reservePort, spawnServer, stopProcess } from '../browser-runtime.mjs';
 import { act, checkSuiteControls } from '../browser-controls.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -15,14 +16,11 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const moduleDir = spawnSync('go',['list','-m','-f','{{.Dir}}','github.com/airencracken/comfylib'],{cwd:root,encoding:'utf8'});
 assert.equal(moduleDir.status,0,moduleDir.stderr);
 const { accountLayout,accountWidths,invitationLayout,invitationWidths,assertInvitationLayout } = await import(pathToFileURL(path.join(moduleDir.stdout.trim(),'ui/uitest/layout.mjs')).href);
-const temporary = await mkdtemp(path.join(tmpdir(), 'tidings-browser-'));
+const temporary = await temporaryDirectory('tidings');
 const password = 'quiet mornings and books';
 const passwordFile = path.join(temporary, 'password');
 await writeFile(passwordFile, password + '\n', { mode: 0o600 });
-const reservation=createServer();
-await new Promise(resolve=>reservation.listen(0,'127.0.0.1',resolve));
-const port=reservation.address().port;
-await new Promise(resolve=>reservation.close(resolve));
+const port = await reservePort();
 const localOrigin='http://127.0.0.1:'+port;
 const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:'+port, TIDINGS_BASE_URL: localOrigin, TIDINGS_SECURE_COOKIES: '', TIDINGS_APPS: '[{"id":"witmoot","url":"https://suite.example.org"}]' };
 const binary = path.join(root, 'bin/tidings');
@@ -55,16 +53,10 @@ db.execute("UPDATE entries SET image_url='https://example.org/preview.png' WHERE
 db.commit()
 `, path.join(env.TIDINGS_DATA_DIR,'reader.db')], { encoding:'utf8' });
   assert.equal(seeded.status, 0, seeded.stderr);
-  server = spawn(binary, ['serve'], { env, stdio:['ignore','pipe','pipe'] });
-  let output = '';
-  const origin = await new Promise((resolve,reject) => {
-    const timeout = setTimeout(() => reject(new Error('Server did not become ready: '+output)),15000);
-    server.once('exit', code => {clearTimeout(timeout);reject(new Error('Server exited '+code+': '+output));});
-    const capture = chunk => { output += chunk; const match=output.match(/url=(http:\/\/127\.0\.0\.1:\d+)/);if(match){clearTimeout(timeout);resolve(match[1]);} };
-    server.stdout.on('data',capture);server.stderr.on('data',capture);
-  });
+  const origin = localOrigin;
+  server = await spawnServer(binary, ['serve'], { env, health: origin + '/healthz' });
   assert.equal((await fetch(origin + '/healthz')).status,200);
-  browser = await chromium.launch({ headless:true, executablePath: process.env.CHROMIUM || '/usr/bin/chromium' });
+  browser = await chromium.launch({ headless:true, executablePath: await findBrowser({ required: true }) });
   const context = await browser.newContext({ viewport:{width:1440,height:1000} });
   context.on('request',request => observed.add(request.url()));
   const page=await context.newPage();page.on('pageerror',error => errors.push(String(error)));
@@ -352,6 +344,6 @@ db.commit()
   console.log('Browser checks passed: optional keyboard shortcuts, rich articles, tracking cleanup, cached inline images, live fetch status, cached feed images, accounts, invitation, isolated state, household opt-in, feed groups, exports, pagination, JavaScript-free forms, owner-only administration, both themes, and seven routes at four widths.');
 } finally {
   if(browser) await browser.close();
-  if(server && server.exitCode===null){server.kill('SIGTERM');await Promise.race([once(server,'exit'),new Promise(resolve=>setTimeout(resolve,5000))]);if(server.exitCode===null)server.kill('SIGKILL');}
+  await stopProcess(server);
   await rm(temporary,{recursive:true,force:true});
 }
