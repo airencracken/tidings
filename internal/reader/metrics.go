@@ -4,6 +4,7 @@ package reader
 import (
 	"context"
 	"github.com/airencracken/comfylib/admin"
+	"github.com/airencracken/comfylib/analytics"
 	"time"
 )
 
@@ -16,7 +17,7 @@ func (s *Store) Metrics(ctx context.Context, now time.Time) ([]admin.Metric, err
 		{Label: "Subscriptions", SQL: "SELECT count(*) FROM subscriptions", Detail: "", Bytes: false},
 		{Label: "Cached stories", SQL: "SELECT count(*) FROM entries", Detail: "", Bytes: false},
 		{Label: "Sources with errors", SQL: "SELECT count(*) FROM feeds WHERE error<>''", Detail: "", Bytes: false},
-		{Label: "Recent stories", SQL: "SELECT count(*) FROM entries WHERE published>=? AND published<=?", Detail: "Published in the last 7 days; this does not measure reading activity.", Bytes: false, Args: []any{now.Add(-7 * 24 * time.Hour).Unix(), now.Unix()}},
+		{Label: "Recent stories", SQL: "SELECT count(*) FROM entries WHERE published>=? AND published<=?", Detail: "Published in the last 7 days; this does not measure reading activity.", Bytes: false, Args: []any{analytics.WindowStart(now).Unix(), now.Unix()}},
 		{Label: "Database size", SQL: "SELECT (SELECT page_count FROM pragma_page_count)*(SELECT page_size FROM pragma_page_size)", Bytes: true, Detail: "Main database allocation; temporary logs, cached media and backups are separate."},
 	})
 }

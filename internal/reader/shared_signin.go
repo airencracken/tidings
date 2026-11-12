@@ -2,12 +2,9 @@
 package reader
 
 import (
-	"fmt"
 	sharedoidc "github.com/airencracken/comfylib/oidc"
 	"github.com/airencracken/comfylib/suite"
-	"github.com/airencracken/comfylib/token"
 	"net/http"
-	"time"
 )
 
 func (a *App) registerSharedSignIn(mux *http.ServeMux) error {
@@ -21,20 +18,8 @@ func (a *App) registerSharedSignIn(mux *http.ServeMux) error {
 			}
 			return u.ID, binding
 		},
-		CSRF: func(r *http.Request) (string, string) { return "csrf", current(r).CSRF },
-		SignIn: func(w http.ResponseWriter, r *http.Request, id int64) (string, error) {
-			raw, digest := token.New()
-			result, err := a.Store.DB.ExecContext(r.Context(), "INSERT INTO sessions(token,user_id,expires) SELECT ?,id,? FROM users WHERE id=? AND suspended=0", digest, time.Now().Add(30*24*time.Hour).Unix(), id)
-			if err != nil {
-				return "", err
-			}
-			count, err := result.RowsAffected()
-			if err != nil || count != 1 {
-				return "", fmt.Errorf("account unavailable")
-			}
-			a.cookie(w, a.cookieName(), raw, 30*86400)
-			return "/", nil
-		},
+		CSRF:   func(r *http.Request) (string, string) { return "csrf", current(r).CSRF },
+		SignIn: a.sharedSignIn,
 	})
 	if err != nil {
 		return err
@@ -43,4 +28,13 @@ func (a *App) registerSharedSignIn(mux *http.ServeMux) error {
 		auth.Register(mux)
 	}
 	return nil
+}
+
+func (a *App) sharedSignIn(w http.ResponseWriter, r *http.Request, id int64) (string, error) {
+	raw, err := a.Store.LoginSession(r.Context(), id)
+	if err != nil {
+		return "", err
+	}
+	a.cookie(w, a.cookieName(), raw, 30*86400)
+	return "/", nil
 }

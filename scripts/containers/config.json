@@ -1,6 +1,6 @@
 {
   "app": "tidings",
-  "previous": "0.5.4",
+  "previous": "0.6.0",
   "port": 8085,
   "tmp_mb": 128,
   "owner_command": "create-owner",

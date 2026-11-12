@@ -19,5 +19,11 @@ func (a *App) metrics(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, err)
 		return
 	}
-	a.render(w, r, page{Kind: "metrics", Title: "Instance metrics", Overview: admin.View{Metrics: metrics}}, 200)
+	activity, err := a.Store.Analytics(r.Context(), time.Now())
+	if err != nil {
+		a.fail(w, r, err)
+		return
+	}
+
+	a.render(w, r, page{Kind: "metrics", Title: "Instance metrics", Overview: admin.View{Metrics: metrics, Activity: &activity, BackURL: "/admin"}}, 200)
 }

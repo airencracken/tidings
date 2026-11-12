@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/airencracken/comfylib/analytics"
 	"net/http"
 	"strings"
 	"time"
@@ -83,6 +84,9 @@ func (s *Store) ManageMember(ctx context.Context, actor, target int64, action, c
 		}
 	}
 	if action == "remove" {
+		if err := analytics.ForgetMember(ctx, tx, analytics.MemberID(target)); err != nil {
+			return err
+		}
 		_, err = tx.ExecContext(ctx, "DELETE FROM users WHERE id=?", target)
 	} else {
 		_, err = tx.ExecContext(ctx, "UPDATE users SET suspended=? WHERE id=?", action == "suspend", target)

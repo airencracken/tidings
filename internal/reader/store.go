@@ -7,10 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/airencracken/comfylib/analytics"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gofrs/flock"
 	_ "modernc.org/sqlite"
@@ -146,6 +148,10 @@ func OpenStore(dir string) (store *Store, failure error) {
 		err = tx.Commit()
 	}
 	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err := analytics.Initialize(context.Background(), db, time.Now()); err != nil {
 		db.Close()
 		return nil, err
 	}

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/airencracken/comfylib/admin"
+	"github.com/airencracken/comfylib/analytics"
 	"github.com/airencracken/comfylib/suite"
 	"html/template"
 	"io"
@@ -38,6 +39,7 @@ type Config struct {
 	Demo           bool
 }
 type App struct {
+	activityHandler     http.Handler
 	Store               *Store
 	Fetcher             *Fetcher
 	images              *imageCache
@@ -152,6 +154,7 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		return nil, err
 	}
 	a.routes()
+	a.activityHandler = analytics.Maintenance(a.Store.DB, a.mux)
 	if err = a.registerSharedSignIn(a.mux); err != nil {
 		return nil, err
 	}
@@ -249,7 +252,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	r = r.WithContext(context.WithValue(r.Context(), contextKey{}, rc))
-	http.NewCrossOriginProtection().Handler(a.mux).ServeHTTP(w, r)
+	http.NewCrossOriginProtection().Handler(a.activityHandler).ServeHTTP(w, r)
 }
 
 func (a *App) routes() {
@@ -267,7 +270,7 @@ func (a *App) routes() {
 	a.mux.Handle("GET /static/comfyware/", http.StripPrefix("/static/comfyware/", http.FileServerFS(ui.Assets())))
 	a.mux.Handle("GET /static/", http.FileServerFS(assets))
 	a.mux.HandleFunc("GET /{$}", a.home)
-	a.mux.HandleFunc("GET /story/{id}", a.story)
+	a.mux.HandleFunc("GET /story/{id}", a.trackStory(a.story))
 	a.mux.HandleFunc("POST /story/{id}/state", a.state)
 	a.mux.HandleFunc("POST /read-page", a.readPage)
 	a.mux.HandleFunc("POST /refresh", a.refresh)
@@ -308,7 +311,7 @@ func (a *App) routes() {
 func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int) {
 	p.Demo = a.config.Demo
 	p.Refresh = a.RefreshStatus(current(r).User.ID)
-	if current(r).User.ID > 0 {
+	if current(r).User.ID > 0 && p.Kind != "metrics" {
 		p.ImagesEnabled, _ = a.Store.ImagesEnabled(r.Context())
 		var err error
 		p.Fetch, err = a.fetchOverview(r.Context(), current(r).User.ID)
@@ -319,9 +322,7 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 	if current(r).User.Owner {
 		p.Backup = a.config.Backups.Status()
 		if p.Kind == "admin" || p.Kind == "metrics" {
-			metrics := p.Overview.Metrics
-			p.Overview = admin.WithSuite(admin.Runtime(a.config.Version, p.Backup), "TIDINGS_")
-			p.Overview.Metrics = metrics
+			p.Overview = admin.WithOperations(p.Overview, a.config.Version, p.Backup, "TIDINGS_")
 		}
 	}
 	rc := current(r)
