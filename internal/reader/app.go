@@ -92,6 +92,7 @@ type page struct {
 	Collection                                         FeedGroup
 	Refresh                                            RefreshStatus
 	Fetch                                              fetchOverview
+	ShowFetch                                          bool
 	ImagesEnabled                                      bool
 	Backup                                             autobackup.Status
 	InviteRef                                          string
@@ -262,23 +263,30 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, formLimit)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 			if err := r.ParseMultipartForm(formLimit); err != nil {
-				http.Error(w, "Invalid or oversized form", 400)
+				a.formError(w, r, rc, "This form could not be read", "The form was incomplete or too large. Go back and try again.", http.StatusBadRequest)
 				return
 			}
 			if r.MultipartForm != nil {
 				defer r.MultipartForm.RemoveAll()
 			}
 		} else if err := r.ParseForm(); err != nil {
-			http.Error(w, "Invalid or oversized form", 400)
+			a.formError(w, r, rc, "This form could not be read", "The form was incomplete or too large. Go back and try again.", http.StatusBadRequest)
 			return
 		}
 		if !token.Equal(r.PostFormValue("csrf"), rc.CSRF) {
-			http.Error(w, "This form has expired. Reload the page and try again.", 403)
+			a.formError(w, r, rc, "This form has expired", "Reload the page and try again.", http.StatusForbidden)
 			return
 		}
 	}
 	r = r.WithContext(context.WithValue(r.Context(), contextKey{}, rc))
 	http.NewCrossOriginProtection().Handler(a.activityHandler).ServeHTTP(w, r)
+}
+
+// formError shows a rejected form through the normal page layout. The request
+// context is attached first so the header matches the signed-in state.
+func (a *App) formError(w http.ResponseWriter, r *http.Request, rc requestContext, title, message string, status int) {
+	r = r.WithContext(context.WithValue(r.Context(), contextKey{}, rc))
+	a.render(w, r, page{Title: title, Kind: "error", Error: message, ReturnTo: "/"}, status)
 }
 
 func (a *App) routes() {
@@ -345,6 +353,7 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 		if err != nil {
 			p.Fetch = fetchOverview{State: "unavailable", Message: "Fetch status is unavailable."}
 		}
+		p.ShowFetch = showFetch(r, p.Kind, p.Fetch, p.Refresh)
 	}
 	if current(r).User.Owner {
 		p.Backup = a.config.Backups.Status()
@@ -371,6 +380,21 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 	w.WriteHeader(status)
 	_, _ = w.Write(b.Bytes())
 }
+
+// showFetch keeps fetch progress off reading pages. Sources always shows it;
+// the reading table shows it only while this reader's own fetch is pending or
+// running, or right after they asked for one. Scheduled background checks of
+// every source do not interrupt reading.
+func showFetch(r *http.Request, kind string, fetch fetchOverview, status RefreshStatus) bool {
+	switch kind {
+	case "sources":
+		return true
+	case "home":
+		return status.Requested || fetch.State == "waiting" || r.URL.Query().Get("notice") == "refresh"
+	}
+	return false
+}
+
 func (a *App) fail(w http.ResponseWriter, r *http.Request, err error) {
 	slog.Error("request failed", "path", r.URL.Path, "error", err)
 	a.render(w, r, page{Title: "Something went wrong", Kind: "error", Error: "Your change could not be completed. Try again."}, 500)
@@ -757,7 +781,7 @@ func (a *App) export(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) account(w http.ResponseWriter, r *http.Request) {
-	a.accountPage(w, r, "account", "Your place here")
+	a.accountPage(w, r, "account", "Your account")
 }
 
 // Owner actions return to the page that supplied the form. Only these two
@@ -859,7 +883,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.limit.allow(a.clientKey(r)) {
-		http.Error(w, "Too many attempts. Please wait 15 minutes.", 429)
+		a.render(w, r, page{Title: "Welcome back", Kind: "login", Error: tooManyAttempts}, http.StatusTooManyRequests)
 		return
 	}
 	raw, err := a.Store.Login(r.Context(), r.PostFormValue("username"), r.PostFormValue("password"))
@@ -876,17 +900,17 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 }
 func (a *App) join(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		a.render(w, r, page{Title: "A place at the table", Kind: "join", Invite: r.URL.Query().Get("code")}, 200)
-		return
-	}
-	if !a.limit.allow(a.clientKey(r)) {
-		http.Error(w, "Too many attempts. Please wait 15 minutes.", 429)
+		a.render(w, r, page{Title: "Join Tidings", Kind: "join", Invite: r.URL.Query().Get("code")}, 200)
 		return
 	}
 	code := r.PostFormValue("code")
+	if !a.limit.allow(a.clientKey(r)) {
+		a.render(w, r, page{Title: "Join Tidings", Kind: "join", Invite: code, Error: tooManyAttempts}, http.StatusTooManyRequests)
+		return
+	}
 	err := a.Store.Join(r.Context(), code, r.PostFormValue("username"), r.PostFormValue("password"))
 	if err != nil {
-		a.render(w, r, page{Title: "A place at the table", Kind: "join", Invite: code, Error: err.Error()}, 400)
+		a.render(w, r, page{Title: "Join Tidings", Kind: "join", Invite: code, Error: err.Error()}, 400)
 		return
 	}
 	http.Redirect(w, r, "/login?notice=joined", 303)
@@ -921,13 +945,17 @@ func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {
 type RefreshStatus struct {
 	Running   bool
 	Queued    bool
+	Requested bool // this reader's own fetch is pending or running
 	NextCheck time.Time
 }
+
+const tooManyAttempts = "Too many attempts. Wait 15 minutes, then try again."
 
 func (a *App) RefreshStatus(uid int64) RefreshStatus {
 	a.refreshMu.Lock()
 	defer a.refreshMu.Unlock()
-	return RefreshStatus{Running: a.refreshRunning && (a.refreshCurrent == uid || a.refreshCurrentAll), Queued: a.refreshAll || a.refreshPending[uid], NextCheck: a.refreshNextCheck}
+	own := uid > 0 && (a.refreshPending[uid] || (a.refreshRunning && a.refreshCurrent == uid && !a.refreshCurrentAll))
+	return RefreshStatus{Running: a.refreshRunning && (a.refreshCurrent == uid || a.refreshCurrentAll), Queued: a.refreshAll || a.refreshPending[uid], Requested: own, NextCheck: a.refreshNextCheck}
 }
 
 // One worker drains a bounded set of account requests, coalescing duplicates.

@@ -24,11 +24,11 @@
       if (typeof status.message !== 'string' || typeof status.state !== 'string') throw new Error('invalid status');
       panel.dataset.state = status.state;
       message.textContent = status.message;
-      detail.textContent = status.detail || '';
-      next.textContent = status.next_check || '';
+      if (detail) detail.textContent = status.detail || '';
+      if (next) next.textContent = status.next_check || '';
       update.hidden = active() || !(status.checked > initialCheck);
     } catch {
-      detail.textContent = 'Could not update fetch status. Trying again shortly.';
+      if (detail) detail.textContent = 'Could not update fetch status. Trying again shortly.';
     } finally {
       pending = false;
       if (!stopped) timer = setTimeout(poll, active() ? 2000 : 30000);

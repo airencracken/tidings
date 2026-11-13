@@ -23,7 +23,7 @@ type opmlDoc struct {
 
 func ParseOPML(data []byte) ([]Feed, error) {
 	if len(data) > 1<<20 {
-		return nil, errors.New("OPML must be at most 1 MiB")
+		return nil, errors.New("OPML file must be 1 MB or smaller")
 	}
 	// Check depth before recursive decoding, including unrecognized elements.
 	d := xml.NewDecoder(bytes.NewReader(data))

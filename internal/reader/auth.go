@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/airencracken/comfylib/token"
 	"golang.org/x/crypto/bcrypt"
@@ -24,8 +25,11 @@ func ValidateCredentials(username, password string) error {
 	if !usernameRE.MatchString(username) {
 		return errors.New("username must be 2–40 letters, numbers, underscores or hyphens")
 	}
-	if len(password) < 12 || len(password) > 72 {
-		return errors.New("password must be 12–72 bytes")
+	if utf8.RuneCountInString(password) < 12 {
+		return errors.New("password must be 12 or more characters")
+	}
+	if len(password) > 72 {
+		return errors.New("password is too long; use a shorter phrase")
 	}
 	return nil
 }

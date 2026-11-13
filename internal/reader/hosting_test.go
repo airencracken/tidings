@@ -77,11 +77,14 @@ func TestOwnerForceFetchContract(t *testing.T) {
 	if err := h.store.DB.QueryRow("SELECT count(*) FROM subscriptions").Scan(&subscriptions); err != nil || subscriptions != 2 {
 		t.Fatal(subscriptions, err)
 	}
-	if w := h.request(1, "GET", "/account", nil); !strings.Contains(w.Body.String(), "Fetch all feeds now") {
+	if w := h.request(1, "GET", "/admin", nil); !strings.Contains(w.Body.String(), "Fetch all feeds now") {
 		t.Fatal("owner action missing")
 	}
-	if w := h.request(2, "GET", "/account", nil); strings.Contains(w.Body.String(), "Fetch all feeds now") {
-		t.Fatal("owner action visible to member")
+	// Your account is personal for owners too; household actions live on Admin.
+	for _, uid := range []int64{1, 2} {
+		if w := h.request(uid, "GET", "/account", nil); strings.Contains(w.Body.String(), "Fetch all feeds now") {
+			t.Fatal("household action on the personal account page", uid)
+		}
 	}
 }
 

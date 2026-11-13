@@ -28,7 +28,7 @@ func (a *App) saveTimezone(w http.ResponseWriter, r *http.Request) {
 		err = a.Store.SetTimezone(r.Context(), current(r).User.ID, name)
 	}
 	if errors.Is(err, displaytime.ErrTimezone) {
-		a.render(w, r, page{Kind: "account", Title: "Your place here", TimezoneInput: &name, TimezoneError: err.Error()}, 422)
+		a.render(w, r, page{Kind: "account", Title: "Your account", TimezoneInput: &name, TimezoneError: err.Error()}, 422)
 		return
 	}
 	if err != nil {

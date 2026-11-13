@@ -35,7 +35,8 @@
     }
     if (event.key === '/') {
       const search = document.getElementById('search');
-      if (search) action = () => search.focus();
+      // Search sits inside the Filter disclosure on the reading table.
+      if (search) action = () => { const disclosure = search.closest('details'); if (disclosure) disclosure.open = true; search.focus(); };
     }
     if (event.key === '?') action = () => { document.getElementById('keyboard-help')?.showModal(); };
     if (action) { event.preventDefault(); action(); }

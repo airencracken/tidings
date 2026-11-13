@@ -20,7 +20,7 @@ const MaxRestoreBytes = 16 << 20
 func DecodeExport(b []byte) (Export, error) {
 	var data Export
 	if len(b) > MaxRestoreBytes {
-		return data, errors.New("reading-data file exceeds 16 MiB")
+		return data, errors.New("reading-data file must be 16 MB or smaller")
 	}
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.DisallowUnknownFields()

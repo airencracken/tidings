@@ -59,8 +59,13 @@ func (a *App) fetchOverview(ctx context.Context, uid int64, zones ...string) (fe
 		out.Message = "Follow a source to begin."
 		out.NextCheck = ""
 	case summary.Failed > 0:
-		out.State, out.Message = "failed", "Some sources could not be fetched."
-		out.Detail = fmt.Sprintf("%d of %d sources need another try. See Sources for details.", summary.Failed, summary.Sources)
+		// The reading table shows only the message; Sources adds the detail
+		// and marks each failed source in its list.
+		out.State, out.Message = "failed", "Feeds checked."
+		if summary.Checked > 0 {
+			out.Message = "Feeds checked at " + f.Clock(time.Unix(summary.Checked, 0)) + "."
+		}
+		out.Detail = fmt.Sprintf("%d of %d sources need another try. Each one shows its last error in the list.", summary.Failed, summary.Sources)
 	case summary.Waiting > 0:
 		out.State, out.Message = "waiting", "Waiting for the first fetch."
 		out.Detail = fmt.Sprintf("%d sources waiting.", summary.Waiting)

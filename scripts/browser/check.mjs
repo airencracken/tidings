@@ -111,6 +111,10 @@ db.commit()
     }
     await firstPaintContext.close();
   }
+  // Fetch progress stays off the reading table and articles unless the reader asked for it.
+  assert.equal(await page.locator('[data-fetch-status]').count(),0);
+  assert.equal(await page.locator('details.filter-disclosure').evaluate(disclosure=>disclosure.open),false);
+  await page.goto(origin+'/sources');
   assert.ok(await page.locator('[data-fetch-status]').isVisible());
   const statusResponse=await context.request.get(origin+'/api/v1/fetch-status');assert.equal(statusResponse.status(),200);
   assert.ok((await statusResponse.json()).next_check.startsWith('Next automatic check'));
@@ -123,7 +127,7 @@ db.commit()
   await page.getByText('Feeds checked just now.',{exact:true}).waitFor();
   assert.ok(await page.getByRole('link',{name:'Show updated stories',exact:true}).isVisible());
   await page.unroute('**/api/v1/fetch-status');
-  await page.goto(origin+'/account');
+  await page.goto(origin+'/admin');
   assert.equal(await page.getByLabel('Show feed images',{exact:true}).isChecked(),false);
   await page.getByLabel('Show feed images',{exact:true}).check();await act(page.getByRole('button',{name:'Save image settings',exact:true}), 'click');
   await page.goto(origin+'/');
@@ -137,9 +141,11 @@ db.commit()
   assert.ok((await page.locator('.reader-body img').getAttribute('src')).startsWith('/story/1/image/'));
   assert.equal(await page.locator('.reader-body script').count(),0);
   assert.ok(!(await page.locator('body').innerText()).includes('The text supplied by this feed'));
-  await page.goto(origin+'/account');await page.getByLabel('Show feed images',{exact:true}).uncheck();await act(page.getByRole('button',{name:'Save image settings',exact:true}), 'click');
+  await page.goto(origin+'/admin');await page.getByLabel('Show feed images',{exact:true}).uncheck();await act(page.getByRole('button',{name:'Save image settings',exact:true}), 'click');
   assert.equal((await context.request.get(origin+'/story/1/image')).status(),404);
   await page.goto(origin+'/story/1');assert.equal(await page.locator('.reader-body img').count(),0);
+  assert.equal(await page.locator('[data-fetch-status]').count(),0);
+  assert.equal(await page.locator('.reading-paper header a.button').count(),0);
   assert.equal(await page.getByRole('button',{name:'Get full story',exact:true}).count(),1);
   await page.goto(origin+'/');
   assert.equal(await page.locator('.story-row').count(),30);
@@ -169,7 +175,7 @@ db.commit()
   // The host enables categories without subscribing any household member.
   await page.goto(origin+'/sources');
   assert.equal(await page.locator('.catalog-card').count(),0);
-  await page.goto(origin+'/account');
+  await page.goto(origin+'/admin');
   for(const category of ['Tech','Science']) await page.locator(`input[name="category"][value="${category}"]`).check();
   await act(page.getByRole('button',{name:'Save suggested categories',exact:true}), 'click');
   await page.goto(origin+'/sources');
@@ -186,7 +192,7 @@ db.commit()
   await page.setViewportSize({width:1440,height:1000});
 
   // An invitation is redeemed in a genuinely separate browser context.
-  await page.goto(origin+'/account');
+  await page.goto(origin+'/account/invitations');
   await act(page.getByRole('button',{name:'Create an invitation',exact:true}), 'click');
   const invitation = await page.locator('#invitation').inputValue();
   const newcomer=await browser.newContext();
@@ -195,7 +201,7 @@ db.commit()
   await member.goto(invitation);
   await act(member.getByLabel('Choose a username'), 'fill', 'alice');
   await act(member.getByLabel('Choose a password'), 'fill', password);
-  await act(member.getByRole('button',{name:'Make yourself at home',exact:true}), 'click');
+  await act(member.getByRole('button',{name:'Create your account',exact:true}), 'click');
   await signIn(member,origin,'alice');
   assert.equal(await member.locator('.story-row').count(),0);
   await member.goto(origin+'/?view=saved');
@@ -215,7 +221,7 @@ db.commit()
   const data=await exported.json();
   assert.equal(data.username,'host');assert.equal(data.version,1);assert.equal(data.stories.length,1);assert.equal(data.feed_groups[0].name,'AI research');
   await member.goto(origin+'/account');
-  await act(member.getByLabel('Tidings JSON file, up to 16 MiB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+  await act(member.getByLabel('Tidings JSON file, up to 16 MB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
   await member.getByLabel('Merge this file into my personal reading data').check();
   await act(member.getByRole('button',{name:'Merge reading data',exact:true}), 'click');
   await member.goto(origin+'/?view=saved');
@@ -227,7 +233,7 @@ db.commit()
 
   assert.equal(await member.getByRole('button',{name:'Fetch all feeds now',exact:true}).count(),0);
   assert.equal(await member.getByRole('button',{name:'Save suggested categories',exact:true}).count(),0);
-  await page.goto(origin+'/account');
+  await page.goto(origin+'/admin');
   let alice=page.locator('details.admin-row').filter({has:page.locator('summary').filter({hasText:'alice'})});
   await act(alice.locator('summary'), 'click');
   await act(alice.getByLabel('Your current password',{exact:true}), 'fill', password);
