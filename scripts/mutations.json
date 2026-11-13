@@ -482,8 +482,8 @@
   {
     "name": "theme applies before the body is parsed",
     "file": "internal/reader/templates/pages.html",
-    "before": "<script src=\"/static/theme.js\"></script>",
-    "after": "<script src=\"/static/theme.js\" defer></script>",
+    "before": "<script src=\"/static/comfyware/theme.js\"></script>",
+    "after": "<script src=\"/static/comfyware/theme.js\" defer></script>",
     "package": "./internal/reader",
     "run": "^TestThemeBootstrapPrecedesPagePaint$"
   },
@@ -562,8 +562,8 @@
   {
     "name": "admin page refuses ordinary members",
     "file": "internal/reader/app.go",
-    "before": "if !current(r).User.Owner {\n\t\thttp.Error(w, \"Only owners can administer this household\"",
-    "after": "if false && !current(r).User.Owner {\n\t\thttp.Error(w, \"Only owners can administer this household\"",
+    "before": "func (a *App) admin(w http.ResponseWriter, r *http.Request) {\n\tif !current(r).User.Owner {",
+    "after": "func (a *App) admin(w http.ResponseWriter, r *http.Request) {\n\tif false && !current(r).User.Owner {",
     "package": "./internal/reader",
     "run": "^TestAdminNavigationAndOwnerOnlySettings$"
   },
