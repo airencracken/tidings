@@ -296,7 +296,7 @@ func (a *App) routes() {
 	a.mux.Handle("GET /static/comfyware/", http.StripPrefix("/static/comfyware/", http.FileServerFS(ui.Assets())))
 	a.mux.Handle("GET /static/", http.FileServerFS(assets))
 	a.mux.HandleFunc("GET /{$}", a.home)
-	a.mux.HandleFunc("GET /story/{id}", a.trackStory(a.story))
+	a.mux.HandleFunc("GET /story/{id}", a.story)
 	a.mux.HandleFunc("POST /story/{id}/state", a.state)
 	a.mux.HandleFunc("POST /read-page", a.readPage)
 	a.mux.HandleFunc("POST /refresh", a.refresh)

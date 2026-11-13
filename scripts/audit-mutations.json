@@ -16,19 +16,27 @@
     "run": "^TestServiceInstallPreservesConfigurationSymlinks$"
   },
   {
-    "name": "successful authentication is recorded",
-    "file": "internal/reader/auth.go",
-    "before": "analytics.RecordLogin(ctx, tx, analytics.MemberID(id), time.Now())",
-    "after": "analytics.Prune(ctx, tx, time.Now())",
+    "name": "stored member activity is deleted",
+    "file": "internal/reader/analytics.go",
+    "before": "\"DELETE FROM comfy_analytics_activity\"",
+    "after": "\"SELECT 1 FROM comfy_analytics_activity WHERE 0\"",
     "package": "./internal/reader",
-    "run": "^TestActivityCountsAuthorizedOpensAndSuccessfulLogins$"
+    "run": "^TestOpeningDatabaseDeletesStoredMemberActivity$"
   },
   {
-    "name": "story opens reach the shared collector",
-    "file": "internal/reader/app.go",
-    "before": "a.trackStory(a.story)",
-    "after": "a.story",
+    "name": "member activity cleanup runs when the database opens",
+    "file": "internal/reader/store.go",
+    "before": "if err := forgetMemberActivity(context.Background(), db); err != nil {",
+    "after": "if err := error(nil); err != nil {",
     "package": "./internal/reader",
-    "run": "^TestActivityCountsAuthorizedOpensAndSuccessfulLogins$"
+    "run": "^TestOpeningDatabaseDeletesStoredMemberActivity$"
+  },
+  {
+    "name": "community sign-in refuses suspended accounts",
+    "file": "internal/reader/analytics.go",
+    "before": "FROM users WHERE id=? AND suspended=0",
+    "after": "FROM users WHERE id=?",
+    "package": "./internal/reader",
+    "run": "^TestSharedSignInStillRejectsSuspendedAccounts$"
   }
 ]

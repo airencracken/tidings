@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/airencracken/comfylib/analytics"
 	"github.com/airencracken/comfylib/ratelimit"
 	"regexp"
 	"sync"
@@ -97,9 +96,6 @@ func (s *Store) Login(ctx context.Context, username, password string) (string, e
 		return "", err
 	}
 	if _, err = tx.ExecContext(ctx, "INSERT INTO sessions(token,user_id,expires) VALUES(?,?,?)", digest, id, time.Now().Add(30*24*time.Hour).Unix()); err != nil {
-		return "", err
-	}
-	if err := analytics.RecordLogin(ctx, tx, analytics.MemberID(id), time.Now()); err != nil {
 		return "", err
 	}
 	return raw, tx.Commit()
