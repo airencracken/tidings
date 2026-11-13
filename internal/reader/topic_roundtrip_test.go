@@ -15,6 +15,13 @@ func TestMigratedTopicsExportRoundTrip(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer s.Close()
+	full := []string{"overflow"}
+	for i := 1; i <= 12; i++ {
+		full = append(full, fmt.Sprintf("t%02d", i))
+	}
+	if got := feedTags(t, s, 2, false)["Full"]; !slices.Equal(got, full) {
+		t.Fatalf("migration lost tags before export: got %v, want %v", got, full)
+	}
 	data, err := s.Export(t.Context(), User{ID: 2})
 	if err != nil {
 		t.Fatal(err)
@@ -40,7 +47,7 @@ func TestMigratedTopicsExportRoundTrip(t *testing.T) {
 
 func TestTagLimitsPermitEveryValidThirteenTagList(t *testing.T) {
 	for _, letter := range []string{"a", "é", "界", "\U00010400"} {
-		for count := 0; count <= maxSourceTags; count++ {
+		for count := 0; count <= 13; count++ {
 			var tags []string
 			for i := 0; i < count; i++ {
 				tags = append(tags, fmt.Sprint(i)+strings.Repeat(letter, 38))

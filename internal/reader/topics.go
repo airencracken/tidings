@@ -96,7 +96,10 @@ func migrateTopicsToTags(ctx context.Context, tx *sql.Tx) error {
 			// cannot happen; keep the tags rather than fail the upgrade.
 			tag = ""
 		}
-		ordered, _ := withTopic(tag, tags)
+		ordered, err := withTopic(tag, tags)
+		if err != nil {
+			return err
+		}
 		if err = writeTags(ctx, tx, s.user.Int64, s.feed, ordered, household); err != nil {
 			return err
 		}
