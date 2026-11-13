@@ -107,7 +107,7 @@ Under **Your account** you can download your subscriptions as OPML, or all your
 reading data as JSON: subscriptions, tags, groups, read, saved and skipped
 markers, and the text
 of stories you marked. You can merge a Tidings JSON export from another
-instance, up to 16 MB, 10,000 marked stories, 2,000 sources and 100 groups.
+instance, up to 16 MiB, 10,000 marked stories, 2,000 sources and 100 groups.
 Your existing choices win when they conflict. Exports never include passwords
 or other members' data.
 
@@ -164,7 +164,7 @@ Things to know:
   minutes per client address.
 - Tidings fetches only public HTTP(S) addresses on ports 80 and 443. Private
   networks and cloud metadata addresses are blocked, including after redirects.
-  A feed fetch reads at most 4 MB and 1,000 entries.
+  A feed fetch reads at most 4 MiB and 1,000 entries.
 - `/healthz` answers without signing in and shows no data.
 - Upgrades migrate the database on startup. Back up first; an older version
   cannot open a migrated database.
