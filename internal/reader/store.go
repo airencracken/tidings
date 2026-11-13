@@ -169,10 +169,6 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if err := forgetMemberActivity(context.Background(), db); err != nil {
-		db.Close()
-		return nil, err
-	}
 	return &Store{DB: db, lock: lock, Directory: dir}, nil
 }
 

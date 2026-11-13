@@ -253,6 +253,11 @@ func run() error {
 	<-pollDone
 	<-backupDone
 	app.Wait()
+	flushCtx, flushed := context.WithTimeout(context.Background(), 5*time.Second)
+	if flushErr := app.Flush(flushCtx); flushErr != nil {
+		slog.Warn("save site health counts", "error", flushErr)
+	}
+	flushed()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

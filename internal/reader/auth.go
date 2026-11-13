@@ -17,6 +17,9 @@ import (
 var usernameRE = regexp.MustCompile(`^[a-zA-Z0-9_-]{2,40}$`)
 var ErrCredentials = errors.New("check your username and password")
 
+// ErrInvitation means an invitation link is invalid, expired, used or revoked.
+var ErrInvitation = errors.New("invitation is invalid, expired, or already used")
+
 func checkPassword(hash []byte, password string) error {
 	return bcrypt.CompareHashAndPassword(hash, []byte(password))
 }
@@ -142,7 +145,7 @@ func (s *Store) Join(ctx context.Context, code, username, password string) error
 		return err
 	}
 	if n != 1 {
-		return errors.New("invitation is invalid, expired, or already used")
+		return ErrInvitation
 	}
 	if _, err = tx.ExecContext(ctx, "INSERT INTO users(username,password) VALUES(?,?)", username, hash); err != nil {
 		return errors.New("that username is already taken")

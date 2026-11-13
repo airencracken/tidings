@@ -42,6 +42,7 @@ type Config struct {
 }
 type App struct {
 	activityHandler     http.Handler
+	monitor             *analytics.Monitor
 	Store               *Store
 	Fetcher             *Fetcher
 	images              *imageCache
@@ -177,7 +178,9 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		return nil, err
 	}
 	a.routes()
-	a.activityHandler = analytics.Maintenance(a.Store.DB, a.mux)
+	// Site health: requests, status classes and latency per route pattern.
+	a.monitor = analytics.NewMonitor(a.Store.DB)
+	a.activityHandler = analytics.Maintenance(a.Store.DB, a.monitor.Middleware(a.mux))
 	if err = a.registerSharedSignIn(a.mux); err != nil {
 		return nil, err
 	}
@@ -914,6 +917,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.limit.allow(a.clientKey(r)) {
+		a.recordSecurity(r, analytics.RecordRateLimited)
 		a.render(w, r, page{Title: "Welcome back", Kind: "login", Error: tooManyAttempts}, http.StatusTooManyRequests)
 		return
 	}
@@ -923,6 +927,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 			a.fail(w, r, err)
 			return
 		}
+		a.recordSecurity(r, analytics.RecordFailedSignIn)
 		a.render(w, r, page{Title: "Welcome back", Kind: "login", Error: err.Error()}, 401)
 		return
 	}
@@ -936,11 +941,15 @@ func (a *App) join(w http.ResponseWriter, r *http.Request) {
 	}
 	code := r.PostFormValue("code")
 	if !a.limit.allow(a.clientKey(r)) {
+		a.recordSecurity(r, analytics.RecordRateLimited)
 		a.render(w, r, page{Title: "Join Tidings", Kind: "join", Invite: code, Error: tooManyAttempts}, http.StatusTooManyRequests)
 		return
 	}
 	err := a.Store.Join(r.Context(), code, r.PostFormValue("username"), r.PostFormValue("password"))
 	if err != nil {
+		if errors.Is(err, ErrInvitation) {
+			a.recordSecurity(r, analytics.RecordRejectedToken)
+		}
 		a.render(w, r, page{Title: "Join Tidings", Kind: "join", Invite: code, Error: err.Error()}, 400)
 		return
 	}
@@ -1111,6 +1120,17 @@ func (a *App) refreshFeeds(uid int64, all, force bool) {
 	workers.Wait()
 }
 func (a *App) Wait() { a.wg.Wait() }
+
+// Flush writes site-health counts still held in memory. Call it on shutdown.
+func (a *App) Flush(ctx context.Context) error { return a.monitor.Flush(ctx) }
+
+// recordSecurity counts a security event; a failure is logged and never
+// changes the response.
+func (a *App) recordSecurity(r *http.Request, record func(context.Context, analytics.Executor, time.Time) error) {
+	if err := record(r.Context(), a.Store.DB, time.Now()); err != nil {
+		slog.WarnContext(r.Context(), "record security counter", "error", err)
+	}
+}
 func (a *App) Poll(ctx context.Context, interval time.Duration) {
 	interval = min(interval, time.Minute)
 	if interval <= 0 {

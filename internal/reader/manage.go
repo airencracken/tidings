@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/airencracken/comfylib/analytics"
 	"github.com/airencracken/comfylib/displaytime"
 	"net/http"
 	"strings"
@@ -86,9 +85,6 @@ func (s *Store) ManageMember(ctx context.Context, actor, target int64, action, c
 	}
 	if action == "remove" {
 		if err := displaytime.ForgetMember(ctx, tx, target); err != nil {
-			return err
-		}
-		if err := analytics.ForgetMember(ctx, tx, analytics.MemberID(target)); err != nil {
 			return err
 		}
 		_, err = tx.ExecContext(ctx, "DELETE FROM users WHERE id=?", target)

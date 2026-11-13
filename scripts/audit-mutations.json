@@ -16,27 +16,35 @@
     "run": "^TestServiceInstallPreservesConfigurationSymlinks$"
   },
   {
-    "name": "stored member activity is deleted",
-    "file": "internal/reader/analytics.go",
-    "before": "\"DELETE FROM comfy_analytics_activity\"",
-    "after": "\"SELECT 1 FROM comfy_analytics_activity WHERE 0\"",
-    "package": "./internal/reader",
-    "run": "^TestOpeningDatabaseDeletesStoredMemberActivity$"
-  },
-  {
-    "name": "member activity cleanup runs when the database opens",
-    "file": "internal/reader/store.go",
-    "before": "if err := forgetMemberActivity(context.Background(), db); err != nil {",
-    "after": "if err := error(nil); err != nil {",
-    "package": "./internal/reader",
-    "run": "^TestOpeningDatabaseDeletesStoredMemberActivity$"
-  },
-  {
     "name": "community sign-in refuses suspended accounts",
     "file": "internal/reader/analytics.go",
     "before": "FROM users WHERE id=? AND suspended=0",
     "after": "FROM users WHERE id=?",
     "package": "./internal/reader",
     "run": "^TestSharedSignInStillRejectsSuspendedAccounts$"
+  },
+  {
+    "name": "site health wraps the routes",
+    "file": "internal/reader/app.go",
+    "before": "a.monitor.Middleware(a.mux)",
+    "after": "a.mux",
+    "package": "./internal/reader",
+    "run": "^TestSiteHealthIsCountedPerRouteWithoutNamingAnyone$"
+  },
+  {
+    "name": "failed sign-ins are counted",
+    "file": "internal/reader/app.go",
+    "before": "a.recordSecurity(r, analytics.RecordFailedSignIn)",
+    "after": "_ = analytics.RecordFailedSignIn",
+    "package": "./internal/reader",
+    "run": "^TestSecurityEventsAreCounted$"
+  },
+  {
+    "name": "rejected invitations are counted",
+    "file": "internal/reader/app.go",
+    "before": "if errors.Is(err, ErrInvitation) {",
+    "after": "if false {",
+    "package": "./internal/reader",
+    "run": "^TestSecurityEventsAreCounted$"
   }
 ]
