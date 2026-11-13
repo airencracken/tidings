@@ -157,7 +157,7 @@ func verifyDatabase(ctx context.Context, path string) error {
 	if err = db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return err
 	}
-	if version != 2 && version != 3 && version != 4 && version != 5 {
+	if version < 2 || version > 6 {
 		return fmt.Errorf("unsupported backup schema %d", version)
 	}
 	var check string

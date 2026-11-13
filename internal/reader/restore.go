@@ -182,7 +182,7 @@ func (s *Store) RestorePersonal(ctx context.Context, u User, data Export) error 
 		} else if err != nil {
 			return err
 		}
-		state, err := tx.ExecContext(ctx, "INSERT INTO states(user_id,entry_id,read,saved) VALUES(?,?,?,?) ON CONFLICT(user_id,entry_id) DO NOTHING", u.ID, id, e.Read, e.Saved)
+		state, err := tx.ExecContext(ctx, "INSERT INTO states(user_id,entry_id,read,saved,skipped) VALUES(?,?,?,?,?) ON CONFLICT(user_id,entry_id) DO NOTHING", u.ID, id, e.Read, e.Saved, e.Skipped && !e.Saved)
 		if err != nil {
 			return err
 		}

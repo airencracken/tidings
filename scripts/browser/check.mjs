@@ -152,8 +152,8 @@ db.commit()
   await act(page.getByRole('link',{name:'Next page',exact:true}), 'click');
   assert.equal(await page.locator('.story-row').count(),5);
   await page.goto(origin+'/');
-  await act(page.locator('.story-row').first().getByRole('button',{name:'Set aside',exact:true}), 'click');
-  await act(page.getByRole('link',{name:'Set aside',exact:true}), 'click');
+  await act(page.locator('.story-row').first().getByRole('button',{name:'Save for later',exact:true}), 'click');
+  await act(page.getByRole('link',{name:'Saved for later',exact:true}), 'click');
   assert.equal(await page.locator('.story-row').count(),1);
   await act(page.locator('.story-row h2 a').first(), 'click');
   await act(page.getByRole('button',{name:'Mark read and return',exact:true}), 'click');
@@ -268,11 +268,21 @@ db.commit()
   await page.keyboard.press('j');
   const selectedStory=await page.locator('.keyboard-selected [data-story-open]').getAttribute('href');
   await Promise.all([page.waitForURL(origin+selectedStory),page.keyboard.press('Enter')]);
-  await Promise.all([page.waitForNavigation(),page.keyboard.press('m')]);
-  assert.equal(await page.getByRole('button',{name:'Mark unread',exact:true}).count(),1);
-  await act(page.locator('body'), 'click', {position:{x:5,y:5}});
   await Promise.all([page.waitForNavigation(),page.keyboard.press('s')]);
-  assert.equal(await page.getByRole('button',{name:'Remove from set aside',exact:true}).count(),1);
+  assert.equal(await page.getByRole('button',{name:'Remove from saved',exact:true}).count(),1);
+  await act(page.locator('body'), 'click', {position:{x:5,y:5}});
+  await Promise.all([page.waitForNavigation(),page.keyboard.press('x')]);
+  assert.equal(await page.getByRole('button',{name:'Undo skip',exact:true}).count(),1);
+  // Skip leaves the reading table without marking the story read.
+  await page.goto(origin+'/');
+  assert.equal(await page.locator(`.story-row a[href="${selectedStory}"]`).count(),0);
+  await act(page.getByRole('link',{name:'Skipped stories',exact:true}), 'click');
+  const skipped=page.locator('.story-row').filter({has:page.locator(`a[href="${selectedStory}"]`)});
+  assert.equal(await skipped.getByRole('button',{name:'Mark read',exact:true}).count(),1);
+  await act(skipped.getByRole('button',{name:'Undo skip',exact:true}), 'click');
+  assert.equal(await page.locator(`.story-row a[href="${selectedStory}"]`).count(),0);
+  await page.goto(origin+selectedStory);
+  await Promise.all([page.waitForURL(origin+'/'),page.keyboard.press('m')]);
   await page.goto(origin+'/account');await page.getByLabel('Enable keyboard shortcuts',{exact:true}).uncheck();
   await act(page.getByRole('button',{name:'Save reading preferences',exact:true}), 'click');await page.goto(origin+'/');
   assert.equal(await page.locator('script[src="/static/keyboard.js"]').count(),0);

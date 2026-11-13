@@ -32,7 +32,7 @@ func sampleURL(f sampleFeed) string { return "https://example.invalid/tidings/" 
 func sampleEntries(f sampleFeed, now time.Time) []reader.Entry {
 	var out []reader.Entry
 	for i, title := range f.Titles {
-		out = append(out, reader.Entry{Key: f.Slug + "-" + fmt.Sprint(i), Title: title, URL: "https://example.invalid/tidings/" + f.Slug + "/" + fmt.Sprint(i), Body: "This is an illustrated example for the disposable Tidings demo, not a report from a real publisher. Read it here, mark it read, or set it aside. Your choices belong to this account alone.\n\nTry following the household table, adding tags, and placing the same source in more than one interest group. Everything in this demo is removed when it stops.", Published: now.Add(-time.Duration(i+1) * time.Hour).Unix()})
+		out = append(out, reader.Entry{Key: f.Slug + "-" + fmt.Sprint(i), Title: title, URL: "https://example.invalid/tidings/" + f.Slug + "/" + fmt.Sprint(i), Body: "This is an illustrated example for the disposable Tidings demo, not a report from a real publisher. Read it here, mark it read, save it for later, or skip it. Your choices belong to this account alone.\n\nTry following the household table, adding tags, and placing the same source in more than one interest group. Everything in this demo is removed when it stops.", Published: now.Add(-time.Duration(i+1) * time.Hour).Unix()})
 	}
 	return out
 }

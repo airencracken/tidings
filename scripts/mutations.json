@@ -590,5 +590,53 @@
     "after": "AND suspended IN (0,1)",
     "package": "./internal/reader",
     "run": "^TestDisplayTimezoneAccountRoutesAndRendering$"
+  },
+  {
+    "name": "skipped stories leave Unread",
+    "file": "internal/reader/store.go",
+    "before": "where += \" AND coalesce(st.read,0)=0 AND coalesce(st.skipped,0)=0\"",
+    "after": "where += \" AND coalesce(st.read,0)=0\"",
+    "package": "./internal/reader",
+    "run": "^TestSkipLeavesShelvesWithoutMarkingReadOrSaved$"
+  },
+  {
+    "name": "skipped stories leave other shelves",
+    "file": "internal/reader/store.go",
+    "before": "\tdefault:\n\t\twhere += \" AND coalesce(st.skipped,0)=0\"",
+    "after": "\tdefault:\n\t\twhere += \"\"",
+    "package": "./internal/reader",
+    "run": "^TestSkipLeavesShelvesWithoutMarkingReadOrSaved$"
+  },
+  {
+    "name": "saving a skipped story unskips it",
+    "file": "internal/reader/store.go",
+    "before": "update += \",skipped=0\"",
+    "after": "update += \"\"",
+    "package": "./internal/reader",
+    "run": "^TestSavingASkippedStoryUnskipsIt$"
+  },
+  {
+    "name": "reading-state field allowlist",
+    "file": "internal/reader/app.go",
+    "before": "if !stateFields[field] || (value",
+    "after": "if (value",
+    "package": "./internal/reader",
+    "run": "^TestSkipStateRejectsBadFieldsValuesAndStrangers$"
+  },
+  {
+    "name": "restore keeps skips",
+    "file": "internal/reader/restore.go",
+    "before": "e.Saved, e.Skipped && !e.Saved)",
+    "after": "e.Saved, false)",
+    "package": "./internal/reader",
+    "run": "^TestSkipSurvivesExportAndRestore$"
+  },
+  {
+    "name": "skip migration runs on older databases",
+    "file": "internal/reader/store.go",
+    "before": "if err == nil && version < 6 {",
+    "after": "if err == nil && version < 0 {",
+    "package": "./internal/reader",
+    "run": "^TestSkipMigrationAddsColumnAndKeepsState$"
   }
 ]

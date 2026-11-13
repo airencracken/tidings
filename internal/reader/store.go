@@ -34,6 +34,9 @@ var migrationV4 string
 //go:embed migration_v5.sql
 var migrationV5 string
 
+//go:embed migration_v6.sql
+var migrationV6 string
+
 type Store struct {
 	DB        *sql.DB
 	lock      *flock.Flock
@@ -125,7 +128,7 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 5 {
+	if version > 6 {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
@@ -143,8 +146,11 @@ func OpenStore(dir string) (store *Store, failure error) {
 			_, err = tx.Exec(migrationV5)
 		}
 	}
+	if err == nil && version < 6 {
+		_, err = tx.Exec(migrationV6)
+	}
 	if err == nil {
-		_, err = tx.Exec("PRAGMA user_version=5")
+		_, err = tx.Exec("PRAGMA user_version=6")
 	}
 	if err == nil {
 		err = tx.Commit()
@@ -309,11 +315,17 @@ const visible = `((e.import_owner IS NULL OR e.import_owner=st.user_id) AND (EXI
 func entryWhere(uid int64, f Filter) (string, []any) {
 	where := visible
 	args := []any{uid, uid}
-	if f.View == "saved" {
+	// Skipped stories leave every shelf except Saved for later and Skipped.
+	switch f.View {
+	case "saved":
 		where = "(coalesce(st.saved,0)=1)"
 		args = nil
-	} else if f.View == "unread" || f.View == "" {
-		where += " AND coalesce(st.read,0)=0"
+	case "skipped":
+		where += " AND coalesce(st.skipped,0)=1"
+	case "unread", "":
+		where += " AND coalesce(st.read,0)=0 AND coalesce(st.skipped,0)=0"
+	default:
+		where += " AND coalesce(st.skipped,0)=0"
 	}
 	if f.View == "group" {
 		where += " AND EXISTS(SELECT 1 FROM group_feeds g WHERE g.feed_id=e.feed_id)"
@@ -359,7 +371,7 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 			order = "ASC"
 		}
 	}
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published ` + order + `,e.id ` + order + ` LIMIT 31 OFFSET ?`
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),coalesce(st.skipped,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published ` + order + `,e.id ` + order + ` LIMIT 31 OFFSET ?`
 	params := []any{uid, uid}
 	params = append(params, args...)
 	params = append(params, offset)
@@ -371,7 +383,7 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 	out := []Entry{}
 	for rows.Next() {
 		var e Entry
-		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source, &e.Category); err != nil {
+		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Skipped, &e.Source, &e.Category); err != nil {
 			return nil, false, err
 		}
 		out = append(out, e)
@@ -393,8 +405,8 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 
 func (s *Store) Entry(ctx context.Context, uid, id int64) (Entry, error) {
 	var e Entry
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
-	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source)
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),coalesce(st.skipped,0),f.title FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1)`
+	err := s.DB.QueryRowContext(ctx, q, uid, id, uid, uid).Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Skipped, &e.Source)
 	if err == nil {
 		var body, rich string
 		copyErr := s.DB.QueryRowContext(ctx, "SELECT body,body_html FROM article_copies WHERE user_id=? AND entry_id=?", uid, id).Scan(&body, &rich)
@@ -408,12 +420,26 @@ func (s *Store) Entry(ctx context.Context, uid, id int64) (Entry, error) {
 	return e, err
 }
 
+// stateFields are the per-member markers a reader can toggle.
+var stateFields = map[string]bool{"read": true, "saved": true, "skipped": true}
+
 func (s *Store) SetState(ctx context.Context, uid, id int64, field string, value bool) error {
-	if field != "read" && field != "saved" {
+	if !stateFields[field] {
 		return errors.New("unknown reading state")
 	}
-	// The authorization and state write use one SQLite statement.
-	q := `INSERT INTO states(user_id,entry_id,` + field + `) SELECT ?,e.id,? FROM entries e LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1) ON CONFLICT(user_id,entry_id) DO UPDATE SET ` + field + `=excluded.` + field
+	// The authorization and state write use one SQLite statement. Saving a
+	// skipped story brings it back: saving also clears the skip.
+	update := field + `=excluded.` + field
+	unskip := ""
+	if field == "saved" && value {
+		update += ",skipped=0"
+		unskip = ",skipped"
+	}
+	values := "?"
+	if unskip != "" {
+		values = "?,0"
+	}
+	q := `INSERT INTO states(user_id,entry_id,` + field + unskip + `) SELECT ?,e.id,` + values + ` FROM entries e LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE e.id=? AND (` + visible + ` OR coalesce(st.saved,0)=1) ON CONFLICT(user_id,entry_id) DO UPDATE SET ` + update
 	res, err := s.DB.ExecContext(ctx, q, uid, value, uid, id, uid, uid)
 	if err != nil {
 		return err
@@ -474,8 +500,8 @@ func (s *Store) ApplyFetch(ctx context.Context, f Feed, r FetchResult) error {
 			// When the publisher later supplies a restored story, move the
 			// reader's markers onto that canonical entry, without publishing
 			// any uploaded text. Existing canonical markers take precedence.
-			if _, err = tx.ExecContext(ctx, `INSERT INTO states(user_id,entry_id,read,saved)
-              SELECT st.user_id,real.id,st.read,st.saved FROM entries own
+			if _, err = tx.ExecContext(ctx, `INSERT INTO states(user_id,entry_id,read,saved,skipped)
+              SELECT st.user_id,real.id,st.read,st.saved,st.skipped FROM entries own
               JOIN states st ON st.entry_id=own.id AND st.user_id=own.import_owner
               JOIN entries real ON real.feed_id=own.feed_id AND real.key=own.original_key AND real.url=own.url AND real.import_owner IS NULL
               WHERE own.feed_id=? AND own.original_key=? AND own.url=?
@@ -570,14 +596,14 @@ func (s *Store) Export(ctx context.Context, u User) (Export, error) {
 		return out, err
 	}
 	// The export includes only personally marked stories and subscribed sources.
-	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,coalesce(c.body,e.body),coalesce(c.body_html,e.body_html),e.image_url,e.published,st.read,st.saved,f.title,c.entry_id IS NOT NULL FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id LEFT JOIN article_copies c ON c.entry_id=e.id AND c.user_id=st.user_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
+	rows, err := tx.QueryContext(ctx, `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,coalesce(c.body,e.body),coalesce(c.body_html,e.body_html),e.image_url,e.published,st.read,st.saved,st.skipped,f.title,c.entry_id IS NOT NULL FROM states st JOIN entries e ON e.id=st.entry_id JOIN feeds f ON f.id=e.feed_id LEFT JOIN article_copies c ON c.entry_id=e.id AND c.user_id=st.user_id WHERE st.user_id=? ORDER BY e.id`, u.ID)
 	if err != nil {
 		return out, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var e Entry
-		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Source, &e.FullStory); err != nil {
+		if err = rows.Scan(&e.ID, &e.FeedID, &e.Key, &e.Title, &e.URL, &e.Body, &e.BodyHTML, &e.ImageURL, &e.Published, &e.Read, &e.Saved, &e.Skipped, &e.Source, &e.FullStory); err != nil {
 			return out, err
 		}
 		out.Stories = append(out.Stories, e)

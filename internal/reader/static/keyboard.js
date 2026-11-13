@@ -28,8 +28,9 @@
       const link = story.querySelector('[data-story-open]');
       if (link) action = () => link.click();
     }
-    if (event.key === 'm' || event.key === 's') {
-      const field = event.key === 'm' ? 'read' : 'saved';
+    const fields = { m: 'read', s: 'saved', x: 'skipped' };
+    if (fields[event.key]) {
+      const field = fields[event.key];
       const form = Array.from(story.querySelectorAll('form')).find(form => form.elements.field?.value === field);
       if (form) action = () => form.requestSubmit();
     }

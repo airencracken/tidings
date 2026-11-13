@@ -233,7 +233,7 @@ func TestSchemaV1Upgrade(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = db.Exec(`DROP TABLE article_copies;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;DROP INDEX entries_import_owner;ALTER TABLE entries DROP COLUMN import_owner;ALTER TABLE entries DROP COLUMN original_key;ALTER TABLE users DROP COLUMN suspended;ALTER TABLE invites DROP COLUMN revoked;PRAGMA user_version=1`); err != nil {
+	if _, err = db.Exec(`DROP TABLE article_copies;ALTER TABLE states DROP COLUMN skipped;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;DROP INDEX entries_import_owner;ALTER TABLE entries DROP COLUMN import_owner;ALTER TABLE entries DROP COLUMN original_key;ALTER TABLE users DROP COLUMN suspended;ALTER TABLE invites DROP COLUMN revoked;PRAGMA user_version=1`); err != nil {
 		t.Fatal(err)
 	}
 	db.Close()
@@ -243,7 +243,7 @@ func TestSchemaV1Upgrade(t *testing.T) {
 	}
 	defer s.Close()
 	var n int
-	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&n); err != nil || n != 5 {
+	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&n); err != nil || n != 6 {
 		t.Fatal(n, err)
 	}
 }

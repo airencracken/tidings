@@ -421,7 +421,7 @@ func parseFilter(r *http.Request) (Filter, error) {
 	if f.View == "" {
 		f.View = "unread"
 	}
-	if f.View != "unread" && f.View != "all" && f.View != "saved" && f.View != "group" {
+	if f.View != "unread" && f.View != "all" && f.View != "saved" && f.View != "group" && f.View != "skipped" {
 		return f, errors.New("unknown reading shelf")
 	}
 	if len(f.Query) > 300 || len(f.Category) > 160 {
@@ -509,7 +509,10 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 		p.Collection = g
 	}
 	if f.View == "saved" {
-		p.Title = "Set aside"
+		p.Title = "Saved for later"
+	}
+	if f.View == "skipped" {
+		p.Title = "Skipped"
 	}
 	if f.View == "all" {
 		p.Title = "All stories"
@@ -597,7 +600,7 @@ func (a *App) state(w http.ResponseWriter, r *http.Request) {
 	}
 	field := r.PostFormValue("field")
 	value := r.PostFormValue("value")
-	if (field != "read" && field != "saved") || (value != "true" && value != "false") {
+	if !stateFields[field] || (value != "true" && value != "false") || len(r.PostForm["field"]) != 1 || len(r.PostForm["value"]) != 1 {
 		a.bad(w, r, "Invalid reading state")
 		return
 	}

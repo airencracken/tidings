@@ -3,7 +3,7 @@
 <img src="docs/images/town-crier.png" alt="Tidings’ town crier with a bell and scroll" width="144" height="152" align="right">
 
 A quiet RSS and Atom reader for you and your people. Follow the writers and
-sites you choose, read a finite page, set something aside, and put it down.
+sites you choose, read a finite page, save something for later, and put it down.
 
 Tidings is part of Comfyware. It is one Go program with a SQLite database. One
 installation serves a household. Each member has their own subscriptions, tags,
@@ -60,7 +60,9 @@ last five minutes.
 The reading table shows a finite page of stories, newest first. There are no
 unread counts. **Filter** holds search and the Topic and Source filters.
 Opening a story does not mark it read; choose **Mark read** or **Mark read and
-return** when you are done. **Set aside** keeps a story on its own shelf.
+return** when you are done. **Save for later** keeps a story on its own shelf.
+**Skip** a story that is not for you: it leaves your shelves without being
+marked read, and **Skipped stories** lets you bring it back.
 
 Stories keep their headings, links, lists, quotations, tables and code. Tidings
 cleans the publisher's markup before showing it and removes known tracking
@@ -68,7 +70,9 @@ fields such as `utm_source` from links. When a feed has only an excerpt, **Get
 full story** downloads the article and keeps a private copy for you.
 
 Keyboard shortcuts are off by default. Turn them on under **Your account →
-Reading preferences**, where the shortcut guide lives. Leave them off if a
+Reading preferences**, where the shortcut guide lives: `j` and `k` move between
+stories, Enter opens one, `m` marks it read, `s` saves it for later, `x` skips
+it, `/` searches and `?` shows the guide. Leave them off if a
 browser extension already uses these keys.
 
 Choose your timezone under **Your account → Times and dates**. UTC is the
@@ -93,12 +97,13 @@ Groups only organise. They never share a source or its stories with anyone.
 The owner can keep a set of **Household sources**. Every account, including the
 owner's, starts with the household table off. Turn it on under **Your account**
 to add those stories to your reading table and a Household shelf. Read and saved
-markers stay yours. Stories you set aside are kept when you stop following.
+markers stay yours. Stories you saved for later are kept when you stop following.
 
 ## Your data
 
 Under **Your account** you can download your subscriptions as OPML, or all your
-reading data as JSON: subscriptions, tags, groups, reading state, and the text
+reading data as JSON: subscriptions, tags, groups, read, saved and skipped
+markers, and the text
 of stories you marked. You can merge a Tidings JSON export from another
 instance, up to 16 MB, 10,000 marked stories, 2,000 sources and 100 groups.
 Your existing choices win when they conflict. Exports never include passwords

@@ -16,17 +16,25 @@ upgrade, and keep that copy if you might return to an older version.
   table. It opens by itself when a filter is active.
 - **Your account** holds personal settings only. Invitations, members, household
   sources, suggested sources, feed images and backups are under **Admin**.
-- The article page has one main button, **Mark read and return**. **Read on**
-  the publisher's site is a plain link.
+- **Set aside** is now **Save for later**, and its shelf is **Saved for later**.
+- New: **Skip** a story that is not for you. It leaves Unread, All stories and
+  group shelves without being marked read or saved. **Skipped stories**, linked
+  under the shelves, lets you undo a skip. Saving a skipped story brings it
+  back. The keyboard shortcut is `x`.
+- The article page has one main button, **Mark read and return**, plus **Save
+  for later** and **Skip**. **Read on** the publisher's site is a plain link.
 - Text is at least 12 pixels, and buttons and links are larger. Sign-in, join,
   invitations and metrics use Tidings' headings and colours.
 - Expired forms and too many sign-in attempts show a normal Tidings page.
 
 Operators:
 
+- Migrates to schema 6, adding the skip marker. Backups from schema 2 to 5
+  still restore.
 - Opening the database deletes all sign-in and story-open rows stored by 0.7.0
-  and 0.8.0, including in databases restored from older backups. The schema
-  version stays at 5.
+  and 0.8.0, including in databases restored from older backups.
+- JSON exports include `"skipped": true` only for skipped stories, so exports
+  without skips still import into earlier versions. Older exports import here.
 
 ## 0.8.0
 

@@ -115,6 +115,9 @@ dialog::backdrop { background: #0007; }
 .shelves nav a:hover { background: var(--soft); }
 .shelves small { display: block; font-size: 12px; }
 .shelves > .field-help { padding: 0 13px; }
+.skipped-link { margin: 8px 0 0; padding: 0 13px; font-size: 13px; }
+.skipped-link a { color: var(--muted); }
+.skipped-link a[aria-current] { color: var(--green); font-weight: 650; }
 .group-shelf-heading { margin: 26px 13px 12px; }
 .shelf-note { border-top: 1px solid var(--line); margin-top: 28px; padding: 24px 13px 18px; }
 .shelf-note h2 { font-size: 24px; line-height: 1.25; }
@@ -307,6 +310,7 @@ dialog::backdrop { background: #0007; }
   .shelves > .eyebrow, .shelf-note, .shelves > .field-help { display: none; }
   .shelves nav { flex-direction: row; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
   .shelves nav a { font-size: 13px; padding: 8px 10px; }
+  .skipped-link { padding: 0 10px; }
   .filters { gap: 12px; }
   .filters label { flex: 1 1 120px; }
   .story-row { padding: 24px; }
