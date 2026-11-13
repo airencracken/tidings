@@ -3,6 +3,8 @@ package reader
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -129,5 +131,68 @@ func TestStylesheetParserRejectsMinifiedAndPatchedRules(t *testing.T) {
 				t.Fatalf("parser accepted %q", source)
 			}
 		})
+	}
+}
+
+var cssPixelSize = regexp.MustCompile(`(?:font-size:\s*|font:[^;]*?\b)(\d+(?:\.\d+)?)px`)
+
+// smallType lists declared text sizes under the 12px reading floor. Zero is
+// allowed: it hides a visible label while keeping its accessible name.
+func smallType(source string) []string {
+	var found []string
+	for n, line := range strings.Split(source, "\n") {
+		for _, match := range cssPixelSize.FindAllStringSubmatch(line, -1) {
+			size, err := strconv.ParseFloat(match[1], 64)
+			if err == nil && size > 0 && size < 12 {
+				found = append(found, fmt.Sprintf("line %d: %s", n+1, match[0]))
+			}
+		}
+	}
+	return found
+}
+
+func TestStylesheetKeepsTextAtLeastTwelvePixels(t *testing.T) {
+	source := appStylesheet(t)
+	for _, problem := range smallType(source) {
+		t.Error(problem)
+	}
+	for _, bad := range []string{".a { font-size: 11px; }", ".a { font: 400 10px/1.5 serif; }", ".a { font: italic 11.5px Georgia; }"} {
+		if len(smallType(bad)) != 1 {
+			t.Errorf("small type not detected in %q", bad)
+		}
+	}
+	for _, ok := range []string{".a { font-size: 12px; }", ".a { font: 400 14px/1.5 serif; padding: 2px 8px; }", ".a { font-size: 0; }"} {
+		if found := smallType(ok); len(found) != 0 {
+			t.Errorf("false positive in %q: %v", ok, found)
+		}
+	}
+	// Actionable controls get 13-14px; the article body keeps its 19px Georgia.
+	for _, want := range []string{
+		".story-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; }",
+		".text-button { padding: 2px 0; border: 0; background: transparent; color: var(--muted); font-size: 14px;",
+		".reader-body { font: 19px/1.8 Georgia,",
+	} {
+		if !strings.Contains(source, want) {
+			t.Errorf("stylesheet lost %q", want)
+		}
+	}
+}
+
+func TestSharedComfylibPagesUseTidingsTokensAndHeadings(t *testing.T) {
+	source := appStylesheet(t)
+	for _, want := range []string{
+		`:root[data-comfy-app="tidings"] {`, "--comfy-ink: var(--ink);", "--comfy-panel: var(--paper);",
+		"--comfy-line: var(--line);", "--comfy-accent: var(--green);", "--comfy-admin-muted: var(--muted);",
+		`[data-comfy-app="tidings"] :is(.account-page, .invitation-page) :is(h1, h2) { font-family: Georgia, "Times New Roman", serif; font-weight: 400;`,
+		`[data-comfy-app="tidings"] .comfy-admin-dashboard h1 { font: 400 `,
+		`[data-comfy-app="tidings"] .comfy-admin-dashboard h2 { font: 400 `,
+	} {
+		if !strings.Contains(source, want) {
+			t.Errorf("stylesheet is missing %q", want)
+		}
+	}
+	page := webHarness(t).request(1, "GET", "/account/invitations", nil).Body.String()
+	if !strings.Contains(page, `data-comfy-app="tidings"`) {
+		t.Fatal("shared pages need the app scope attribute for these overrides")
 	}
 }
