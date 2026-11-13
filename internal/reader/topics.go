@@ -40,6 +40,9 @@ func withTopic(topic string, tags []string) ([]string, error) {
 			out = append(out, t)
 		}
 	}
+	if len(out) > maxSourceTags {
+		return nil, errors.New("use at most 13 tags per source, including the topic")
+	}
 	return out, nil
 }
 

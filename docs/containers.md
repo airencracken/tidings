@@ -1,7 +1,7 @@
 # Run Tidings with Docker Compose
 
 Images are published to [GHCR](https://github.com/airencracken/tidings/pkgs/container/tidings)
-as `ghcr.io/airencracken/tidings:v0.9.0`, for linux/amd64 and linux/arm64.
+as `ghcr.io/airencracken/tidings:v0.9.1`, for linux/amd64 and linux/arm64.
 There is no `latest` tag, and release tags never change.
 
 Download `docker-compose.yml` from the matching source release. Put your public

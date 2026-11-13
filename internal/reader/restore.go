@@ -62,7 +62,11 @@ func validateExport(data Export) error {
 			if _, err = topicTag(f.Category); err != nil {
 				return err
 			}
-			if _, err = ParseTags(strings.Join(f.Tags, ",")); err != nil {
+			tags, err := ParseTags(strings.Join(f.Tags, ","))
+			if err != nil {
+				return err
+			}
+			if _, err = withTopic(f.Category, tags); err != nil {
 				return err
 			}
 			if len(f.Title) > 1000 {

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"unicode/utf8"
 )
 
 type FeedGroup struct {
@@ -15,10 +16,14 @@ type FeedGroup struct {
 	FeedIDs   []int64 `json:"feed_ids"`
 }
 
+// A legacy topic can add one tag to a source that already had twelve.
+const maxSourceTags = 13
+const maxTagBytes = maxSourceTags*(40*utf8.UTFMax+1) - 1
+
 func ParseTags(raw string) ([]string, error) {
 	out := []string{}
 	seen := map[string]bool{}
-	if len(raw) > 1000 {
+	if len(raw) > maxTagBytes || !utf8.ValidString(raw) {
 		return nil, errors.New("tags are too long")
 	}
 	for _, part := range strings.Split(raw, ",") {
@@ -33,8 +38,8 @@ func ParseTags(raw string) ([]string, error) {
 			out = append(out, s)
 			seen[s] = true
 		}
-		if len(out) > 12 {
-			return nil, errors.New("use at most 12 tags per source")
+		if len(out) > maxSourceTags {
+			return nil, errors.New("use at most 13 tags per source")
 		}
 	}
 	return out, nil

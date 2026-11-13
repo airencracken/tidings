@@ -13,7 +13,7 @@ feed groups, saved stories and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.9.0](https://github.com/airencracken/tidings/releases/tag/v0.9.0)** · [What's new](docs/release-notes.md)
+Current release: **[0.9.1](https://github.com/airencracken/tidings/releases/tag/v0.9.1)** · [What's new](docs/release-notes.md)
 
 ## Install
 
@@ -81,7 +81,7 @@ this browser.
 
 ## Feed groups and tags
 
-Tags are how you organise sources. Each source can have up to 12 tags; they are
+Tags are how you organise sources. Each source can have up to 13 tags; they are
 case-insensitive, may contain spaces, and are at most 40 characters. Edit them
 under **Sources → Edit tags**. The first tag shows on each story and names the
 source's folder in OPML exports.

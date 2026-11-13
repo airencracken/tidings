@@ -4,6 +4,13 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
+## 0.9.1
+
+- Reading-data exports restore correctly for sources whose topic migration produced thirteen tags. All tags and their order are kept.
+- Sources accept up to thirteen tags when adding, editing and importing. Unicode tags that fit the character limits also fit the input byte limit. Invalid or excessive tags are rejected before storage changes.
+- Color palettes keep Tidings' fonts and heading weights.
+- Uses Comfylib 0.7.2. No database migration is needed.
+
 ## 0.9.0
 
 - **Save for later** replaces **Set aside**.

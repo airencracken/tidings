@@ -2,13 +2,13 @@
 
 [GitHub releases](https://github.com/airencracken/tidings/releases) have Linux
 amd64 and arm64 archives, Debian packages, a source archive and SHA-256
-checksums. The current release is **0.9.0**. To create the first owner, see
+checksums. The current release is **0.9.1**. To create the first owner, see
 [setup](setup.md).
 
 ## Linux archive
 
 Download the archive for your architecture and the checksum file, then run
-`sha256sum -c tidings_0.9.0_checksums.txt --ignore-missing` in that directory.
+`sha256sum -c tidings_0.9.1_checksums.txt --ignore-missing` in that directory.
 The archive holds the program, licences, guides, and service and proxy examples
 under `deploy/`.
 
@@ -19,7 +19,7 @@ installed version.
 ## Debian or Ubuntu
 
 ```sh
-sudo apt install ./tidings_0.9.0_amd64.deb
+sudo apt install ./tidings_0.9.1_amd64.deb
 sudo tidings create-owner --username owner
 sudo systemctl enable --now tidings
 ```

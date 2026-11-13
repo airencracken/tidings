@@ -694,5 +694,13 @@
     "after": "\tif false {",
     "package": "./internal/reader",
     "run": "^TestOwnerChoosesTheSitePalette$"
+  },
+  {
+    "name": "migrated thirteen-tag sources remain importable",
+    "file": "internal/reader/groups.go",
+    "before": "const maxSourceTags = 13",
+    "after": "const maxSourceTags = 12",
+    "package": "./internal/reader",
+    "run": "^TestMigratedTopicsExportRoundTrip$"
   }
 ]
