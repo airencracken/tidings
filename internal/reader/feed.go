@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/airencracken/comfylib/ui"
 	"html"
 	"io"
 	"net/url"
@@ -120,7 +121,7 @@ func plainText(s string, limit int) string { return extractText(s, limit, false)
 func ParseFeed(data []byte, base string, now time.Time) (ParsedFeed, error) {
 	var result ParsedFeed
 	if len(data) > MaxFeedBytes {
-		return result, errors.New("feed is larger than 4 MB")
+		return result, errors.New("feed is larger than " + ui.Size(MaxFeedBytes))
 	}
 	d := xml.NewDecoder(bytes.NewReader(data))
 	d.CharsetReader = charset.NewReaderLabel

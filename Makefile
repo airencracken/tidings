@@ -74,6 +74,7 @@ test-config:
 .PHONY: test-suite-assets
 test-suite-assets: ## Verify shared module integration and deployment contracts
 	python3 scripts/comfy.py check
+	python3 scripts/comfy.py check-docs
 	python3 scripts/comfy.py suite-deployment
 	python3 scripts/comfy.py release-dispatch
 

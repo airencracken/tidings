@@ -25,7 +25,7 @@ func PublicOrigin(raw string) (string, error) {
 
 func (a *App) invitations(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can manage invitations", http.StatusForbidden)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	a.renderInvitations(w, r, "", "")

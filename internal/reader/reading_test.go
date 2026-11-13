@@ -365,9 +365,9 @@ func TestThemeBootstrapPrecedesPagePaint(t *testing.T) {
 			uid = 0
 		}
 		body := h.request(uid, "GET", path, nil).Body.String()
-		bootstrap := strings.Index(body, `<script src="/static/theme.js"></script>`)
+		bootstrap := strings.Index(body, `<script src="/static/comfyware/theme.js"></script>`)
 		styles := strings.Index(body, `<link rel="stylesheet"`)
-		if bootstrap < 0 || styles < bootstrap || strings.Contains(body, `src="/static/theme.js" defer`) {
+		if bootstrap < 0 || styles < bootstrap || strings.Contains(body, `theme.js" defer`) || !strings.Contains(body, `data-theme-key="tidings-theme"`) {
 			t.Fatal("theme can be applied after paint", path)
 		}
 	}

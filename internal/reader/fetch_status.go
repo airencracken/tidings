@@ -78,7 +78,7 @@ func (a *App) fetchOverview(ctx context.Context, uid int64, zones ...string) (fe
 func (a *App) fetchStatus(w http.ResponseWriter, r *http.Request) {
 	status, err := a.fetchOverview(r.Context(), current(r).User.ID, preferredTimezone(r))
 	if err != nil {
-		http.Error(w, "Could not check fetch status", http.StatusServiceUnavailable)
+		a.problem(w, r, http.StatusServiceUnavailable, "Could not check fetch status.", err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

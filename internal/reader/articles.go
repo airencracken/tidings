@@ -92,12 +92,12 @@ func (s *Store) saveArticle(ctx context.Context, uid, id int64, body, rich strin
 func (a *App) fetchArticle(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	entry, err := a.Store.Entry(r.Context(), current(r).User.ID, id)
 	if errors.Is(err, sql.ErrNoRows) {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err != nil {
@@ -126,7 +126,7 @@ func (a *App) fetchArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = a.Store.saveArticle(ctx, current(r).User.ID, id, body, rich); errors.Is(err, sql.ErrNoRows) {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	} else if err != nil {
 		a.fail(w, r, err)

@@ -2,7 +2,10 @@
 package reader
 
 import (
+	"errors"
+
 	"fmt"
+	"github.com/airencracken/comfylib/password"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -215,7 +218,7 @@ func TestTemplateVoiceUsesPlainHouseholdWords(t *testing.T) {
 			t.Errorf("templates still say %q", retired)
 		}
 	}
-	for _, kept := range []string{"reading table", "Save for later", "Saved for later", "Skip", "12 or more characters", "up to 1 MB", "up to 16 MB"} {
+	for _, kept := range []string{"reading table", "Save for later", "Saved for later", "Skip", "12 or more characters", `up to {{uploadLimit "opml"}}`, `up to {{uploadLimit "restore"}}`} {
 		if !strings.Contains(source, kept) {
 			t.Errorf("templates lost %q", kept)
 		}
@@ -231,9 +234,9 @@ func TestRejectedFormsUseTheStyledLayout(t *testing.T) {
 		status int
 		text   string
 	}{
-		{2, "/story/1/state", url.Values{"csrf": {"stale"}}, 403, "Reload the page and try again."},
-		{0, "/login", url.Values{"csrf": {""}, "username": {"alice"}}, 403, "This form has expired"},
-		{2, "/account/keyboard", url.Values{"csrf": {"x"}, "bad": {"%zz"}}, 403, "This form has expired"},
+		{2, "/story/1/state", url.Values{"csrf": {"stale"}}, 403, "Reload it and try again."},
+		{0, "/login", url.Values{"csrf": {""}, "username": {"alice"}}, 403, "Reload it and try again."},
+		{2, "/account/keyboard", url.Values{"csrf": {"x"}, "bad": {"%zz"}}, 403, "Reload it and try again."},
 	} {
 		w := h.request(tc.uid, "POST", tc.path, tc.values)
 		body := w.Body.String()
@@ -250,7 +253,7 @@ func TestRejectedFormsUseTheStyledLayout(t *testing.T) {
 	r.AddCookie(cookieFor(h, 2))
 	w := httptest.NewRecorder()
 	h.app.ServeHTTP(w, r)
-	if w.Code != 400 || !strings.Contains(w.Body.String(), "This form could not be read") || !strings.Contains(w.Body.String(), `class="site-header"`) {
+	if w.Code != 400 || !strings.Contains(w.Body.String(), "That didn&#39;t work") || !strings.Contains(w.Body.String(), `class="site-header"`) {
 		t.Fatal("malformed form not styled", w.Code, w.Body.String())
 	}
 }
@@ -274,23 +277,29 @@ func TestRateLimitedSignInAndJoinStayOnTheirForms(t *testing.T) {
 	}
 }
 
-func TestPasswordRulesMatchTheirCopy(t *testing.T) {
-	for password, ok := range map[string]bool{
-		"elevenchars":                   false,
-		"twelve chars":                  true,
-		"ééééééééééé":                   false, // 11 characters, 22 bytes
-		"éééééééééééé":                  true,  // 12 characters
-		strings.Repeat("a", 72):         true,
-		strings.Repeat("a", 73):         false,
-		strings.Repeat("é", 37):         false, // 37 characters, 74 bytes: too long for bcrypt
-		"\x00\x00\x00\x00\x00\x00short": false,
-	} {
-		err := ValidateCredentials("reader", password)
-		if (err == nil) != ok {
-			t.Errorf("%q: got %v", password, err)
-		}
+// Comfylib owns the password rule; Tidings applies it everywhere an account
+// chooses a password and keeps its own username rule.
+func TestAccountsUseTheSharedPasswordRule(t *testing.T) {
+	if err := ValidateCredentials("reader", "short"); !errors.Is(err, password.ErrTooShort) {
+		t.Fatal(err)
 	}
-	if err := ValidateCredentials("reader", "short"); err == nil || err.Error() != "password must be 12 or more characters" {
+	if err := ValidateCredentials("reader", strings.Repeat("a", password.MaxBytes+1)); !errors.Is(err, password.ErrTooLong) {
+		t.Fatal(err)
+	}
+	if err := ValidateCredentials("no spaces allowed", testPassword); err == nil || errors.Is(err, password.ErrTooShort) {
+		t.Fatal("username rule lost", err)
+	}
+	h := webHarness(t)
+	raw, err := h.store.Invite(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := h.request(0, "POST", "/join", url.Values{"code": {raw}, "username": {"newcomer"}, "password": {"short"}})
+	if w.Code != 400 || !strings.Contains(w.Body.String(), password.ErrTooShort.Error()) {
+		t.Fatal("join does not show the shared message", w.Code)
+	}
+	// A password over bcrypt's limit is refused at sign-in without hashing.
+	if _, err = h.store.Login(t.Context(), "alice", strings.Repeat("x", password.MaxBytes+1)); !errors.Is(err, ErrCredentials) {
 		t.Fatal(err)
 	}
 }

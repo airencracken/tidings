@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/airencracken/comfylib/ui"
 	"image"
 	_ "image/gif"
 	"image/jpeg"
@@ -122,7 +123,7 @@ func downloadImage(ctx context.Context, address string, client *http.Client) ([]
 		return nil, err
 	}
 	if len(data) > imageDownloadLimit {
-		return nil, errors.New("image exceeds 5 MiB")
+		return nil, errors.New("image is larger than " + ui.Size(imageDownloadLimit))
 	}
 	return previewImage(data)
 }

@@ -19,7 +19,7 @@ func (a *App) createGroup(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	household := scope(r)
 	if household && !u.Owner {
-		http.Error(w, "Only owners can create household groups", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	if r.PostFormValue("kind") != "explicit" && r.PostFormValue("kind") != "tag" {
@@ -46,12 +46,12 @@ func (a *App) group(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	g, err := a.Store.Group(r.Context(), u, id)
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err != nil {
@@ -85,7 +85,7 @@ func (a *App) group(w http.ResponseWriter, r *http.Request) {
 func (a *App) saveGroup(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	var ids []int64
@@ -99,7 +99,7 @@ func (a *App) saveGroup(w http.ResponseWriter, r *http.Request) {
 	}
 	err = a.Store.SetGroupMembers(r.Context(), current(r).User, id, ids)
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err != nil {
@@ -111,12 +111,12 @@ func (a *App) saveGroup(w http.ResponseWriter, r *http.Request) {
 func (a *App) deleteGroup(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	err = a.Store.DeleteGroup(r.Context(), current(r).User, id)
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err != nil {
@@ -129,17 +129,17 @@ func (a *App) sourceTags(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	household := scope(r)
 	if household && !u.Owner {
-		http.Error(w, "Only owners can change household tags", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err = a.Store.SetTags(r.Context(), u, id, r.PostFormValue("tags"), household); err != nil {
 		if err == sql.ErrNoRows {
-			http.NotFound(w, r)
+			a.problem(w, r, http.StatusNotFound, "", nil)
 		} else {
 			a.bad(w, r, err.Error())
 		}

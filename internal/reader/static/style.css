@@ -1,32 +1,39 @@
 :root {
   color-scheme: light dark;
-  --ink: light-dark(#293e36, #e2e8dc);
-  --muted: light-dark(#626e65, #a7b4a5);
-  --green: light-dark(#355c48, #aec99c);
-  --green-dark: light-dark(#244333, #c5dcb5);
-  --line: light-dark(#dddcd1, #364339);
-  --paper: light-dark(#fffef9, #202b24);
-  --background: light-dark(#f5f3ea, #171f1a);
-  --soft: light-dark(#e9eddf, #2a372b);
-  --rust: light-dark(#965639, #dbaa85);
-  --button-text: light-dark(#fffef9, #1b2d21);
-  font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Tidings maps its colours to the shared Comfyware tokens once. These are
+     the sage palette's values, so pages look right before palettes.css
+     loads; a chosen palette overrides them. */
+  --comfy-surface: light-dark(#f5f3ea, #171f1a);
+  --comfy-raised: light-dark(#fffef9, #202b24);
+  --comfy-border: light-dark(#dddcd1, #364339);
+  --comfy-control-border: light-dark(#76866f, #7d8f7a);
+  --comfy-text: light-dark(#293e36, #e2e8dc);
+  --comfy-muted: light-dark(#626e65, #a7b4a5);
+  --comfy-accent: light-dark(#355c48, #aec99c);
+  --comfy-accent-text: light-dark(#fffef9, #1b2d21);
+  --comfy-danger: light-dark(#965639, #dbaa85);
+  --comfy-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --comfy-heading-font: Georgia, "Times New Roman", serif;
+  --comfy-heading-weight: 400;
+  --comfy-radius: 9px;
+  --comfy-radius-small: 6px;
+  /* Tidings' own names follow the tokens, so every palette reaches its pages. */
+  --background: var(--comfy-surface);
+  --paper: var(--comfy-raised);
+  --line: var(--comfy-border);
+  --ink: var(--comfy-text);
+  --muted: var(--comfy-muted);
+  --green: var(--comfy-accent);
+  --button-text: var(--comfy-accent-text);
+  --rust: var(--comfy-danger);
+  --soft: color-mix(in srgb, var(--comfy-accent) 10%, var(--comfy-raised));
+  --green-dark: color-mix(in srgb, var(--comfy-accent) 75%, var(--comfy-text));
+  font: 15px/1.65 var(--comfy-font);
   color: var(--ink);
   background: var(--background);
 }
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] { color-scheme: dark; }
-
-/* Comfylib pages (sign-in, join, invitations, metrics) read these tokens.
-   The attribute selector outranks the shared defaults loaded after this file. */
-:root[data-comfy-app="tidings"] {
-  --comfy-ink: var(--ink);
-  --comfy-panel: var(--paper);
-  --comfy-line: var(--line);
-  --comfy-accent: var(--green);
-  --comfy-admin-muted: var(--muted);
-  --danger: var(--rust);
-}
 
 /* Base */
 * { box-sizing: border-box; }
@@ -34,7 +41,7 @@ body { margin: 0; }
 a { color: var(--green); text-underline-offset: 4px; }
 a:hover { color: var(--green-dark); }
 h1, h2, h3, p { margin-top: 0; }
-h1, h2 { font-family: Georgia, "Times New Roman", serif; line-height: 1.2; font-weight: 400; letter-spacing: -.025em; }
+h1, h2 { font-family: var(--comfy-heading-font); line-height: 1.2; font-weight: var(--comfy-heading-weight); letter-spacing: -.025em; }
 h1 { font-size: clamp(32px, 4vw, 46px); margin-bottom: 14px; }
 h2 { font-size: 26px; margin-bottom: 14px; }
 h3 { font-size: 18px; line-height: 1.4; margin-bottom: 12px; }
@@ -43,15 +50,15 @@ button, input, select { font: inherit; }
 button { flex-shrink: 0; }
 button, .button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border: 1px solid var(--green); border-radius: 6px; background: var(--green); color: var(--button-text); font-weight: 600; cursor: pointer; text-decoration: none; line-height: 1.5; }
 button:hover, .button:hover { background: var(--green-dark); color: var(--button-text); }
-button.secondary, .button.secondary { background: transparent; color: var(--green); border-color: light-dark(#aebaaa, #61745b); }
+button.secondary, .button.secondary { background: transparent; color: var(--green); border-color: var(--comfy-control-border); }
 button.secondary:hover, .button.secondary:hover { background: var(--soft); }
-input, select { display: block; width: 100%; min-width: 0; border: 1px solid light-dark(#bfc6b7, #667760); border-radius: 6px; padding: 10px 12px; color: var(--ink); background: light-dark(#fffefb, #19221c); }
+input, select { display: block; width: 100%; min-width: 0; border: 1px solid var(--comfy-control-border); border-radius: 6px; padding: 10px 12px; color: var(--ink); background: var(--paper); }
 label { display: block; font-size: 13px; font-weight: 650; margin: 18px 0 6px; }
 label input, label select { margin-top: 7px; }
 input::placeholder { color: var(--muted); opacity: .9; }
 input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green); flex-shrink: 0; margin: 0; }
 .checkbox { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
-:focus-visible { outline: 3px solid light-dark(#a76a35, #d6ab75); outline-offset: 4px; }
+:focus-visible { outline: 3px solid var(--comfy-accent); outline-offset: 4px; }
 .skip-link { position: absolute; top: -80px; left: 12px; padding: 10px; background: var(--paper); z-index: 5; }
 .skip-link:focus { top: 8px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -59,7 +66,7 @@ dialog { max-width: min(500px, calc(100vw - 40px)); border: 1px solid var(--line
 dialog::backdrop { background: #0007; }
 
 /* Header and footer */
-.site-header { border-bottom: 1px solid var(--line); background: light-dark(#fbfaf3, #1c261f); }
+.site-header { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--comfy-raised) 60%, var(--comfy-surface)); }
 .header-inner { max-width: 1200px; margin: auto; padding: 23px 32px; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
 .brand { display: flex; align-items: center; gap: 13px; text-decoration: none; font: 700 31px/1.2 Georgia, serif; }
 .brand small { display: block; font: 400 12px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .035em; color: var(--muted); margin-top: 5px; }
@@ -68,9 +75,6 @@ dialog::backdrop { background: #0007; }
 .site-header nav > a { text-decoration: none; }
 .site-header nav > a:hover { text-decoration: underline; }
 .site-header form { margin: 0; }
-.theme-picker { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--muted); font-size: 12px; font-weight: 400; }
-.theme-picker[hidden] { display: none; }
-.theme-picker select { width: auto; font-size: 13px; padding: 5px; margin: 0; }
 .text-button { padding: 2px 0; border: 0; background: transparent; color: var(--muted); font-size: 14px; font-weight: 400; }
 .text-button:hover { background: transparent; color: var(--ink); text-decoration: underline; }
 .site-footer { border-top: 1px solid var(--line); max-width: 1136px; margin: auto; padding: 23px 0 28px; display: flex; justify-content: space-between; gap: 20px; font-size: 12px; color: var(--muted); }
@@ -87,7 +91,7 @@ dialog::backdrop { background: #0007; }
 .paper { background: var(--paper); border: 1px solid var(--line); border-radius: 9px; padding: 28px; }
 .narrow { max-width: 590px; margin: 32px auto; padding: 38px; }
 .narrow .button { margin-top: 22px; }
-.notice { padding: 14px 18px; border: 1px solid light-dark(#bcc7b2, #657b55); border-radius: 6px; background: var(--soft); margin-bottom: 25px; }
+.notice { padding: 14px 18px; border: 1px solid var(--comfy-border); border-radius: 6px; background: var(--soft); margin-bottom: 25px; }
 .error { padding: 14px 18px; border: 1px solid var(--rust); border-radius: 6px; background: transparent; margin-bottom: 25px; color: var(--rust); overflow-wrap: anywhere; }
 .demo-notice { font-size: 13px; overflow-wrap: anywhere; }
 .demo-notice small { display: block; margin-top: 6px; color: var(--muted); }
@@ -144,7 +148,7 @@ dialog::backdrop { background: #0007; }
 .story-row { padding: 30px 32px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-columns: minmax(0, 1fr); }
 .story-row + .story-row { border-top: 1px solid var(--line); }
 .story-row:has(.story-image) { grid-template-columns: minmax(0, 1fr) 184px; gap: 28px; }
-.story-row h2 { font-family: Georgia, serif; font-size: 27px; line-height: 1.4; margin-bottom: 14px; max-width: 48ch; overflow-wrap: anywhere; }
+.story-row h2 { font-family: var(--comfy-heading-font); font-size: 27px; line-height: 1.4; margin-bottom: 14px; max-width: 48ch; overflow-wrap: anywhere; }
 .story-row h2 a { color: var(--ink); text-decoration: none; }
 .story-row h2 a:hover { text-decoration: underline; }
 .is-read h2 a { color: var(--muted); }
@@ -200,7 +204,7 @@ dialog::backdrop { background: #0007; }
 .catalog-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .catalog-card { display: flex; flex-direction: column; padding: 24px; }
 .catalog-card > p:not(.eyebrow) { color: var(--muted); font-size: 13px; flex: 1; }
-.catalog-card h3 { font-family: Georgia, serif; font-weight: 400; font-size: 24px; }
+.catalog-card h3 { font-family: var(--comfy-heading-font); font-weight: var(--comfy-heading-weight); font-size: 24px; }
 .catalog-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
 .catalog-bottom > a { font-size: 13px; }
 .small { font-size: 13px; padding: 7px 14px; }
@@ -252,9 +256,9 @@ dialog::backdrop { background: #0007; }
 .welcome-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 90px; max-width: 1000px; margin: 35px auto 30px; align-items: center; }
 .welcome-copy h1 { font-size: clamp(40px, 4.6vw, 62px); line-height: 1.12; margin-bottom: 25px; }
 .welcome-copy > .lede { font-size: 17px; max-width: 410px; }
-.welcome-note { background: var(--soft); border: 1px solid light-dark(#d5ddc3, #4c5d40); border-radius: 3px 3px 28px 3px; padding: 28px 30px; margin-top: 32px; max-width: 390px; }
+.welcome-note { background: var(--soft); border: 1px solid var(--comfy-border); border-radius: 3px 3px 28px 3px; padding: 28px 30px; margin-top: 32px; max-width: 390px; }
 .welcome-note p { font: 24px/1.55 Georgia, serif; margin-bottom: 18px; }
-.welcome-note span { display: block; border-top: 1px solid light-dark(#cbd4bf, #4d5e45); padding-top: 16px; font: italic 15px/1.6 Georgia, serif; color: var(--rust); }
+.welcome-note span { display: block; border-top: 1px solid var(--comfy-border); padding-top: 16px; font: italic 15px/1.6 Georgia, serif; color: var(--rust); }
 .login-paper { padding: 35px; }
 .login-paper h2 { font-size: 32px; }
 .login-paper > .muted { font-size: 14px; }
@@ -272,17 +276,6 @@ dialog::backdrop { background: #0007; }
 .admin-row form { margin-top: 1rem; }
 
 
-/* Shared Comfylib pages, in Tidings type */
-[data-comfy-app="tidings"] :is(.account-page, .invitation-page) :is(h1, h2) { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.025em; color: var(--ink); }
-[data-comfy-app="tidings"] :is(.account-page, .invitation-header) h1 { font-size: 34px; line-height: 1.2; }
-[data-comfy-app="tidings"] :is(.account-page, .invitation-page) h2 { font-size: 24px; line-height: 1.25; }
-[data-comfy-app="tidings"] .login-paper h2 { font-size: 32px; }
-[data-comfy-app="tidings"] main:has(> .comfy-admin-dashboard) { background: var(--background); }
-[data-comfy-app="tidings"] .comfy-admin-dashboard { --comfy-ink: var(--ink); --comfy-panel: var(--paper); --comfy-line: var(--line); --comfy-admin-muted: var(--muted); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-[data-comfy-app="tidings"] .comfy-admin-dashboard h1 { font: 400 clamp(32px, 4vw, 46px)/1.2 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
-[data-comfy-app="tidings"] .comfy-admin-dashboard h2 { font: 400 26px/1.2 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
-[data-comfy-app="tidings"] .comfy-admin-dashboard a { color: var(--green); }
-[data-comfy-app="tidings"] .comfy-admin-dashboard :focus-visible { outline-color: light-dark(#a76a35, #d6ab75); }
 
 @media (max-width: 1000px) {
   .welcome-grid { gap: 40px; }

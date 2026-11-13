@@ -103,7 +103,7 @@ db.commit()
       }).observe(document,{childList:true,subtree:true});
     },saved);
     const firstPaint=await firstPaintContext.newPage();
-    await firstPaint.route('**/static/theme.js',async route=>{await new Promise(resolve=>setTimeout(resolve,150));await route.continue();});
+    await firstPaint.route('**/static/comfyware/theme.js',async route=>{await new Promise(resolve=>setTimeout(resolve,150));await route.continue();});
     for(const route of ['/login','/join','/login']) {
       await firstPaint.goto(origin+route);
       assert.equal(await firstPaint.evaluate(()=>window.firstBodyTheme),saved,'theme changed after body parsing on '+route);
@@ -183,7 +183,7 @@ db.commit()
   assert.equal(await page.getByRole('heading',{name:'Simon Willison',exact:true}).count(),0);
   await page.goto(origin+'/account/invitations');
   for(const theme of ['light','dark']) {
-    await act(page.getByLabel('Theme',{exact:true}), 'selectOption', theme);
+    await act(page.getByLabel('Color theme',{exact:true}), 'selectOption', theme);
     for(const width of invitationWidths) {
       await page.setViewportSize({width,height:1000});
       assertInvitationLayout(await page.evaluate(invitationLayout),width,theme+' invitations');
@@ -221,7 +221,7 @@ db.commit()
   const data=await exported.json();
   assert.equal(data.username,'host');assert.equal(data.version,1);assert.equal(data.stories.length,1);assert.equal(data.feed_groups[0].name,'AI research');
   await member.goto(origin+'/account');
-  await act(member.getByLabel('Tidings JSON file, up to 16 MB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+  await act(member.getByLabel('Tidings JSON file, up to 16.8 MB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
   await member.getByLabel('Merge this file into my personal reading data').check();
   await act(member.getByRole('button',{name:'Merge reading data',exact:true}), 'click');
   await member.goto(origin+'/?view=saved');
@@ -310,7 +310,7 @@ db.commit()
   welcome.on('pageerror',error=>errors.push(String(error)));
   await welcome.goto(origin+'/login');
   for(const theme of ['light','dark']) {
-    await act(welcome.getByLabel('Theme',{exact:true}), 'selectOption', theme);
+    await act(welcome.getByLabel('Color theme',{exact:true}), 'selectOption', theme);
     for(const width of [375,1440]) {
       await welcome.setViewportSize({width,height:1000});
       assert.ok(await welcome.locator('.welcome-mascot').evaluate(img=>img.complete&&img.naturalWidth>0),'mascot did not load');
@@ -322,7 +322,7 @@ db.commit()
   await welcomeContext.close();
   for (const theme of ['light','dark']) {
     await page.goto(origin+'/');
-    await act(page.getByLabel('Theme',{exact:true}), 'selectOption', theme);
+    await act(page.getByLabel('Color theme',{exact:true}), 'selectOption', theme);
     for(const width of [375,768,1024,1440]) {
       await page.setViewportSize({width,height:1000});
       for(const route of ['/','/sources','/groups','/account','/admin','/account/invitations','/story/1']) {

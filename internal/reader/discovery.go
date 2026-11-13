@@ -106,7 +106,7 @@ func discoverLinks(body string, base *url.URL) ([]DiscoveredFeed, error) {
 }
 func (a *App) discover(w http.ResponseWriter, r *http.Request) {
 	if scope(r) && !current(r).User.Owner {
-		http.Error(w, "Only owners can change household sources", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	feeds, err := a.Fetcher.Discover(r.Context(), r.PostFormValue("website"))

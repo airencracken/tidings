@@ -104,7 +104,7 @@ func (s *Store) ManageMember(ctx context.Context, actor, target int64, action, c
 func (a *App) memberAction(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	if !u.Owner {
-		http.Error(w, "Only owners can manage members", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	id, err := pathID(r)
@@ -119,7 +119,7 @@ func (a *App) memberAction(w http.ResponseWriter, r *http.Request) {
 }
 func (a *App) revokeInvite(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can revoke invitations", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	if _, err := a.Store.DB.ExecContext(r.Context(), "UPDATE invites SET revoked=1 WHERE token=?", r.PostFormValue("invitation")); err != nil {

@@ -65,3 +65,7 @@ CREATE TABLE IF NOT EXISTS feed_group_members (
  feed_id INTEGER NOT NULL REFERENCES feeds(id) ON DELETE CASCADE,
  PRIMARY KEY(group_id,feed_id)
 );
+CREATE TABLE IF NOT EXISTS site_palette (
+ id INTEGER PRIMARY KEY CHECK(id=1),
+ palette TEXT NOT NULL DEFAULT '' CHECK(length(palette)<=40)
+);

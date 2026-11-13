@@ -178,21 +178,38 @@ func TestStylesheetKeepsTextAtLeastTwelvePixels(t *testing.T) {
 	}
 }
 
-func TestSharedComfylibPagesUseTidingsTokensAndHeadings(t *testing.T) {
+func TestTidingsMapsItsColoursToTheSharedTokens(t *testing.T) {
 	source := appStylesheet(t)
 	for _, want := range []string{
-		`:root[data-comfy-app="tidings"] {`, "--comfy-ink: var(--ink);", "--comfy-panel: var(--paper);",
-		"--comfy-line: var(--line);", "--comfy-accent: var(--green);", "--comfy-admin-muted: var(--muted);",
-		`[data-comfy-app="tidings"] :is(.account-page, .invitation-page) :is(h1, h2) { font-family: Georgia, "Times New Roman", serif; font-weight: 400;`,
-		`[data-comfy-app="tidings"] .comfy-admin-dashboard h1 { font: 400 `,
-		`[data-comfy-app="tidings"] .comfy-admin-dashboard h2 { font: 400 `,
+		"--comfy-surface: light-dark(#f5f3ea, #171f1a);", "--comfy-raised:", "--comfy-border:", "--comfy-control-border:",
+		"--comfy-text:", "--comfy-muted:", "--comfy-accent:", "--comfy-accent-text:", "--comfy-danger:",
+		`--comfy-heading-font: Georgia, "Times New Roman", serif;`, "--comfy-heading-weight: 400;",
+		"--ink: var(--comfy-text);", "--paper: var(--comfy-raised);", "--green: var(--comfy-accent);",
+		"h1, h2 { font-family: var(--comfy-heading-font);",
 	} {
 		if !strings.Contains(source, want) {
 			t.Errorf("stylesheet is missing %q", want)
 		}
 	}
+	// Overrides of shared pages and the old token names are gone: the shared
+	// styles read the tokens directly.
+	for _, gone := range []string{"--comfy-ink", "--comfy-panel", "--comfy-line", "--comfy-admin-muted", `[data-comfy-app="tidings"] .comfy-admin-dashboard`, `:is(.account-page, .invitation-page)`, ".theme-picker[hidden]"} {
+		if strings.Contains(source, gone) {
+			t.Errorf("stylesheet still has %q", gone)
+		}
+	}
+	// Tidings' own names must never be read back by the tokens, or the
+	// shared fallback would loop.
+	for _, line := range strings.Split(source, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "--comfy-") && strings.Contains(line, "var(--") && !strings.Contains(line, "var(--comfy-") {
+			t.Errorf("token reads an app variable: %s", line)
+		}
+	}
 	page := webHarness(t).request(1, "GET", "/account/invitations", nil).Body.String()
-	if !strings.Contains(page, `data-comfy-app="tidings"`) {
-		t.Fatal("shared pages need the app scope attribute for these overrides")
+	for _, want := range []string{`data-comfy-app="tidings"`, `data-palette="sage"`, `href="/static/comfyware/palettes.css"`} {
+		if !strings.Contains(page, want) {
+			t.Errorf("page is missing %q", want)
+		}
 	}
 }

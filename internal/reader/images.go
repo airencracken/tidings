@@ -48,7 +48,7 @@ func (s *Store) SetImagesEnabled(ctx context.Context, actor int64, enabled bool)
 
 func (a *App) saveImages(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can change feed images", http.StatusForbidden)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	values := r.PostForm["enabled"]

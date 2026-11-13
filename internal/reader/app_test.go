@@ -85,7 +85,7 @@ func TestRoutesAndSecurityHeaders(t *testing.T) {
 			}
 		})
 	}
-	for _, path := range []string{"/login", "/join?code=example", "/healthz", "/static/style.css", "/static/theme.js"} {
+	for _, path := range []string{"/login", "/join?code=example", "/healthz", "/static/style.css", "/static/comfyware/theme.js", "/static/comfyware/palettes.css"} {
 		w := h.request(0, "GET", path, nil)
 		if w.Code != 200 {
 			t.Fatalf("public route %s: %d %s", path, w.Code, w.Body)

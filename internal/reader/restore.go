@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/airencracken/comfylib/ui"
 	"io"
 	"net/http"
 	"strings"
@@ -20,7 +21,7 @@ const MaxRestoreBytes = 16 << 20
 func DecodeExport(b []byte) (Export, error) {
 	var data Export
 	if len(b) > MaxRestoreBytes {
-		return data, errors.New("reading-data file must be 16 MB or smaller")
+		return data, errors.New("reading-data file must be " + ui.Size(MaxRestoreBytes) + " or smaller")
 	}
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.DisallowUnknownFields()

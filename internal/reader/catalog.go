@@ -89,7 +89,7 @@ func (a *App) catalogSettings(ctx context.Context) ([]CatalogCategory, error) {
 
 func (a *App) saveSuggestions(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can change suggested categories", http.StatusForbidden)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	available, err := a.catalogSettings(r.Context())

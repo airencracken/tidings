@@ -11,6 +11,7 @@ import (
 	"github.com/airencracken/comfylib/admin"
 	"github.com/airencracken/comfylib/analytics"
 	"github.com/airencracken/comfylib/displaytime"
+	"github.com/airencracken/comfylib/problem"
 	"github.com/airencracken/comfylib/suite"
 	"html/template"
 	"io"
@@ -78,6 +79,8 @@ type page struct {
 	TimezoneInput                                      *string
 	TimezoneError, TimezoneNotice                      string
 	Overview                                           admin.View
+	PaletteAttrs                                       template.HTMLAttr
+	SitePalette                                        ui.Palette
 	Title, Kind, Error, Notice, CSRF, ReturnTo, Invite string
 	User                                               User
 	Feeds, GroupFeeds                                  []Feed
@@ -114,6 +117,11 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 	}
 	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), config: c, ctx: ctx, mux: http.NewServeMux()}
 	funcs := template.FuncMap{"timezonePreference": displaytime.RenderPreference, "adminSummary": admin.Render,
+		"themePicker": func() template.HTML { return ui.ThemePicker(true) },
+		"palettes":    ui.Palettes,
+		"uploadLimit": func(name string) string {
+			return map[string]string{"opml": ui.Size(MaxOPMLBytes), "restore": ui.Size(MaxRestoreBytes)}[name]
+		},
 		"article":   renderArticle,
 		"cleanLink": CleanArticleURL,
 		"checked": func(n int64) string {
@@ -267,18 +275,18 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, formLimit)
 		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 			if err := r.ParseMultipartForm(formLimit); err != nil {
-				a.formError(w, r, rc, "This form could not be read", "The form was incomplete or too large. Go back and try again.", http.StatusBadRequest)
+				a.problem(w, withRequest(r, rc), http.StatusBadRequest, "", err)
 				return
 			}
 			if r.MultipartForm != nil {
 				defer r.MultipartForm.RemoveAll()
 			}
 		} else if err := r.ParseForm(); err != nil {
-			a.formError(w, r, rc, "This form could not be read", "The form was incomplete or too large. Go back and try again.", http.StatusBadRequest)
+			a.problem(w, withRequest(r, rc), http.StatusBadRequest, "", err)
 			return
 		}
 		if !token.Equal(r.PostFormValue("csrf"), rc.CSRF) {
-			a.formError(w, r, rc, "This form has expired", "Reload the page and try again.", http.StatusForbidden)
+			a.problems().Expired(w, withRequest(r, rc))
 			return
 		}
 	}
@@ -286,11 +294,10 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.NewCrossOriginProtection().Handler(a.activityHandler).ServeHTTP(w, r)
 }
 
-// formError shows a rejected form through the normal page layout. The request
-// context is attached first so the header matches the signed-in state.
-func (a *App) formError(w http.ResponseWriter, r *http.Request, rc requestContext, title, message string, status int) {
-	r = r.WithContext(context.WithValue(r.Context(), contextKey{}, rc))
-	a.render(w, r, page{Title: title, Kind: "error", Error: message, ReturnTo: "/"}, status)
+// withRequest attaches the request context before an early error page, so
+// the header matches the signed-in state.
+func withRequest(r *http.Request, rc requestContext) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), contextKey{}, rc))
 }
 
 func (a *App) routes() {
@@ -334,6 +341,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("POST /account/timezone", a.saveTimezone)
 	a.mux.HandleFunc("GET /admin/metrics", a.metrics)
 	a.mux.HandleFunc("GET /admin", a.admin)
+	a.mux.HandleFunc("POST /admin/palette", a.savePalette)
 	a.mux.HandleFunc("GET /account/invitations", a.invitations)
 	a.mux.HandleFunc("POST /account/restore", a.restorePersonal)
 	a.mux.HandleFunc("POST /account/household", a.groupOptin)
@@ -347,7 +355,20 @@ func (a *App) routes() {
 }
 
 func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int) {
+	if err := a.renderPage(w, r, a.withPageData(r, p), status); err != nil {
+		a.problem(w, r, http.StatusInternalServerError, "", err)
+	}
+}
+
+// withPageData fills the parts of a page every view shares.
+func (a *App) withPageData(r *http.Request, p page) page {
 	p.Demo = a.config.Demo
+	palette, err := a.Store.SitePalette(r.Context())
+	if err != nil {
+		slog.WarnContext(r.Context(), "read site palette", "error", err)
+	}
+	p.PaletteAttrs = ui.PaletteAttrs(palette)
+	p.SitePalette = palette
 	p.Refresh = a.RefreshStatus(current(r).User.ID)
 	if current(r).User.ID > 0 && p.Kind != "metrics" {
 		p.ImagesEnabled, _ = a.Store.ImagesEnabled(r.Context())
@@ -373,15 +394,31 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 	if p.ReturnTo == "" {
 		p.ReturnTo = r.URL.RequestURI()
 	}
+	return p
+}
+
+// renderPage writes a complete page, or nothing when the template fails.
+func (a *App) renderPage(w http.ResponseWriter, r *http.Request, p page, status int) error {
 	var b bytes.Buffer
 	if err := a.templates.ExecuteTemplate(&b, preferredTimezone(r), "layout", p); err != nil {
-		slog.Error("render page", "error", err)
-		http.Error(w, "Could not display this page", 500)
-		return
+		return err
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
 	_, _ = w.Write(b.Bytes())
+	return nil
+}
+
+// problem writes an error page inside the Tidings layout, or JSON for API
+// requests. detail goes to the log only.
+func (a *App) problem(w http.ResponseWriter, r *http.Request, status int, message string, detail error) {
+	a.problems().Write(w, r, status, message, detail)
+}
+
+func (a *App) problems() problem.Writer {
+	return problem.Writer{Layout: func(w http.ResponseWriter, r *http.Request, pg problem.Page) error {
+		return a.renderPage(w, r, a.withPageData(r, page{Title: pg.Title, Kind: "error", Error: pg.Message, ReturnTo: "/"}), pg.Status)
+	}}
 }
 
 // showFetch keeps fetch progress off reading pages. Sources always shows it;
@@ -399,11 +436,10 @@ func showFetch(r *http.Request, kind string, fetch fetchOverview, status Refresh
 }
 
 func (a *App) fail(w http.ResponseWriter, r *http.Request, err error) {
-	slog.Error("request failed", "path", r.URL.Path, "error", err)
-	a.render(w, r, page{Title: "Something went wrong", Kind: "error", Error: "Your change could not be completed. Try again."}, 500)
+	a.problem(w, r, http.StatusInternalServerError, "", err)
 }
 func (a *App) bad(w http.ResponseWriter, r *http.Request, msg string) {
-	a.render(w, r, page{Title: "Please check this", Kind: "error", Error: msg}, 400)
+	a.problem(w, r, http.StatusBadRequest, msg, nil)
 }
 func back(r *http.Request) string {
 	s := r.PostFormValue("return_to")
@@ -414,7 +450,7 @@ func back(r *http.Request) string {
 	return u.RequestURI()
 }
 func notice(r *http.Request) string {
-	return map[string]string{"keyboard": "Your reading preferences were saved.", "images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again."}[r.URL.Query().Get("notice")]
+	return map[string]string{"keyboard": "Your reading preferences were saved.", "images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again.", "palette": "Site colours saved."}[r.URL.Query().Get("notice")]
 }
 func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
@@ -522,7 +558,7 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 	if f.GroupID > 0 {
 		g, e := a.Store.Group(r.Context(), u, f.GroupID)
 		if e == sql.ErrNoRows {
-			http.NotFound(w, r)
+			a.problem(w, r, http.StatusNotFound, "", nil)
 			return
 		}
 		if e != nil {
@@ -609,12 +645,12 @@ func pathID(r *http.Request) (int64, error) {
 func (a *App) story(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	e, err := a.Store.Entry(r.Context(), current(r).User.ID, id)
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err != nil {
@@ -626,7 +662,7 @@ func (a *App) story(w http.ResponseWriter, r *http.Request) {
 func (a *App) state(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	field := r.PostFormValue("field")
@@ -637,7 +673,7 @@ func (a *App) state(w http.ResponseWriter, r *http.Request) {
 	}
 	err = a.Store.SetState(r.Context(), current(r).User.ID, id, field, value == "true")
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
+		a.problem(w, r, http.StatusNotFound, "", nil)
 		return
 	}
 	if err != nil {
@@ -658,7 +694,7 @@ func (a *App) readPage(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := a.Store.MarkPage(r.Context(), current(r).User.ID, ids); err != nil {
 		if err == sql.ErrNoRows {
-			http.NotFound(w, r)
+			a.problem(w, r, http.StatusNotFound, "", nil)
 		} else {
 			a.fail(w, r, err)
 		}
@@ -706,7 +742,7 @@ func (a *App) subscribe(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	group := scope(r)
 	if group && !u.Owner {
-		http.Error(w, "Only owners can change household sources", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	f := Feed{URL: r.PostFormValue("url")}
@@ -731,7 +767,7 @@ func (a *App) unsubscribe(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	group := scope(r)
 	if group && !u.Owner {
-		http.Error(w, "Only owners can change household sources", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	id, err := pathID(r)
@@ -753,7 +789,7 @@ func (a *App) importOPML(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	group := scope(r)
 	if group && !u.Owner {
-		http.Error(w, "Only owners can change household sources", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	f, _, err := r.FormFile("opml")
@@ -762,7 +798,7 @@ func (a *App) importOPML(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer f.Close()
-	b, err := io.ReadAll(io.LimitReader(f, (1<<20)+1))
+	b, err := io.ReadAll(io.LimitReader(f, MaxOPMLBytes+1))
 	if err != nil {
 		a.bad(w, r, "Could not read this file")
 		return
@@ -833,7 +869,7 @@ func adminReturn(r *http.Request, suffix string) string {
 
 func (a *App) admin(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can administer this household", http.StatusForbidden)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	a.accountPage(w, r, "admin", "Admin settings")
@@ -889,7 +925,7 @@ func (a *App) password(w http.ResponseWriter, r *http.Request) {
 }
 func (a *App) invite(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can invite members", 403)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	base, err := PublicOrigin(a.config.BaseURL)
@@ -972,11 +1008,11 @@ func (a *App) refresh(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) forceRefresh(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can fetch all feeds", http.StatusForbidden)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 	if !a.startRefresh(0, true, true) {
-		http.Error(w, "The server is shutting down. Try again after it restarts.", http.StatusServiceUnavailable)
+		a.problem(w, r, http.StatusServiceUnavailable, "The server is shutting down. Try again after it restarts.", nil)
 		return
 	}
 	http.Redirect(w, r, adminReturn(r, "?notice=refresh-all"), http.StatusSeeOther)

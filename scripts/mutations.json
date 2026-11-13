@@ -678,5 +678,21 @@
     "after": "if false && topicRedirect(w, r) {",
     "package": "./internal/reader",
     "run": "^TestTopicBookmarksRedirectToTagFilters$"
+  },
+  {
+    "name": "site palette is validated",
+    "file": "internal/reader/palette.go",
+    "before": "palette, err := ui.ParsePalette(name)",
+    "after": "palette, err := ui.Palette(name), error(nil)",
+    "package": "./internal/reader",
+    "run": "^TestOwnerChoosesTheSitePalette$"
+  },
+  {
+    "name": "only owners change the site palette",
+    "file": "internal/reader/palette.go",
+    "before": "\tif !current(r).User.Owner {",
+    "after": "\tif false {",
+    "package": "./internal/reader",
+    "run": "^TestOwnerChoosesTheSitePalette$"
   }
 ]

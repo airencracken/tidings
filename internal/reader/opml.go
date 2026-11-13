@@ -6,7 +6,12 @@ import (
 	"errors"
 	"io"
 	"strings"
+
+	"github.com/airencracken/comfylib/ui"
 )
+
+// MaxOPMLBytes bounds an uploaded OPML file.
+const MaxOPMLBytes = 1 << 20
 
 type outline struct {
 	Text     string    `xml:"text,attr"`
@@ -23,8 +28,8 @@ type opmlDoc struct {
 }
 
 func ParseOPML(data []byte) ([]Feed, error) {
-	if len(data) > 1<<20 {
-		return nil, errors.New("OPML file must be 1 MB or smaller")
+	if len(data) > MaxOPMLBytes {
+		return nil, errors.New("OPML file must be " + ui.Size(MaxOPMLBytes) + " or smaller")
 	}
 	// Check depth before recursive decoding, including unrecognized elements.
 	d := xml.NewDecoder(bytes.NewReader(data))

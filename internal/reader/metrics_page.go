@@ -9,7 +9,7 @@ import (
 
 func (a *App) metrics(w http.ResponseWriter, r *http.Request) {
 	if !current(r).User.Owner {
-		http.Error(w, "Only owners can view instance metrics", http.StatusForbidden)
+		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
 

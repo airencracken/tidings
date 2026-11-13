@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	comfypassword "github.com/airencracken/comfylib/password"
 	"github.com/airencracken/comfylib/ratelimit"
 	"regexp"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/airencracken/comfylib/token"
 	"golang.org/x/crypto/bcrypt"
@@ -24,15 +24,13 @@ func checkPassword(hash []byte, password string) error {
 	return bcrypt.CompareHashAndPassword(hash, []byte(password))
 }
 
-func ValidateCredentials(username, password string) error {
+func ValidateCredentials(username, secret string) error {
 	if !usernameRE.MatchString(username) {
 		return errors.New("username must be 2–40 letters, numbers, underscores or hyphens")
 	}
-	if utf8.RuneCountInString(password) < 12 {
-		return errors.New("password must be 12 or more characters")
-	}
-	if len(password) > 72 {
-		return errors.New("password is too long; use a shorter phrase")
+	// Comfylib owns the shared rule: 12 characters, at most 72 bytes.
+	if err := comfypassword.Validate(secret); err != nil {
+		return err
 	}
 	return nil
 }
@@ -80,6 +78,9 @@ func (s *Store) SetPassword(ctx context.Context, username, password string) erro
 }
 
 func (s *Store) Login(ctx context.Context, username, password string) (string, error) {
+	if !comfypassword.Fits(password) {
+		return "", ErrCredentials
+	}
 	var id int64
 	var hash []byte
 	err := s.DB.QueryRowContext(ctx, "SELECT id,password FROM users WHERE username=? AND suspended=0", username).Scan(&id, &hash)
