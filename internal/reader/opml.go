@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
+	"strings"
 )
 
 type outline struct {
@@ -72,8 +73,8 @@ func ParseOPML(data []byte) ([]Feed, error) {
 				if err != nil {
 					return err
 				}
-				c, err := category(cat)
-				if err != nil {
+				c := strings.TrimSpace(cat)
+				if _, err := topicTag(c); err != nil {
 					return err
 				}
 				out = append(out, Feed{URL: u, Title: label, Category: c})
@@ -101,6 +102,12 @@ func EncodeOPML(feeds []Feed) ([]byte, error) {
 	d := opmlDoc{Version: "2.0", Title: "Tidings subscriptions"}
 	indexes := map[string]int{}
 	for _, f := range feeds {
+		// A source's first tag names its folder; untagged sources stay at
+		// the top level, so importing them adds no tag.
+		if f.Category == "" {
+			d.Outlines = append(d.Outlines, outline{Text: f.Title, Title: f.Title, Type: "rss", URL: f.URL})
+			continue
+		}
 		i, ok := indexes[f.Category]
 		if !ok {
 			i = len(d.Outlines)

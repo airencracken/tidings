@@ -48,20 +48,17 @@ func TestSubscribePreservesMetadataAndExplicitEdits(t *testing.T) {
 	if err := s.SetTags(ctx, u, f.ID, "weekend, custom", false); err != nil {
 		t.Fatal(err)
 	}
-	if err := s.SetTopic(ctx, u, f.ID, "My topic", false); err != nil {
-		t.Fatal(err)
-	}
 	f.Category = "Changed"
 	f.Tags = []string{"replacement"}
 	if err := s.Subscribe(ctx, 2, []Feed{f}, false); err != nil {
 		t.Fatal(err)
 	}
 	feeds, err := s.Feeds(ctx, 2, false)
-	if err != nil || feeds[0].Category != "My topic" || strings.Join(feeds[0].Tags, ",") != "custom,weekend" {
+	if err != nil || feeds[0].Category != "weekend" || strings.Join(feeds[0].Tags, ",") != "weekend,custom" {
 		t.Fatalf("duplicate reset metadata: %+v %v", feeds, err)
 	}
-	if err = s.SetTopic(ctx, User{ID: 3}, f.ID, "Other", false); err != sql.ErrNoRows {
-		t.Fatal("cross account topic", err)
+	if err = s.SetTags(ctx, User{ID: 3}, f.ID, "other", false); err != sql.ErrNoRows {
+		t.Fatal("cross account tags", err)
 	}
 	g, err := s.CreateGroup(ctx, u, "Before", "", false)
 	if err != nil {
@@ -233,7 +230,7 @@ func TestSchemaV1Upgrade(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = db.Exec(`DROP TABLE article_copies;ALTER TABLE states DROP COLUMN skipped;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;DROP INDEX entries_import_owner;ALTER TABLE entries DROP COLUMN import_owner;ALTER TABLE entries DROP COLUMN original_key;ALTER TABLE users DROP COLUMN suspended;ALTER TABLE invites DROP COLUMN revoked;PRAGMA user_version=1`); err != nil {
+	if _, err = db.Exec(`DROP TABLE article_copies;ALTER TABLE states DROP COLUMN skipped;ALTER TABLE subscription_tags DROP COLUMN position;ALTER TABLE household_tags DROP COLUMN position;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;ALTER TABLE entries DROP COLUMN image_url;DROP TABLE instance_options;DROP INDEX entries_import_owner;ALTER TABLE entries DROP COLUMN import_owner;ALTER TABLE entries DROP COLUMN original_key;ALTER TABLE users DROP COLUMN suspended;ALTER TABLE invites DROP COLUMN revoked;PRAGMA user_version=1`); err != nil {
 		t.Fatal(err)
 	}
 	db.Close()
@@ -243,7 +240,7 @@ func TestSchemaV1Upgrade(t *testing.T) {
 	}
 	defer s.Close()
 	var n int
-	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&n); err != nil || n != 6 {
+	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&n); err != nil || n != 7 {
 		t.Fatal(n, err)
 	}
 }
@@ -341,7 +338,7 @@ func TestPersonalRestoreRoundTripIsolationAndAtomicity(t *testing.T) {
 }
 func TestNewRoutesAndCSRF(t *testing.T) {
 	h := webHarness(t)
-	for _, path := range []string{"/sources/discover", "/sources/1/topic", "/groups/1/rename", "/account/restore", "/account/invitations/revoke", "/account/members/2"} {
+	for _, path := range []string{"/sources/discover", "/groups/1/rename", "/account/restore", "/account/invitations/revoke", "/account/members/2"} {
 		w := h.request(2, "POST", path, url.Values{"csrf": {"invalid"}})
 		if w.Code != 403 {
 			t.Fatal(path, w.Code)

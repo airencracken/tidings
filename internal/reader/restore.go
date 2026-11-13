@@ -58,7 +58,7 @@ func validateExport(data Export) error {
 			}
 			sources[f.ID] = address
 			urls[address] = f.ID
-			if _, err = category(f.Category); err != nil {
+			if _, err = topicTag(f.Category); err != nil {
 				return err
 			}
 			if _, err = ParseTags(strings.Join(f.Tags, ",")); err != nil {
@@ -150,8 +150,7 @@ func (s *Store) RestorePersonal(ctx context.Context, u User, data Export) error 
 	}
 	for _, f := range data.Feeds {
 		id := ids[f.ID]
-		topic, _ := category(f.Category)
-		res, e := tx.ExecContext(ctx, "INSERT INTO subscriptions(user_id,feed_id,category) VALUES(?,?,?) ON CONFLICT(user_id,feed_id) DO NOTHING", u.ID, id, topic)
+		res, e := tx.ExecContext(ctx, "INSERT INTO subscriptions(user_id,feed_id) VALUES(?,?) ON CONFLICT(user_id,feed_id) DO NOTHING", u.ID, id)
 		if e != nil {
 			return e
 		}
@@ -161,6 +160,8 @@ func (s *Store) RestorePersonal(ctx context.Context, u User, data Export) error 
 		}
 		if count > 0 {
 			tags, _ := ParseTags(strings.Join(f.Tags, ","))
+			// Older exports carry a topic; it becomes the first tag.
+			tags, _ = withTopic(f.Category, tags)
 			if err = writeTags(ctx, tx, u.ID, id, tags, false); err != nil {
 				return err
 			}

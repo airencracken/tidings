@@ -110,7 +110,7 @@ func TestHomeFiltersSitInADisclosureThatOpensWhenActive(t *testing.T) {
 	if strings.Index(closed, "filter-disclosure") > strings.Index(closed, "story-list") {
 		t.Fatal("stories should lead the reading column")
 	}
-	for _, query := range []string{"q=tools", "topic=General", fmt.Sprintf("feed=%d", f.ID), "view=all&q=%3Cscript%3E"} {
+	for _, query := range []string{"q=tools", "tag=tech", fmt.Sprintf("feed=%d", f.ID), "view=all&q=%3Cscript%3E"} {
 		page := h.request(2, "GET", "/?"+query, nil)
 		if page.Code != 200 || !strings.Contains(page.Body.String(), `<details class="filter-disclosure" open><summary>Filter</summary>`) {
 			t.Fatal("active filter left the disclosure closed", query, page.Code)
@@ -119,7 +119,7 @@ func TestHomeFiltersSitInADisclosureThatOpensWhenActive(t *testing.T) {
 			t.Fatal("search text was not escaped")
 		}
 	}
-	for _, bad := range []string{"feed=abc", "feed=-1", "topic=" + strings.Repeat("x", 161), "q=" + strings.Repeat("x", 301)} {
+	for _, bad := range []string{"feed=abc", "feed=-1", "tag=" + strings.Repeat("x", 161), "q=" + strings.Repeat("x", 301)} {
 		if w := h.request(2, "GET", "/?"+bad, nil); w.Code != 400 {
 			t.Fatal("bad filter accepted", bad, w.Code)
 		}

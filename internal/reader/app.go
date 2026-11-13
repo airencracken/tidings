@@ -17,6 +17,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -84,7 +85,7 @@ type page struct {
 	Filter                                             Filter
 	More                                               bool
 	Previous, Next                                     string
-	Topics                                             []string
+	Tags                                               []string
 	Suggestions                                        []Suggestion
 	GroupScope                                         bool
 	Date                                               string
@@ -313,7 +314,6 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /sources", a.sources)
 	a.mux.HandleFunc("POST /sources", a.subscribe)
 	a.mux.HandleFunc("POST /sources/discover", a.discover)
-	a.mux.HandleFunc("POST /sources/{id}/topic", a.sourceTopic)
 	a.mux.HandleFunc("POST /groups/{id}/rename", a.renameGroup)
 	a.mux.HandleFunc("POST /account/members/{id}", a.memberAction)
 	a.mux.HandleFunc("POST /account/invitations/revoke", a.revokeInvite)
@@ -417,15 +417,15 @@ func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
 func parseFilter(r *http.Request) (Filter, error) {
 	q := r.URL.Query()
-	f := Filter{View: q.Get("view"), Query: strings.TrimSpace(q.Get("q")), Category: q.Get("topic")}
+	f := Filter{View: q.Get("view"), Query: strings.TrimSpace(q.Get("q")), Tag: q.Get("tag")}
 	if f.View == "" {
 		f.View = "unread"
 	}
 	if f.View != "unread" && f.View != "all" && f.View != "saved" && f.View != "group" && f.View != "skipped" {
 		return f, errors.New("unknown reading shelf")
 	}
-	if len(f.Query) > 300 || len(f.Category) > 160 {
-		return f, errors.New("search or topic is too long")
+	if len(f.Query) > 300 || len(f.Tag) > 160 {
+		return f, errors.New("search or tag is too long")
 	}
 	if q.Get("page") != "" {
 		n, e := strconv.Atoi(q.Get("page"))
@@ -479,8 +479,33 @@ func parseFilter(r *http.Request) (Filter, error) {
 	return f, nil
 }
 
+// topicRedirect maps a bookmarked Topic filter to the equivalent tag filter.
+// Topics became each source's first tag in schema 7.
+func topicRedirect(w http.ResponseWriter, r *http.Request) bool {
+	q := r.URL.Query()
+	if _, ok := q["topic"]; !ok {
+		return false
+	}
+	topic := q.Get("topic")
+	q.Del("topic")
+	if len(topic) <= 160 {
+		if tag, err := topicTag(topic); err == nil && tag != "" && q.Get("tag") == "" {
+			q.Set("tag", tag)
+		}
+	}
+	target := "/"
+	if encoded := q.Encode(); encoded != "" {
+		target += "?" + encoded
+	}
+	http.Redirect(w, r, target, http.StatusMovedPermanently)
+	return true
+}
+
 func (a *App) home(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
+	if topicRedirect(w, r) {
+		return
+	}
 	f, err := parseFilter(r)
 	if err != nil {
 		a.bad(w, r, err.Error())
@@ -545,12 +570,15 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 	seen := map[string]bool{}
 	for _, list := range [][]Feed{p.Feeds, p.GroupFeeds} {
 		for _, feed := range list {
-			if !seen[feed.Category] {
-				p.Topics = append(p.Topics, feed.Category)
-				seen[feed.Category] = true
+			for _, tag := range feed.Tags {
+				if !seen[tag] {
+					p.Tags = append(p.Tags, tag)
+					seen[tag] = true
+				}
 			}
 		}
 	}
+	sort.Strings(p.Tags)
 	query := r.URL.Query()
 	if len(p.Entries) > 0 {
 		last := p.Entries[len(p.Entries)-1]
@@ -678,7 +706,7 @@ func (a *App) subscribe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Only owners can change household sources", 403)
 		return
 	}
-	f := Feed{URL: r.PostFormValue("url"), Category: r.PostFormValue("category")}
+	f := Feed{URL: r.PostFormValue("url")}
 	var err error
 	f.Tags, err = ParseTags(r.PostFormValue("tags"))
 	if err != nil {

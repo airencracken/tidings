@@ -154,7 +154,8 @@ dialog::backdrop { background: #0007; }
 .story-meta { display: flex; gap: 10px 15px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-bottom: 14px; }
 .story-meta > a { font-size: 13px; font-weight: 650; text-decoration: none; }
 .story-meta > time { margin-left: auto; }
-.story-meta > span:first-of-type { background: var(--soft); padding: 2px 8px; border-radius: 3px; }
+.story-meta > .story-tag { background: var(--soft); padding: 2px 8px; border-radius: 3px; color: var(--muted); font-weight: 400; text-decoration: none; }
+.story-meta > .story-tag:hover { color: var(--ink); text-decoration: underline; }
 .excerpt { color: var(--muted); font-size: 15px; line-height: 1.75; max-width: 66ch; margin-bottom: 18px; overflow-wrap: anywhere; }
 .story-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; }
 .story-actions form { margin: 0; }

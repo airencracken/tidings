@@ -331,8 +331,8 @@ func TestSearchPaginationAndTopics(t *testing.T) {
 			t.Errorf("search %q got %d want %d err %v", query, len(got), want, err)
 		}
 	}
-	if got, _, err := s.Entries(ctx, 2, Filter{View: "all", Category: "AI"}); err != nil || len(got) != 0 {
-		t.Fatal("topic filter ignored")
+	if got, _, err := s.Entries(ctx, 2, Filter{View: "all", Tag: "ai"}); err != nil || len(got) != 0 {
+		t.Fatal("tag filter ignored")
 	}
 }
 

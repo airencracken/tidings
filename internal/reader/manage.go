@@ -132,27 +132,6 @@ func (a *App) revokeInvite(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/account/invitations", 303)
 }
-func (s *Store) SetTopic(ctx context.Context, u User, fid int64, raw string, household bool) error {
-	topic, err := category(raw)
-	if err != nil {
-		return err
-	}
-	q := "UPDATE subscriptions SET category=? WHERE user_id=? AND feed_id=?"
-	args := []any{topic, u.ID, fid}
-	if household {
-		q = "UPDATE group_feeds SET category=? WHERE feed_id=? AND EXISTS(SELECT 1 FROM users WHERE id=? AND owner=1 AND suspended=0)"
-		args = []any{topic, fid, u.ID}
-	}
-	res, err := s.DB.ExecContext(ctx, q, args...)
-	if err != nil {
-		return err
-	}
-	n, err := res.RowsAffected()
-	if err == nil && n == 0 {
-		return sql.ErrNoRows
-	}
-	return err
-}
 func (s *Store) RenameGroup(ctx context.Context, u User, id int64, name string) error {
 	name = strings.TrimSpace(name)
 	if name == "" || len([]rune(name)) > 60 || strings.ContainsAny(name, "\r\n\x00") {
@@ -167,21 +146,6 @@ func (s *Store) RenameGroup(ctx context.Context, u User, id int64, name string) 
 		return sql.ErrNoRows
 	}
 	return err
-}
-func (a *App) sourceTopic(w http.ResponseWriter, r *http.Request) {
-	id, err := pathID(r)
-	if err == nil {
-		err = a.Store.SetTopic(r.Context(), current(r).User, id, r.PostFormValue("category"), scope(r))
-	}
-	if err != nil {
-		a.bad(w, r, err.Error())
-		return
-	}
-	to := "/sources"
-	if scope(r) {
-		to += "?scope=household"
-	}
-	http.Redirect(w, r, to, 303)
 }
 func (a *App) renameGroup(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)

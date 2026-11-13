@@ -50,12 +50,13 @@ func writeTags(ctx context.Context, tx *sql.Tx, uid, fid int64, tags []string, h
 	if _, err := tx.ExecContext(ctx, q, args...); err != nil {
 		return err
 	}
-	for _, tag := range tags {
-		q = "INSERT INTO subscription_tags(user_id,feed_id,tag) VALUES(?,?,?)"
-		args = []any{uid, fid, tag}
+	// Position keeps the order the reader typed; the first tag leads.
+	for position, tag := range tags {
+		q = "INSERT INTO subscription_tags(user_id,feed_id,tag,position) VALUES(?,?,?,?)"
+		args = []any{uid, fid, tag, position}
 		if household {
-			q = "INSERT INTO household_tags(feed_id,tag) VALUES(?,?)"
-			args = []any{fid, tag}
+			q = "INSERT INTO household_tags(feed_id,tag,position) VALUES(?,?,?)"
+			args = []any{fid, tag, position}
 		}
 		if _, err := tx.ExecContext(ctx, q, args...); err != nil {
 			return err

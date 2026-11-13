@@ -291,10 +291,18 @@ db.commit()
   await act(page.getByLabel('Search suggested sources',{exact:true}), 'fill', 'zzzzabsent');
   await act(page.getByRole('button',{name:'Find sources',exact:true}), 'click');
   assert.equal(await page.locator('.catalog-card').count(),0);
-  await act(page.locator('summary').filter({hasText:'Edit tags and topic'}).first(), 'click');
-  await act(page.getByLabel('Topic',{exact:true}).last(), 'fill', 'Research');
-  await act(page.getByRole('button',{name:'Save topic',exact:true}), 'click');
-  assert.equal(await page.locator('.source-row .eyebrow').first().textContent(),'Research');
+  // Tags are a source's only organisation; the first one leads.
+  assert.equal(await page.getByLabel('Topic',{exact:true}).count(),0);
+  await act(page.locator('summary').filter({hasText:'Edit tags'}).first(), 'click');
+  await act(page.locator('.source-row').first().getByLabel('Tags, separated by commas',{exact:false}), 'fill', 'Research, weekend');
+  await act(page.getByRole('button',{name:'Save tags',exact:true}).first(), 'click');
+  assert.equal(await page.locator('.source-row .feed-tags span').first().textContent(),'research');
+  // An old Topic bookmark lands on the equivalent tag filter.
+  await page.goto(origin+'/?view=all&topic=Research');
+  assert.equal(new URL(page.url()).searchParams.get('tag'),'research');
+  assert.equal(await page.locator('details.filter-disclosure').evaluate(disclosure=>disclosure.open),true);
+  assert.equal(await page.locator('#tag').inputValue(),'research');
+  assert.ok(await page.locator('.story-row').count()>0);
   const screenshotDir = process.env.TIDINGS_SCREENSHOT_DIR;
   if(screenshotDir) await mkdir(screenshotDir,{recursive:true});
   const welcomeContext=await browser.newContext();

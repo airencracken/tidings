@@ -67,7 +67,7 @@ type Feed struct {
 	Tags      []string `json:"tags"`
 }
 type Filter struct {
-	View, Query, Category     string
+	View, Query, Tag          string
 	FeedID                    int64
 	Page                      int
 	Before                    int64
@@ -128,7 +128,7 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 6 {
+	if version > 7 {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
@@ -149,8 +149,11 @@ func OpenStore(dir string) (store *Store, failure error) {
 	if err == nil && version < 6 {
 		_, err = tx.Exec(migrationV6)
 	}
+	if err == nil && version < 7 {
+		err = migrateTopicsToTags(context.Background(), tx)
+	}
 	if err == nil {
-		_, err = tx.Exec("PRAGMA user_version=6")
+		_, err = tx.Exec("PRAGMA user_version=7")
 	}
 	if err == nil {
 		err = tx.Commit()
@@ -173,17 +176,6 @@ func OpenStore(dir string) (store *Store, failure error) {
 	return &Store{DB: db, lock: lock, Directory: dir}, nil
 }
 
-func category(s string) (string, error) {
-	s = strings.TrimSpace(s)
-	if s == "" {
-		s = "General"
-	}
-	if len([]rune(s)) > 40 || strings.ContainsAny(s, "\r\n\x00") {
-		return "", errors.New("topic must be 1–40 characters on one line")
-	}
-	return s, nil
-}
-
 // Subscriptions, including an entire OPML import, are committed together.
 func (s *Store) Subscribe(ctx context.Context, uid int64, feeds []Feed, group bool) error {
 	if len(feeds) > 200 {
@@ -195,14 +187,12 @@ func (s *Store) Subscribe(ctx context.Context, uid int64, feeds []Feed, group bo
 		if err != nil {
 			return err
 		}
-		feeds[i].Category, err = category(feeds[i].Category)
+		feeds[i].Tags, err = ParseTags(strings.Join(feeds[i].Tags, ","))
 		if err != nil {
 			return err
 		}
-		if len(feeds[i].Tags) == 0 {
-			feeds[i].Tags = []string{feeds[i].Category}
-		}
-		feeds[i].Tags, err = ParseTags(strings.Join(feeds[i].Tags, ","))
+		// An OPML folder or an old export's topic becomes the first tag.
+		feeds[i].Tags, err = withTopic(feeds[i].Category, feeds[i].Tags)
 		if err != nil {
 			return err
 		}
@@ -258,9 +248,9 @@ func (s *Store) Subscribe(ctx context.Context, uid int64, feeds []Feed, group bo
 			return err
 		}
 		if group {
-			_, err = tx.ExecContext(ctx, "INSERT INTO group_feeds(feed_id,category) SELECT id,? FROM feeds WHERE url=? ON CONFLICT(feed_id) DO NOTHING", f.Category, f.URL)
+			_, err = tx.ExecContext(ctx, "INSERT INTO group_feeds(feed_id) SELECT id FROM feeds WHERE url=? ON CONFLICT(feed_id) DO NOTHING", f.URL)
 		} else {
-			_, err = tx.ExecContext(ctx, "INSERT INTO subscriptions(user_id,feed_id,category) SELECT ?,id,? FROM feeds WHERE url=? ON CONFLICT(user_id,feed_id) DO NOTHING", uid, f.Category, f.URL)
+			_, err = tx.ExecContext(ctx, "INSERT INTO subscriptions(user_id,feed_id) SELECT ?,id FROM feeds WHERE url=? ON CONFLICT(user_id,feed_id) DO NOTHING", uid, f.URL)
 		}
 		if err != nil {
 			return err
@@ -283,10 +273,10 @@ func (s *Store) Feeds(ctx context.Context, uid int64, group bool) ([]Feed, error
 }
 
 func feedList(ctx context.Context, db queryer, uid int64, group bool) ([]Feed, error) {
-	q := "SELECT f.id,f.url,f.title,s.category,f.etag,f.modified,f.checked,f.next_check,f.error,(SELECT json_group_array(tag) FROM subscription_tags t WHERE t.user_id=s.user_id AND t.feed_id=f.id) FROM feeds f JOIN subscriptions s ON s.feed_id=f.id WHERE s.user_id=? ORDER BY s.category,f.title"
+	q := "SELECT f.id,f.url,f.title,f.etag,f.modified,f.checked,f.next_check,f.error,(SELECT json_group_array(tag) FROM (SELECT tag FROM subscription_tags t WHERE t.user_id=s.user_id AND t.feed_id=f.id ORDER BY t.position,t.tag)) FROM feeds f JOIN subscriptions s ON s.feed_id=f.id WHERE s.user_id=? ORDER BY f.title,f.id"
 	args := []any{uid}
 	if group {
-		q = "SELECT f.id,f.url,f.title,g.category,f.etag,f.modified,f.checked,f.next_check,f.error,(SELECT json_group_array(tag) FROM household_tags t WHERE t.feed_id=f.id) FROM feeds f JOIN group_feeds g ON g.feed_id=f.id ORDER BY g.category,f.title"
+		q = "SELECT f.id,f.url,f.title,f.etag,f.modified,f.checked,f.next_check,f.error,(SELECT json_group_array(tag) FROM (SELECT tag FROM household_tags t WHERE t.feed_id=f.id ORDER BY t.position,t.tag)) FROM feeds f JOIN group_feeds g ON g.feed_id=f.id ORDER BY f.title,f.id"
 		args = nil
 	}
 	rows, err := db.QueryContext(ctx, q, args...)
@@ -299,11 +289,16 @@ func feedList(ctx context.Context, db queryer, uid int64, group bool) ([]Feed, e
 		var f Feed
 		f.Group = group
 		var tags string
-		if err = rows.Scan(&f.ID, &f.URL, &f.Title, &f.Category, &f.ETag, &f.Modified, &f.Checked, &f.NextCheck, &f.Error, &tags); err != nil {
+		if err = rows.Scan(&f.ID, &f.URL, &f.Title, &f.ETag, &f.Modified, &f.Checked, &f.NextCheck, &f.Error, &tags); err != nil {
 			return nil, err
 		}
 		if err = json.Unmarshal([]byte(tags), &f.Tags); err != nil {
 			return nil, err
+		}
+		// Exports name the first tag as the category, so earlier versions
+		// that still use topics import the same organisation.
+		if len(f.Tags) > 0 {
+			f.Category = f.Tags[0]
 		}
 		out = append(out, f)
 	}
@@ -338,9 +333,9 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 		where += " AND e.feed_id=?"
 		args = append(args, f.FeedID)
 	}
-	if f.Category != "" {
-		where += ` AND (EXISTS(SELECT 1 FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id AND sub.category=?) OR EXISTS(SELECT 1 FROM group_feeds g JOIN users u ON u.id=? WHERE u.group_optin=1 AND g.feed_id=e.feed_id AND g.category=?))`
-		args = append(args, uid, f.Category, uid, f.Category)
+	if f.Tag != "" {
+		where += ` AND (EXISTS(SELECT 1 FROM subscription_tags t WHERE t.user_id=? AND t.feed_id=e.feed_id AND t.tag=?) OR EXISTS(SELECT 1 FROM household_tags t JOIN users u ON u.id=? WHERE u.group_optin=1 AND t.feed_id=e.feed_id AND t.tag=?))`
+		args = append(args, uid, f.Tag, uid, f.Tag)
 	}
 	if f.GroupID > 0 {
 		where += " AND " + groupMatch
@@ -371,7 +366,7 @@ func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool
 			order = "ASC"
 		}
 	}
-	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),coalesce(st.skipped,0),f.title,coalesce((SELECT sub.category FROM subscriptions sub WHERE sub.user_id=? AND sub.feed_id=e.feed_id),(SELECT g.category FROM group_feeds g WHERE g.feed_id=e.feed_id),'General') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published ` + order + `,e.id ` + order + ` LIMIT 31 OFFSET ?`
+	q := `SELECT e.id,e.feed_id,coalesce(nullif(e.original_key,''),e.key),e.title,e.url,e.body,e.body_html,e.image_url,e.published,coalesce(st.read,0),coalesce(st.saved,0),coalesce(st.skipped,0),f.title,coalesce((SELECT t.tag FROM subscription_tags t WHERE t.user_id=? AND t.feed_id=e.feed_id ORDER BY t.position,t.tag LIMIT 1),(SELECT t.tag FROM household_tags t WHERE t.feed_id=e.feed_id ORDER BY t.position,t.tag LIMIT 1),'') FROM entries e JOIN feeds f ON f.id=e.feed_id LEFT JOIN states st ON st.entry_id=e.id AND st.user_id=? WHERE ` + where + ` ORDER BY e.published ` + order + `,e.id ` + order + ` LIMIT 31 OFFSET ?`
 	params := []any{uid, uid}
 	params = append(params, args...)
 	params = append(params, offset)

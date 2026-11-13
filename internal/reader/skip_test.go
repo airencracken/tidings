@@ -188,7 +188,7 @@ func TestSkipMigrationAddsColumnAndKeepsState(t *testing.T) {
 	INSERT INTO feeds(id,url,title) VALUES(1,'https://example.org/f','F');
 	INSERT INTO entries(id,feed_id,key,title,url,body,published) VALUES(1,1,'k','T','https://example.org/s','B',1);
 	INSERT INTO states(user_id,entry_id,read,saved) VALUES(1,1,1,1);
-	ALTER TABLE states DROP COLUMN skipped; PRAGMA user_version=5`); err != nil {
+	ALTER TABLE states DROP COLUMN skipped;ALTER TABLE subscription_tags DROP COLUMN position;ALTER TABLE household_tags DROP COLUMN position; PRAGMA user_version=5`); err != nil {
 		t.Fatal(err)
 	}
 	if err = s.Close(); err != nil {
@@ -200,7 +200,7 @@ func TestSkipMigrationAddsColumnAndKeepsState(t *testing.T) {
 	}
 	defer upgraded.Close()
 	var version, read, saved, skipped int
-	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 6 {
+	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
 		t.Fatal(version, err)
 	}
 	if err = upgraded.DB.QueryRow("SELECT read,saved,skipped FROM states WHERE user_id=1 AND entry_id=1").Scan(&read, &saved, &skipped); err != nil || read != 1 || saved != 1 || skipped != 0 {
@@ -210,7 +210,7 @@ func TestSkipMigrationAddsColumnAndKeepsState(t *testing.T) {
 		t.Fatal("skipped accepts a non-boolean value")
 	}
 	// A newer database refuses to open in this version.
-	if _, err = upgraded.DB.Exec("PRAGMA user_version=7"); err != nil {
+	if _, err = upgraded.DB.Exec("PRAGMA user_version=8"); err != nil {
 		t.Fatal(err)
 	}
 	upgraded.Close()
@@ -227,7 +227,7 @@ func TestSkipMigrationIsAtomic(t *testing.T) {
 		t.Fatal(err)
 	}
 	// A conflicting column makes the migration fail and roll back.
-	if _, err = s.DB.Exec("ALTER TABLE states DROP COLUMN skipped; ALTER TABLE states ADD COLUMN skipped TEXT; PRAGMA user_version=5"); err != nil {
+	if _, err = s.DB.Exec("ALTER TABLE states DROP COLUMN skipped;ALTER TABLE subscription_tags DROP COLUMN position;ALTER TABLE household_tags DROP COLUMN position; ALTER TABLE states ADD COLUMN skipped TEXT; PRAGMA user_version=5"); err != nil {
 		t.Fatal(err)
 	}
 	s.Close()

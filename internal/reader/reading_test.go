@@ -256,7 +256,7 @@ func TestKeyboardPreference(t *testing.T) {
 	}
 }
 
-const dropV5 = `ALTER TABLE states DROP COLUMN skipped;DROP TABLE article_copies;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;`
+const dropV5 = `ALTER TABLE states DROP COLUMN skipped;ALTER TABLE subscription_tags DROP COLUMN position;ALTER TABLE household_tags DROP COLUMN position;DROP TABLE article_copies;ALTER TABLE users DROP COLUMN keyboard_shortcuts;ALTER TABLE entries DROP COLUMN body_html;ALTER TABLE feeds DROP COLUMN next_check;ALTER TABLE feeds DROP COLUMN poll_interval;ALTER TABLE feeds DROP COLUMN failures;`
 
 func TestReadingMigrationAtomicity(t *testing.T) {
 	for _, conflict := range []bool{false, true} {
@@ -288,7 +288,7 @@ func TestReadingMigrationAtomicity(t *testing.T) {
 				if err = upgraded.DB.QueryRow("SELECT keyboard_shortcuts FROM users WHERE username='before'").Scan(&enabled); err != nil || enabled {
 					t.Fatal(enabled, err)
 				}
-				if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 6 {
+				if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
 					t.Fatal(version, err)
 				}
 				return

@@ -58,7 +58,7 @@ publishes. **Refresh feeds** checks your sources now, skipping any checked in th
 last five minutes.
 
 The reading table shows a finite page of stories, newest first. There are no
-unread counts. **Filter** holds search and the Topic and Source filters.
+unread counts. **Filter** holds search and the Tag and Source filters.
 Opening a story does not mark it read; choose **Mark read** or **Mark read and
 return** when you are done. **Save for later** keeps a story on its own shelf.
 **Skip** a story that is not for you: it leaves your shelves without being
@@ -80,9 +80,10 @@ default.
 
 ## Feed groups and tags
 
-Each source has a topic and up to 12 tags. Tags are case-insensitive, may
-contain spaces, and are at most 40 characters. Edit them under **Sources → Edit
-tags and topic**.
+Tags are how you organise sources. Each source can have up to 12 tags; they are
+case-insensitive, may contain spaces, and are at most 40 characters. Edit them
+under **Sources → Edit tags**. The first tag shows on each story and names the
+source's folder in OPML exports.
 
 **Feed groups** gather sources around an interest, in one of two ways:
 

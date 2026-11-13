@@ -638,5 +638,45 @@
     "after": "if err == nil && version < 0 {",
     "package": "./internal/reader",
     "run": "^TestSkipMigrationAddsColumnAndKeepsState$"
+  },
+  {
+    "name": "migrated topic becomes the first tag",
+    "file": "internal/reader/topics.go",
+    "before": "tag, err := topicTag(s.topic)",
+    "after": "tag, err := \"\", error(nil)",
+    "package": "./internal/reader",
+    "run": "^TestTopicMigrationMakesTheTopicTheFirstTag$"
+  },
+  {
+    "name": "topic migration runs on older databases",
+    "file": "internal/reader/store.go",
+    "before": "if err == nil && version < 7 {",
+    "after": "if err == nil && version < 0 {",
+    "package": "./internal/reader",
+    "run": "^TestTopicMigrationMakesTheTopicTheFirstTag$"
+  },
+  {
+    "name": "imported topic becomes the first tag",
+    "file": "internal/reader/restore.go",
+    "before": "tags, _ = withTopic(f.Category, tags)",
+    "after": "tags, _ = tags, error(nil)",
+    "package": "./internal/reader",
+    "run": "^TestOldExportsAndOPMLImportTopicsAsFirstTags$"
+  },
+  {
+    "name": "tags keep their typed order",
+    "file": "internal/reader/store.go",
+    "before": "ORDER BY t.position,t.tag)) FROM feeds f JOIN subscriptions",
+    "after": "ORDER BY t.tag)) FROM feeds f JOIN subscriptions",
+    "package": "./internal/reader",
+    "run": "^TestTagOrderIsKeptAsTyped$"
+  },
+  {
+    "name": "topic bookmarks redirect to tag filters",
+    "file": "internal/reader/app.go",
+    "before": "if topicRedirect(w, r) {",
+    "after": "if false && topicRedirect(w, r) {",
+    "package": "./internal/reader",
+    "run": "^TestTopicBookmarksRedirectToTagFilters$"
   }
 ]
