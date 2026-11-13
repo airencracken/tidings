@@ -1,30 +1,23 @@
 # Third-party components
 
-Tidings uses the pinned Comfylib release for opaque tokens, session-bound CSRF tokens,
-password confirmation and hidden input, proxy client resolution, backup scheduling,
-service configuration, administrative privilege dropping, proxy examples, and
-shared account-form styles and browser checks,
-under AGPL-3.0-or-later. The mutation runner executes directly from the pinned Comfylib module under
-the same license. [Miniflux](https://miniflux.app/) is a design inspiration for article reading,
-keyboard navigation, link cleanup, and adaptive feed fetching.
-The interface follows the Comfyware family palette
-and server-rendered form conventions used by Witmoot.
-
-Go dependencies and their transitive versions are recorded in `go.mod` and
-`go.sum`. Principal runtime dependencies are:
+Exact versions of all Go dependencies are in `go.mod` and `go.sum`. The main
+runtime dependencies are:
 
 | Component | Use | License |
 | --- | --- | --- |
-| Comfylib | Tokens, passwords, backups, proxy/service tools, shared forms | AGPL-3.0-or-later |
+| Comfylib | Tokens, passwords, backups, proxy and service tools, shared pages | AGPL-3.0-or-later |
 | Go x/crypto | bcrypt passwords | BSD-3-Clause |
-| Go x/net | HTML parsing, sanitising, and XML charset support | BSD-3-Clause |
-| Readeck go-readability v2 | Local full-story extraction | MIT |
-| Go x/image | Cached image decoding and resizing | BSD-3-Clause |
-| Go x/term | Hidden terminal password input | BSD-3-Clause |
-| Gofrs flock | Instance and administrative file locks | BSD-3-Clause |
+| Go x/net | HTML parsing and cleaning, XML character sets | BSD-3-Clause |
+| Readeck go-readability v2 | Full-story extraction | MIT |
+| Go x/image | Feed image decoding and resizing | BSD-3-Clause |
+| Gofrs flock | Instance and command file locks | BSD-3-Clause |
 | Modernc SQLite | SQLite without cgo | BSD-3-Clause; SQLite public domain |
 
-Playwright is an Apache-2.0 development dependency, pinned in
-`scripts/browser/package-lock.json`. No frontend package is served to readers.
-Publisher names and feed addresses identify their respective publishers; no
-affiliation is implied. Story text remains the publisher's material.
+Playwright (Apache-2.0) is a development dependency for browser checks, pinned
+in `scripts/browser/package-lock.json`. Nothing from it is served to readers.
+
+[Miniflux](https://miniflux.app/) inspired Tidings' article reading, keyboard
+navigation, link cleaning and adaptive fetching.
+
+Publisher names and feed addresses belong to their publishers; no affiliation is
+implied. Story text remains the publisher's work.

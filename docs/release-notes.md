@@ -1,210 +1,189 @@
-# Tidings 0.8.0
-
-Account settings now offer the same **Times and dates** control used across the
-five Comfyware applications. Open `/account`, choose an IANA timezone such as
-`America/Los_Angeles`, and select **Save timezone**. UTC is the default. Your
-choice is saved for your account across sessions and devices. **Use this device's
-timezone** fills the field when JavaScript is available; saving remains explicit.
-Manual selection and local date rendering also work without JavaScript.
-
-Comfylib 0.6.0 owns validation, formatting, the account control, browser detection
-and bounded template caching. Dates handle daylight saving and calendar boundaries.
-Admin dashboard sign-in and backup instants follow your preference; reporting
-days remain UTC. Stored timestamps, API responses and machine-readable timestamps
-retain their existing UTC contract. Account isolation, native permissions and CSRF
-checks apply to every preference change.
-
-Startup adds a separately versioned display preference namespace. Application
-migration and export format versions are unchanged. Back up the stopped data
-directory before upgrading and retain that snapshot for a downgrade.
-
-# Tidings 0.7.0
-
-Native admin metrics now use one shared dashboard with identical typography, spacing, cards, tables and reporting definitions across the apps. Successful local and community sign-ins and authorized content opens are recorded by Comfylib 0.5.0. Views count once per account, item and UTC day; thumbnails, background assets, failed requests and signed-out visits do not count.
-
-Only active administrators (called owners in this app where applicable) can read the dashboard or its account sign-in summaries. Ordinary members, guests and moderators cannot read analytics. The dashboard shows the past seven UTC days, when collection began, daily totals, recent sign-ins by account, and most-viewed content. Recording begins after upgrade; no earlier history is inferred. No IP addresses or browser identifiers are recorded. Activity is retained for ninety UTC days, pruned at startup and daily while serving, and removed when its account is deleted.
-
-The analytics tables are additive and separately versioned by Comfylib; existing application data and application migration versions are unchanged. Back up before upgrading. Existing archives remain supported. Shared browser contracts now check exact dashboard styling, widths and access boundaries in both themes and with JavaScript disabled.
-
-# Tidings 0.6.0
-
-Native owner/admin metrics now show aggregate membership, content, storage and recent activity, with owner-only operational summaries for backups and configured suite connections. The pages work without JavaScript and follow the application's existing permissions.
-
-Rate limiting uses the bounded shared implementations while retaining the app's own budgets. Release preparation, artifact verification, browser fixtures and immutable CI workflows use the published Comfylib pin directly. A release preflight verifies version metadata, cold module caches and the exact shared workflow revision before publication.
-
-No application database migration is added. Existing service configuration and account permissions remain supported.
-
 # Tidings releases
+
+Each release lists what members and owners will notice, then notes for the
+person who runs the server. Back up the stopped data directory before any
+upgrade, and keep that copy if you might return to an older version.
+
+## Unreleased
+
+- Tidings no longer records who signs in or which stories anyone opens.
+  Instance metrics cover operational health: members, sources, stories, source
+  errors, database size and backups.
+- Fetch progress appears on **Sources**, and on the reading table only while a
+  fetch you asked for is running or has just finished. Failed sources show their
+  last error in the source list.
+- Search and the Topic and Source filters sit behind **Filter** on the reading
+  table. It opens by itself when a filter is active.
+- **Your account** holds personal settings only. Invitations, members, household
+  sources, suggested sources, feed images and backups are under **Admin**.
+- The article page has one main button, **Mark read and return**. **Read on**
+  the publisher's site is a plain link.
+- Text is at least 12 pixels, and buttons and links are larger. Sign-in, join,
+  invitations and metrics use Tidings' headings and colours.
+- Expired forms and too many sign-in attempts show a normal Tidings page.
+
+Operators:
+
+- Opening the database deletes all sign-in and story-open rows stored by 0.7.0
+  and 0.8.0, including in databases restored from older backups. The schema
+  version stays at 5.
+
+## 0.8.0
+
+- Choose your timezone under **Your account → Times and dates**. UTC is the
+  default. **Use this device's timezone** fills the field when JavaScript is on;
+  nothing is saved until you choose **Save timezone**.
+- Dates on pages follow your choice. The metrics page keeps its reporting days
+  in UTC.
+
+Operators:
+
+- Requires Comfylib 0.6.0. Startup adds a separate table for display
+  preferences. The database schema and export format are unchanged.
+- Stored timestamps and API responses stay in UTC.
+
+## 0.7.0
+
+- The owner metrics page uses the dashboard shared by the Comfyware apps.
+- Only owners can open it. It showed seven days of sign-ins and story opens per
+  account. (Removed in the next release.)
+
+Operators:
+
+- Requires Comfylib 0.5.0, which adds its own versioned tables. The Tidings
+  schema is unchanged and existing backups remain supported.
+- Activity was kept for 90 days and deleted with its account. No IP addresses
+  or browser identifiers were recorded.
+
+## 0.6.0
+
+- Owners get an instance metrics page with member, source, story and storage
+  totals, plus backup status and configured Comfyware connections. It works
+  without JavaScript.
+
+Operators:
+
+- Sign-in rate limits use the shared Comfylib implementation with the same
+  budget as before.
+- No database migration.
 
 ## 0.5.4
 
-- Make administration visible in the main navigation for owners. Add a dedicated
-  Admin settings page for household sources, members and backup status.
-- Resolve shared tooling on fresh container CI runners and verify it with the
-  module proxy disabled before running the release gates.
+- Owners get an **Admin** link in the main navigation and an Admin page for
+  household sources, members and backup status.
 
-- Import the suite helpers directly from published Comfylib 0.3.0 and use its
-  embedded styles and browser controls.
-- Replace the local OpenID Connect protocol adapter with the separately versioned
-  Comfylib OIDC module 0.1.0. Existing local session and permission hooks remain
-  application-owned.
-- Run service configuration, deployment, release, artifact scanning, mutation and
-  container checks directly from the pinned shared module. Retain application
-  configuration and both existing backup/restore lifecycle profiles.
-- Add integration tests that verify shared asset routes and exact published bytes.
+Operators:
 
-This maintenance release adds no application database migration or new default
-integration. Back up your data before upgrading. When upgrading from older
-versions, follow the earlier release notes for any migrations you have not run.
+- Uses Comfylib 0.3.0 for suite helpers, styles and browser controls, and the
+  separate Comfylib OIDC 0.1.0 module for community sign-in.
+- No database migration.
 
 ## 0.5.1
 
-- Forward optional app navigation and community sign-in settings through OpenRC
-  and Docker Compose. Native templates document disabled defaults. Regression
-  tests check literal values and reject missing service exports.
-- Add an optional Apps menu and consistent keyboard, focus and account controls.
-- Add explicitly linked community sign-in using OpenID Connect, state, nonce and
-  PKCE. Existing local accounts and passwords remain available; accounts are never
-  created or linked by matching email addresses. Configure this only when wanted.
-- Use published Comfylib v0.2.0 and require Go 1.26.11 or newer for source builds.
-- Upgrade golang.org/x/crypto to v0.59.0 and scan the actual release executables
-  for vulnerable dependencies before publication.
+Operators:
 
-- Add comfortable and compact spacing with preferences kept per application.
-- Use stable published-time and ID cursors for efficient older/newer navigation;
-  existing offset links remain supported and visibility checks are preserved.
-- Upgrade golang.org/x/net and refuse unsafe dangling configuration symlinks.
+- OpenRC and Docker Compose now pass the optional app navigation and community
+  sign-in settings to the service. Both stay off by default.
 
-Read [Suite integration](suite.md) for configuration and security boundaries.
-Back up the stopped data directory before upgrading. Shared sign-in creates an
-additive identity-binding table when configured. Keep the pre-upgrade backup;
-use it when returning to older binaries rather than opening a migrated database
-with an older application. Publishing a release does not change running services.
+## 0.5.0
 
+- An optional **Apps** menu links to your other Comfyware apps.
+- Optional community sign-in with OpenID Connect. You link it to an existing
+  account yourself; accounts are never created or matched by email address.
+  Local passwords keep working.
+- Choose comfortable or compact story spacing.
+- Older and newer page links stay stable while new stories arrive.
 
-# Tidings 0.5.0
+Operators:
 
-- Add an optional Apps menu and consistent keyboard, focus and account controls.
-- Add explicitly linked community sign-in using OpenID Connect, state, nonce and
-  PKCE. Existing local accounts and passwords remain available; accounts are never
-  created or linked by matching email addresses. Configure this only when wanted.
-- Use published Comfylib v0.2.0 and require Go 1.26.11 or newer for source builds.
-- Upgrade golang.org/x/crypto to v0.59.0 and scan the actual release executables
-  for vulnerable dependencies before publication.
+- Requires Go 1.26.11 or newer to build, and Comfylib 0.2.0.
+- Configuring community sign-in adds a table for identity links. See
+  [Comfyware connections](suite.md).
+- Updates golang.org/x/crypto to 0.59.0 and golang.org/x/net. Refuses dangling
+  configuration symlinks.
 
-- Add comfortable and compact spacing with preferences kept per application.
-- Use stable published-time and ID cursors for efficient older/newer navigation;
-  existing offset links remain supported and visibility checks are preserved.
-- Upgrade golang.org/x/net and refuse unsafe dangling configuration symlinks.
+## 0.4.2
 
-Read [Suite integration](suite.md) for configuration and security boundaries.
-Back up the stopped data directory before upgrading. Shared sign-in creates an
-additive identity-binding table when configured. Keep the pre-upgrade backup;
-use it when returning to older binaries rather than opening a migrated database
-with an older application. Publishing a release does not change running services.
+Operators:
 
-# Tidings 0.4.2
+- Shipped service configuration uses `KEY="value"` for every setting. Existing
+  files keep working and are preserved on upgrade.
+- No database migration.
 
-- Standardize shipped service configs and documented environment examples on
-  `KEY="value"`, including numbers, booleans, and empty values.
-- Identify the service manager and installed config path in every template.
-- Check source and generated package configs, literal quoting, and OpenRC
-  environment inheritance during `make check`.
+## 0.4.1
 
-Existing configuration values remain supported and local files are preserved.
-No database migration is introduced.
+- The town crier replaces the bell in browser tabs and the header.
+- **Get full story** works with more publishers, including some that refused
+  the previous TLS settings or returned HTTP 406.
+- Download errors say what went wrong: an HTTP error, a timeout, a size limit or
+  an extraction failure. The existing story stays readable.
 
-# Tidings 0.4.1
+Operators:
 
-- Use the existing town crier for the favicon, touch icon, and header mark.
-  A mascot cache revision replaces the former bell in browser tabs.
+- Server logs record failure details without query strings or response bodies.
+- No database migration.
 
-- Fix full-story downloads rejected by some publishers, including OpenAI's
-  Hacktron announcement. Use a compatible TLS group profile that retains
-  X25519MLKEM768 hybrid key exchange, TLS 1.2 or newer, certificate verification,
-  and the existing public-address-only connection and redirect checks.
-- Accept a broader range of publisher content-negotiation responses, fixing
-  HTTP 406 responses from SANS diary pages.
-- Show publisher HTTP errors, timeouts, size limits, and extraction failures
-  distinctly. Record bounded failure details in server logs without exposing
-  article query strings or publisher response bodies. Existing story text stays
-  available when a fetch fails.
-- Add TLS compatibility and certificate-verification regressions, plus an opt-in
-  live check for real article extraction. No database migration is needed.
+## 0.4.0
 
-# Tidings 0.4.0
+- Stories keep their headings, links, lists, quotations, tables and code.
+- **Get full story** downloads the article from the publisher. Your copy is
+  yours and travels with your export.
+- Known tracking fields such as `utm_source` are removed from article links.
+- Optional keyboard shortcuts, off by default.
+- Sources are checked between every five minutes and once a day, depending on
+  how often they publish.
+- A saved theme applies before the page appears, so pages no longer flash.
 
-- Preserve article headings, links, lists, quotations, tables, and code blocks.
-  Inline images use the existing optional local cache.
-- Add Get full story, using a local Readability parser and the existing public-only
-  HTTP client. Downloaded copies belong to each reader and travel with marked
-  stories in exports and backups.
-- Remove known tracking fields from article links while preserving functional
-  query values, anchors, signed URLs, feed addresses, and media addresses.
-- Add optional per-reader keyboard shortcuts, off by default. Editing fields and
-  browser extension key combinations keep their normal behavior.
-- Adapt feed checks between five minutes and 24 hours; back off on failures,
-  respect publisher cache/retry timing, and allow one refresh per host at a time.
-- Apply saved themes before page content appears to prevent flashes on navigation.
-- Migrate transactionally to schema 5. Fetch full feed bodies once on upgrade to
-  populate article formatting without changing reading state.
+Operators:
 
-# Tidings 0.3.1
+- Migrates to schema 5. Each feed is fetched in full once after the upgrade;
+  reading state is kept.
 
-- When feed images are enabled, fetch full feed bodies to populate image
-  addresses on stories imported by older parser versions. Previously, publisher
-  validators could return “not modified” and leave those addresses empty.
-- Start the fetch immediately and show its progress using the live indicator.
-  Permission checks, setting changes, and validator resets remain atomic.
+## 0.3.1
 
-# Tidings 0.3.0
+- Turning on feed images fills in images for stories fetched by older versions.
 
-- Add browser first-owner setup through `tidings setup`, with a private host key,
-  confirmed passwords, and setup closing once an owner exists.
-- Align `create-owner` and `set-password` across Comfyware: hidden confirmed input
-  by default, plus `--password-prompt`, `--password-stdin`, `--password-file`,
-  and `--data-dir`. Password changes end earlier signed-in sessions.
-- Use published Comfylib v0.1.8 and retain existing account command aliases.
-- Fetch newly followed and imported sources immediately; show live waiting,
-  fetching, completed, and failed states with the next scheduled check.
-- Use roomier story cards and clearer type, and remove repeated reading caveats.
-- Add an owner-controlled option for feed-supplied pictures. Previews are served
-  through Tidings and share a private, bounded local cache with seven-day expiry.
-- Migrate transactionally to schema 4 with images disabled on upgrade. Backups
-  preserve image settings and addresses; cached image files are rebuildable.
-- Exercise every bundled publisher using the production fetcher in an opt-in
-  live-source check, alongside deterministic browser and security tests.
+## 0.3.0
 
-# Tidings 0.2.0
+- Set up the first owner in the browser with `tidings setup`.
+- New and imported sources fetch right away, with live progress.
+- Owners can turn on feed images. Tidings fetches and caches them, so readers'
+  browsers never contact the publisher.
+- Roomier story cards.
 
-- Fix OpenRC configuration inheritance for plain assignments, including the
-  public address, secure cookies, trusted proxies, and backup settings.
-- Give invitations a dedicated page using the shared Comfyware layout. Generated
-  links use the configured public origin and are shown only when created.
-- Add an owner-only **Fetch all feeds now** action. It fetches all subscribed and
-  household feeds, bypasses the five-minute cooldown, coalesces repeated requests,
-  and preserves individual subscriptions and reading state.
-- Let owners enable suggested-source categories. All categories begin disabled,
-  including on upgrade; enabling or disabling them changes suggestions only.
-  Add news, science, culture, food, sports, and nature alongside the existing
-  AI, tech, and infosec catalogs. The 45 optional feeds are never auto-subscribed.
-- Upgrade the database to schema 3 transactionally. Pre-upgrade schema-2 backups
-  remain supported; restore a pre-upgrade backup to roll back to version 0.1.0.
+Operators:
 
-# Tidings 0.1.0
+- `create-owner` and `set-password` prompt twice with hidden input by default,
+  and accept `--password-stdin`, `--password-file` and `--data-dir`. Changing a
+  password signs out that account's other sessions.
+- Migrates to schema 4 with feed images off.
 
-The first public release of Tidings. This is an early release for small,
-self-hosted installations; read the current scope and limitations in the README.
+## 0.2.0
 
-- RSS and Atom sources, tags, handpicked/tag-based feed groups, and optional shared household sources.
-- Independent reading state, saved stories, OPML import/export and versioned JSON export/import.
-- Verified automatic and manual backups, restoration, service configuration,
-  and account recovery using Comfylib v0.1.7.
-- Linux amd64/arm64 archives, Debian packages, source and checksums, versioned
-  multi-platform container images, and Gentoo overlay packaging.
-- Private service accounts, loopback native defaults, HTTPS proxy examples,
-  and tested installation and container lifecycles.
+- Invitations have their own page. Links use the configured public address and
+  are shown once.
+- Owners can choose **Fetch all feeds now** to check every source immediately.
+- Owners choose which suggested-source categories members see. All start off.
+  News, science, culture, food, sports and nature join AI, tech and infosec.
 
-Tidings renders supplied feed text and does not scrape full articles. Personal subscriptions stay personal; shared household reading is opt-in. Native port 8085 avoids Songstead’s port 8083.
+Operators:
+
+- Fixes OpenRC passing plain assignments to the service.
+- Migrates to schema 3. Schema 2 backups still restore; restore one to return to
+  0.1.0.
+
+## 0.1.0
+
+The first public release.
+
+- RSS and Atom sources, tags, feed groups and an optional household table.
+- Personal reading state, saved stories, OPML import and export, and JSON
+  export and import.
+- Automatic and manual verified backups, restore, and account recovery.
+
+Operators:
+
+- Linux amd64 and arm64 archives, Debian packages, container images and a
+  Gentoo overlay. The native port is 8085.
 
 [Installation](releases.md) · [Containers](containers.md) · [Hosting](deployment.md) · [Backups](automatic-backups.md)

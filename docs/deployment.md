@@ -1,37 +1,48 @@
 # Host Tidings
 
-Native services bind to `127.0.0.1:8085` and use `/var/lib/tidings`. A single
-installation has one active server; a lock prevents a second server from opening
-that instance. The data directory is private (0700) and the database is 0600.
-Do not serve the data directory from your reverse proxy.
+Native services listen on `127.0.0.1:8085` and keep data in `/var/lib/tidings`.
+The data directory is private (0700) and only one server can use it at a time.
+Never serve it from your reverse proxy.
 
-Configure the public HTTPS origin before inviting members:
+## Public address and proxy
+
+Set the public HTTPS address before you invite anyone:
 
 ```sh
 TIDINGS_BASE_URL="https://tidings.example.org"
 TIDINGS_TRUSTED_PROXIES="127.0.0.1/32,::1/128"
 ```
 
-Only trust proxies that you control. Examples for Caddy, nginx, and Apache are
-included under `deploy/`. Keep the upstream listener private and terminate TLS
-at your proxy. Native defaults use 8085; containers use port 8080 internally.
+Trust only proxies you control. Example Caddy, nginx and Apache configurations
+are under `deploy/`, and `tidings proxy-config caddy --domain YOUR_DOMAIN`
+prints one for your domain. Terminate TLS at the proxy and keep the Tidings
+listener private. Containers listen on port 8080 inside the container.
 
-OpenRC accepts ordinary `TIDINGS_*=value` assignments in `/etc/conf.d/tidings`;
-`export` is optional. The init script passes the supported settings to the service.
+## Configuration files
 
-## Services and account commands
+systemd reads `/etc/tidings/tidings.env`; OpenRC reads `/etc/conf.d/tidings`.
+Edit the one for your service manager and restart the service. Quote every
+value, including numbers and booleans:
 
-The Debian and Gentoo packages use `/usr/bin/tidings`. Source service examples
-use `/usr/local/bin/tidings`. Use a dedicated `tidings` user and group, and create
-its private state directory before starting a portable service installation.
-Systemd and OpenRC pass configuration through the environment. Their examples
-use a 0077 umask, run without root privileges, and preserve private state.
+```sh
+TIDINGS_BASE_URL="https://tidings.example.org"
+TIDINGS_BACKUP_KEEP="7"
+```
 
-Run owner creation, password recovery, backup and restore commands as the same
-account that owns the database. Installed administrative commands invoked as root
-resolve the service settings and re-run as its configured account. Unmanaged
-root administration is refused. Portable installations should use an explicitly
-configured unprivileged account and `TIDINGS_DATA_DIR`.
+Upgrades keep your local settings. The
+[shared configuration convention](https://github.com/airencracken/comfylib/blob/master/docs/configuration.md)
+covers quoting and escaping.
+
+## Service account and commands
+
+Debian and Gentoo packages install `/usr/bin/tidings`; the source service
+examples use `/usr/local/bin/tidings`. For a source install, create a `tidings`
+user and group and the private state directory first.
+
+Run account, backup and restore commands as the account that owns the database.
+Installed commands run with `sudo` switch to the service account themselves.
+For a portable install, run them as your own unprivileged user with
+`TIDINGS_DATA_DIR` set.
 
 ```sh
 tidings create-owner --username owner
@@ -39,35 +50,17 @@ tidings set-password --username member
 tidings backup --destination /var/lib/tidings/manual-backups
 ```
 
-Never put a password in command-line arguments. Interactive entry disables
-terminal echo and asks for confirmation. Automation can use --password-file with a private file readable by the service account.
+Commands prompt twice for a password with echo off. For automation, use
+`--password-file` with a private file the service account can read. Never put a
+password on the command line.
 
 ## Logs and shutdown
 
-Systemd writes to the journal (`journalctl -u tidings`). OpenRC writes to
-`/var/log/tidings.log`; the included logrotate rule retains eight compressed
-weekly logs. Logs and backups may contain private data; protect them.
+systemd logs to the journal (`journalctl -u tidings`). OpenRC logs to
+`/var/log/tidings.log`, and the included logrotate rule keeps eight weekly
+logs. Logs and backups can contain private data.
 
-A normal SIGTERM closes the listener, waits for background work, and closes the
-database. Check `/healthz` for readiness. Do not use process existence as the
-only readiness signal. Start the service and use browser setup, or create the first owner through the CLI.
+SIGTERM stops new requests, waits for background work and closes the database.
+Use `/healthz` to check readiness.
 
-See [backup and recovery](automatic-backups.md) and [installation/upgrades](releases.md).
-
-## Configuration format
-
-Use double quotes for every value, including numbers and booleans. No `export`
-prefix is needed in service configuration files:
-
-```sh
-TIDINGS_BASE_URL="https://tidings.example.org"
-TIDINGS_BACKUP_KEEP="7"
-```
-
-OpenRC reads `/etc/conf.d/tidings`; systemd reads
-`/etc/tidings/tidings.env`. Edit the file for the service manager you run,
-then restart the service. The other manager's file is independent. Existing
-bare or single-quoted values remain valid, and upgrades preserve local settings.
-
-The [shared configuration convention](https://github.com/airencracken/comfylib/blob/master/docs/configuration.md)
-covers quoting, escaping, and how the examples are checked.
+See [backups and recovery](automatic-backups.md) and [installation and upgrades](releases.md).

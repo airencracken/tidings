@@ -1,18 +1,17 @@
 # Run Tidings with Docker Compose
 
-Published images are at [GHCR](https://github.com/airencracken/tidings/pkgs/container/tidings):
-`ghcr.io/airencracken/tidings:v0.6.0`. The exact version tag contains **linux/amd64**
-and **linux/arm64**. Docker selects your host architecture automatically. There
-is no moving `latest` tag; old release tags are not replaced.
+Images are published to [GHCR](https://github.com/airencracken/tidings/pkgs/container/tidings)
+as `ghcr.io/airencracken/tidings:v0.8.0`, for linux/amd64 and linux/arm64.
+There is no `latest` tag, and release tags never change.
 
-Download `docker-compose.yml` from the matching source release. Set the external
-origin in a private `.env` file before starting:
+Download `docker-compose.yml` from the matching source release. Put your public
+address in a private `.env` file next to it:
 
 ```sh
 TIDINGS_BASE_URL="https://tidings.example.org"
 ```
 
-Then provision the owner with terminal password prompting, and start the service:
+Create the owner and start the service:
 
 ```sh
 docker compose pull
@@ -20,24 +19,18 @@ docker compose run --rm tidings create-owner --username owner
 docker compose up -d
 ```
 
-The example binds `127.0.0.1:8085` to container port 8080. Put your HTTPS reverse
-proxy in front. The initial owner command does not require a running server.
-The image runs as UID/GID **10001**, uses a mode-0700 named `/data` volume, a
-read-only root filesystem, bounded temporary storage, no added capabilities,
-and `no-new-privileges`. A bind-mounted directory must be owned by 10001:10001
-and private before use. Do not change the container to run as root.
+The example publishes `127.0.0.1:8085` to container port 8080; put your HTTPS
+reverse proxy in front. The container runs as UID and GID 10001 with a read-only
+root filesystem and a private named `/data` volume. If you bind-mount a
+directory instead, make it private and owned by 10001:10001. Do not run the
+container as root.
 
-The runtime includes CA certificates, timezone data and zstd. The binary in the
-published image is the exact binary from the checksummed release archive.
-Native lifecycle tests run on both supported architectures before publishing.
-A health check tests `/healthz` using the configured port. Configuration and
-backups are covered by the [hosting guide](deployment.md) and
-[recovery guide](automatic-backups.md).
+To upgrade, back up, change the image version in `docker-compose.yml`, then run
+`docker compose pull` and `docker compose up -d`. Named volumes survive
+`docker compose down`; `docker compose down --volumes` deletes them.
 
-Stop before changing to restored data. Named volumes survive container removal;
-`docker compose down --volumes` deletes them. Back up before upgrading, edit the
-exact image version, then run `docker compose pull` and `docker compose up -d`.
+See the [hosting guide](deployment.md) for settings and
+[backups and recovery](automatic-backups.md) for restores.
 
-For a source development build, use
+To build from source instead, run
 `docker compose -f docker-compose.yml -f docker-compose.build.yml up --build`.
-This override is separate from the default published-image installation.

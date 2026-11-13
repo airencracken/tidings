@@ -45,6 +45,34 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+const helpText = `Tidings: a quiet RSS and Atom reader for you and your people.
+
+Usage:
+  tidings serve
+  tidings setup
+  tidings create-owner --username NAME [--password-prompt | --password-stdin | --password-file PATH]
+  tidings set-password --username NAME [--password-prompt | --password-stdin | --password-file PATH]
+  tidings backup --destination PRIVATE_DIRECTORY
+  tidings restore --archive BACKUP_DIRECTORY --destination NEW_DATA_DIRECTORY
+  tidings proxy-config caddy|nginx|apache --domain YOUR_DOMAIN
+  tidings --version
+
+Settings:
+  TIDINGS_ADDR                   Listen address (127.0.0.1:8085)
+  TIDINGS_DATA_DIR               Private data directory (./data)
+  TIDINGS_BASE_URL               Public HTTPS address, used in invitation links
+  TIDINGS_SECURE_COOKIES         true to require HTTPS cookies
+  TIDINGS_TRUSTED_PROXIES        Proxy IPs or CIDRs to trust
+  TIDINGS_BACKUP_INTERVAL        Automatic backup interval (24h; 0 turns it off)
+  TIDINGS_BACKUP_KEEP            Automatic backups to keep (7)
+  TIDINGS_BACKUP_MAX_BYTES       Total size of automatic backups (10 GiB)
+  TIDINGS_BACKUP_COPY_MAX_BYTES  Size of one uncompressed snapshot (5 GiB)
+
+Password commands prompt twice with echo off, or read a private file.
+Restore into a new directory, then point the service at it.
+`
+
 func run() error {
 	if len(os.Args) > 1 && (os.Args[1] == "setup" || os.Args[1] == "create-owner" || os.Args[1] == "set-password") {
 		return accountCommand(os.Args[1], os.Args[2:], os.Stdin, os.Stdout, svcconfig.Detect("tidings", "/var/lib/tidings"))
@@ -57,14 +85,14 @@ func run() error {
 		return nil
 	}
 	if len(os.Args) > 1 && (os.Args[1] == "--help" || os.Args[1] == "-h" || os.Args[1] == "help") {
-		fmt.Println("Tidings — a quiet RSS and Atom reader for you and your people.\n\nUsage:\n  tidings setup\n  tidings serve\n  tidings create-owner --username NAME [--password-prompt | --password-stdin | --password-file PATH]\n  tidings set-password --username NAME [--password-prompt | --password-stdin | --password-file PATH]\n  tidings backup --destination PRIVATE_DIRECTORY\n  tidings restore --archive BACKUP_DIRECTORY --destination NEW_DATA_DIRECTORY\n  tidings proxy-config caddy|nginx|apache --domain YOUR_DOMAIN\n\nEnvironment:\n  TIDINGS_ADDR       Listen address (127.0.0.1:8085)\n  TIDINGS_DATA_DIR   Private SQLite data directory (./data)\n  TIDINGS_BASE_URL   Public HTTPS origin for shared invitations\n  TIDINGS_SECURE_COOKIES  true behind an HTTPS proxy\n  TIDINGS_TRUSTED_PROXIES Explicit trusted proxy IPs or CIDRs\n  TIDINGS_BACKUP_INTERVAL 24h (0 disables); KEEP=7\n  TIDINGS_BACKUP_MAX_BYTES 10 GiB retained; COPY_MAX_BYTES 5 GiB per snapshot\n\nPasswords are read twice with terminal echo disabled, or from a private file.\nVerified automatic backups are stored in the private backups directory. Restore into a new directory, then switch your service configuration.")
+		fmt.Print(helpText)
 		return nil
 	}
 	if len(os.Args) > 1 && os.Args[1] == "proxy-config" {
 		return proxyconfig.Run(proxyconfig.Spec{App: "tidings", ExampleDomain: "tidings.example.org", DefaultUpstream: "127.0.0.1:8085", ProxyEnvironment: "TIDINGS_TRUSTED_PROXIES=127.0.0.1/32,::1/128", Examples: deploy.Examples}, os.Args[2:], os.Stdout)
 	}
 	if len(os.Args) > 2 && privdrop.HasHelpFlag(os.Args[2:]) {
-		fmt.Println("Use tidings --help for commands and settings. backup needs --destination; restore needs --archive and --destination. Account commands accept --username and --password-file.")
+		fmt.Println("Run tidings --help for commands and settings. backup needs --destination; restore needs --archive and --destination.")
 		return nil
 	}
 	paths := svcconfig.Detect("tidings", "/var/lib/tidings")

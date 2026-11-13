@@ -114,3 +114,16 @@ func TestBackupRestoreAndProxyCommands(t *testing.T) {
 		t.Fatal("proxy config opened the database", err)
 	}
 }
+
+func TestHelpListsEveryCommandAndSetting(t *testing.T) {
+	for _, name := range append([]string{"TIDINGS_DATA_DIR", "tidings serve", "tidings setup", "tidings create-owner", "tidings set-password", "tidings backup", "tidings restore", "tidings proxy-config", "tidings --version"}, serviceSettings...) {
+		if !strings.Contains(helpText, name) {
+			t.Errorf("help does not mention %s", name)
+		}
+	}
+	for _, line := range strings.Split(helpText, "\n") {
+		if len(line) > 100 {
+			t.Errorf("help line is too long for a terminal: %q", line)
+		}
+	}
+}

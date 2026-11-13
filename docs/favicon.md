@@ -1,14 +1,11 @@
 # Favicon artwork
 
-The favicon uses a close-up of Tidings' existing town crier. The SVG embeds the
-small transparent mascot from `docs/images/town-crier.png` and frames his face
-and hat for browser tabs. It contains no external image requests. The app header
-uses the full embedded mascot in place of the former paper mark.
+The favicon is a close-up of the town crier from `docs/images/town-crier.png`.
+`internal/reader/static/favicon.svg` is the source. The raster sizes are checked
+in, so building Tidings needs no graphics tools.
 
-`internal/reader/static/favicon.svg` is the editable framing source. Raster sizes are
-checked in, so building or running Tidings requires no graphics tools. To
-regenerate them, install librsvg's `rsvg-convert` and ImageMagick, then run from
-the repository root:
+To regenerate them, install librsvg's `rsvg-convert` and ImageMagick, then run
+from the repository root:
 
 ```sh
 rsvg-convert --width 16 --height 16 --output internal/reader/static/favicon-16.png internal/reader/static/favicon.svg
@@ -18,13 +15,5 @@ rsvg-convert --width 180 --height 180 --output internal/reader/static/apple-touc
 magick internal/reader/static/favicon-16.png internal/reader/static/favicon-32.png internal/reader/static/favicon-48.png internal/reader/static/favicon.ico
 ```
 
-Every HTML page declares the SVG, ICO fallback, and touch icon with a mascot
-cache revision, so browsers can replace the former bell. `/favicon.ico`
-also handles browsers' automatic requests, including before sign-in. This exact
-public path uses the same embedded asset as `/static/favicon.ico`; private
-routes retain their normal access checks.
-
-Tests validate the embedded mascot, SVG structure, raster dimensions, ICO frame bounds, public GET
-and HEAD responses, read-only methods, page declarations, and nearby paths that
-must remain private. Browser checks render the SVG to a canvas with the site's normal
-content security policy.
+Pages link the icons with a `?v=town-crier` suffix so browsers drop the old bell.
+Change the suffix when the artwork changes.

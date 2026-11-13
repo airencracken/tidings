@@ -1,37 +1,47 @@
 # Backups and recovery
 
-The running service makes a verified, consistent SQLite snapshot automatically
-every day, beginning about a minute after startup. The database includes all
-instance data. Automatic archives are retained under the private data directory.
-Defaults: seven copies, 10 GiB total retained bytes, and a 5 GiB uncompressed
-snapshot limit. zstd is preferred when installed; built-in gzip is the fallback.
-Restoring a zstd archive requires the `zstd` program.
+The running server makes a verified SQLite snapshot every day, starting about a
+minute after it starts. Automatic backups live in the private `backups`
+directory inside the data directory. By default Tidings keeps seven, up to
+10 GiB in total, and refuses a snapshot larger than 5 GiB uncompressed. Archives
+use zstd when it is installed and gzip otherwise; restoring a zstd archive needs
+the `zstd` program.
 
-The `TIDINGS_BACKUP_INTERVAL`, `TIDINGS_BACKUP_KEEP`,
-`TIDINGS_BACKUP_MAX_BYTES`, and `TIDINGS_BACKUP_COPY_MAX_BYTES` settings control
-these limits. Setting the interval to `0` disables automatic backups. Owners
-can inspect backup success or failure from the settings/account interface.
+Change these limits with `TIDINGS_BACKUP_INTERVAL`, `TIDINGS_BACKUP_KEEP`,
+`TIDINGS_BACKUP_MAX_BYTES` and `TIDINGS_BACKUP_COPY_MAX_BYTES`. An interval of
+`0` turns automatic backups off. Owners see the last success or failure under
+**Admin → Instance backups**.
 
-A manual verified backup can run while the server is active:
+## Manual backup
+
+You can make a manual backup while the server runs:
 
 ```sh
 tidings backup --destination /var/lib/tidings/manual-backups
 ```
 
-This prints the complete verified backup directory. Pass that directory, including manifest.json and its snapshot archive, to restore.
+The command prints the backup directory. Tidings never deletes manual backups.
 
-Stop the service before switching to a restored instance. Restore refuses an
-existing instance and validates the snapshot before exposing restored data:
+## Restore
+
+Restore into a new, empty private directory:
 
 ```sh
 tidings restore --archive /private/tidings-backup --destination /private/tidings-restored
 ```
 
-Run the command as the service account, point your configuration at the restored
-private directory, and start the service. Confirm sign-in and your content before
-removing the old copy. Keep protected snapshots on another machine and practice
-restoring them. Backups contain credentials, sessions and private contributions.
-A member's personal data export is not a complete instance backup.
+Restore checks the archive and the database before writing anything, and
+refuses a directory that already holds an instance. Run it as the service
+account. Check the restored copy on a spare loopback port, then stop the
+service, point `TIDINGS_DATA_DIR` at the restored directory and start it again.
+With the supplied systemd unit, also update `WorkingDirectory` and
+`ReadWritePaths`. Keep the old directory until you have checked the new one.
 
-Do not copy only a live SQLite database file while its WAL journal is active.
-A stopped-service copy of the complete private data directory is an alternative.
+## Keep them safe
+
+Backups contain passwords, sessions and every member's reading data. Keep them
+private, copy them to another machine, and practise restoring. A member's JSON
+export is not a backup of the instance.
+
+Do not copy the live database file on its own while the server runs. A copy of
+the whole data directory taken with the service stopped also works.

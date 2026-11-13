@@ -1,16 +1,15 @@
 # README artwork
 
-`images/town-crier.png` is a small transparent derivative of the embedded
-`internal/reader/static/town-crier.png` mascot at commit `9a6ab00`. The original
-artwork and [generation prompt](town-crier-prompt.txt) remain unchanged.
+`images/town-crier.png` is a smaller copy of
+`internal/reader/static/town-crier.png`, made at commit `9a6ab00`. The original
+artwork and its [generation prompt](town-crier-prompt.txt) are unchanged.
 
-Regenerate with:
+Regenerate it with:
 
 ```sh
 magick internal/reader/static/town-crier.png -resize 256x -strip -colors 256 \
   -define png:compression-level=9 docs/images/town-crier.png
 ```
 
-The 256 × 270 image is displayed at 144 × 152 in the GitHub README. The project
-presentation checks keep this download under 100,000 bytes and check the
-website, issue, and existing Ko-fi sponsorship links.
+The README shows the 256 × 270 image at 144 × 152. Keep the file under
+100,000 bytes.
