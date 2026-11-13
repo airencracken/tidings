@@ -4,47 +4,52 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
-## Unreleased
+## 0.9.0
 
-- Tidings no longer records who signs in or which stories anyone opens.
-  Instance metrics cover operational health: members, sources, stories, source
-  errors, database size and backups.
-- Fetch progress appears on **Sources**, and on the reading table only while a
-  fetch you asked for is running or has just finished. Failed sources show their
-  last error in the source list.
-- Search and the Tag and Source filters sit behind **Filter** on the reading
-  table. It opens by itself when a filter is active.
-- Topics are gone: tags are the only way to organise a source. Each source's
-  topic became its first tag, and the first tag now shows on each story. Old
-  links to a Topic filter open the matching Tag filter. Tag order is kept as
-  you type it.
-- **Your account** holds personal settings only. Invitations, members, household
-  sources, suggested sources, feed images and backups are under **Admin**.
-- **Set aside** is now **Save for later**, and its shelf is **Saved for later**.
+- **Save for later** replaces **Set aside**.
 - New: **Skip** a story that is not for you. It leaves Unread, All stories and
-  group shelves without being marked read or saved. **Skipped stories**, linked
-  under the shelves, lets you undo a skip. Saving a skipped story brings it
-  back. The keyboard shortcut is `x`.
+  group shelves without being marked read or saved. Undo it under **Skipped
+  stories**, below the shelves. Saving a skipped story brings it back. The
+  keyboard shortcut is `x`.
+- Topics are gone; tags are how you organise sources. Each source's topic is
+  now its first tag, and the first tag shows on each story. Tags keep the order
+  you type. Old links to a Topic filter open the matching Tag filter.
+- Search and the Tag and Source filters sit behind **Filter**, which opens by
+  itself when a filter is on.
+- Fetch progress shows on **Sources**, and on the reading table only while your
+  own refresh runs. Failed sources show their error in the source list.
 - The article page has one main button, **Mark read and return**, plus **Save
-  for later** and **Skip**. **Read on** the publisher's site is a plain link.
-- Text is at least 12 pixels, and buttons and links are larger. Sign-in, join,
-  invitations and metrics use Tidings' headings and colours.
-- Expired forms and too many sign-in attempts show a normal Tidings page.
+  for later** and **Skip**.
+- **Your account** holds only your own settings. Invitations, members and the
+  other owner tools are under **Admin**.
+- Pick System, Light or Dark and a colour palette from the Account menu.
+  Owners choose the site palette under **Admin → Site colours**; Sage is the
+  default.
+- Tidings no longer records who signs in or which stories anyone opens.
+  Instance metrics show site health instead: requests, errors and response
+  times per kind of page, plus failed sign-ins, rate-limited attempts and
+  rejected invitation links.
+- Larger text and buttons, a Copy button for invitation links, and plain error
+  pages.
 
 Operators:
 
-- Migrates to schema 7: adds the skip marker, adds tag order, and turns each
-  personal and household topic into the source's first tag. A topic is never
-  dropped, so a source that already had 12 tags keeps all 13. The topic
-  columns stay in the database but are no longer read. Backups from schema 2
-  to 6 still restore.
-- Imports keep working: an old export's topic or an OPML folder becomes the
-  first tag. New exports set `category` to the first tag, so earlier versions
-  import the same organisation.
-- Opening the database deletes all sign-in and story-open rows stored by 0.7.0
-  and 0.8.0, including in databases restored from older backups.
-- JSON exports include `"skipped": true` only for skipped stories, so exports
-  without skips still import into earlier versions. Older exports import here.
+- Migrates to schema 7. It adds the skip marker and tag order, and turns each
+  personal and household topic into the source's first tag. Topic columns stay
+  but are no longer read. Backups from schema 2 to 6 still restore.
+- A topic is never dropped: a source that had 12 tags keeps all 13. Saving its
+  tags again asks the member to remove one.
+- A tag-based feed group gains a source whose old topic matches the group's tag.
+- Old exports and OPML folders import as first tags. New exports set
+  `category` to the first tag, and include `"skipped": true` only for skipped
+  stories, so earlier versions still import them.
+- Upgrading deletes the per-account sign-in and story-open records kept by
+  0.7.0 and 0.8.0, including in restored backups.
+- Requires Comfylib 0.7.0, which provides site-health metrics, the shared
+  colour tokens, palettes and theme picker, error pages, and the password rule
+  (12 or more characters, at most 72 bytes).
+- Saved theme choices carry over. The owner's palette is stored in a new
+  `site_palette` table.
 
 ## 0.8.0
 

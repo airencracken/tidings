@@ -13,7 +13,7 @@ feed groups, saved stories and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.8.0](https://github.com/airencracken/tidings/releases/tag/v0.8.0)** · [What's new](docs/release-notes.md)
+Current release: **[0.9.0](https://github.com/airencracken/tidings/releases/tag/v0.9.0)** · [What's new](docs/release-notes.md)
 
 ## Install
 
@@ -76,7 +76,8 @@ it, `/` searches and `?` shows the guide. Leave them off if a
 browser extension already uses these keys.
 
 Choose your timezone under **Your account → Times and dates**. UTC is the
-default.
+default. The Account menu sets System, Light or Dark and a colour palette for
+this browser.
 
 ## Feed groups and tags
 
@@ -130,9 +131,11 @@ Owners have an **Admin** link in the main navigation:
   from feeds, so readers' browsers never contact publishers.
 - **Feed fetching:** **Fetch all feeds now** checks every source in the
   household immediately, including ones not yet due.
+- **Site colours:** the palette everyone sees unless they pick their own.
 - **Instance metrics:** member, source and story totals, sources with errors,
-  database size and backup status. Tidings does not record who signs in or what
-  anyone reads.
+  database size and backup status, plus site health: requests, errors and
+  response times per kind of page, and counts of failed sign-ins. Tidings does
+  not record who signs in or what anyone reads.
 
 ## Hosting
 
