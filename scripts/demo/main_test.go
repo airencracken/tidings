@@ -109,9 +109,13 @@ func TestDemoLifecycleIsolationAndHTTPRoutes(t *testing.T) {
 			if strings.Contains(body, "The village sheet") != tc.optin {
 				t.Fatal("household default does not match the sample account")
 			}
-			body = get(t, client, base+"/account", 200)
-			if strings.Contains(body, "Create an invitation") != tc.owner {
-				t.Fatal("demo roles are wrong")
+			// Owner tools live on Admin; members are refused there.
+			if tc.owner {
+				if body = get(t, client, base+"/admin", 200); !strings.Contains(body, "Create and manage invitations") {
+					t.Fatal("demo owner has no admin tools")
+				}
+			} else {
+				get(t, client, base+"/admin", 403)
 			}
 			body = get(t, client, base+"/?view=group", 200)
 			if strings.Contains(body, "Sample: good sources for a shared reading table") != tc.optin {
