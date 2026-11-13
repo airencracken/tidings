@@ -3,6 +3,7 @@ package reader
 
 import (
 	"net/url"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -66,6 +67,15 @@ func TestSharedPageHelpersAreUsed(t *testing.T) {
 	if !strings.Contains(sources, "OPML file, up to "+ui.Size(MaxOPMLBytes)) {
 		t.Fatal("OPML limit copy")
 	}
+	// Limits are binary and labelled in IEC units; the copy follows the limit.
+	for limit, want := range map[int64]string{MaxOPMLBytes: "1 MiB", MaxRestoreBytes: "16 MiB", MaxFeedBytes: "4 MiB", imageDownloadLimit: "5 MiB"} {
+		if got := ui.Size(limit); got != want {
+			t.Errorf("limit %d shows as %q, want %q", limit, got, want)
+		}
+	}
+	if MaxOPMLBytes != 1<<20 || MaxRestoreBytes != 16<<20 || MaxFeedBytes != 4<<20 || imageDownloadLimit != 5<<20 {
+		t.Fatal("a size limit is no longer a binary value")
+	}
 	if _, err := ParseOPML([]byte(strings.Repeat(" ", MaxOPMLBytes+1))); err == nil || !strings.Contains(err.Error(), ui.Size(MaxOPMLBytes)) {
 		t.Fatal(err)
 	}
@@ -80,5 +90,49 @@ func TestSharedPageHelpersAreUsed(t *testing.T) {
 	}
 	if page := h.request(2, "GET", "/api/v1/missing", nil); page.Code != 404 {
 		t.Fatal(page.Code)
+	}
+}
+
+// A 0.8.0 database (schema 5, no site_palette table) gains the table when it
+// opens, keeps its data, and starts on Tidings' default palette.
+func TestSitePaletteReachesUpgradedDatabases(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "reader")
+	s, err := OpenStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.DB.Exec(`DROP TABLE site_palette;
+	ALTER TABLE states DROP COLUMN skipped;
+	ALTER TABLE subscription_tags DROP COLUMN position; ALTER TABLE household_tags DROP COLUMN position;
+	INSERT INTO users(id,username,password,owner) VALUES(1,'host','x',1);
+	PRAGMA user_version=5`); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	upgraded, err := OpenStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer upgraded.Close()
+	var version, tables int
+	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
+		t.Fatal(version, err)
+	}
+	if err = upgraded.DB.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='site_palette'").Scan(&tables); err != nil || tables != 1 {
+		t.Fatal("site_palette missing after upgrade", tables, err)
+	}
+	if p, err := upgraded.SitePalette(t.Context()); err != nil || p != ui.Sage {
+		t.Fatal(p, err)
+	}
+	if err = upgraded.SetSitePalette(t.Context(), 1, "slate"); err != nil {
+		t.Fatal(err)
+	}
+	if p, _ := upgraded.SitePalette(t.Context()); p != ui.Slate {
+		t.Fatal(p)
+	}
+	if _, err = upgraded.DB.Exec("INSERT INTO site_palette(id,palette) VALUES(2,'sage')"); err == nil {
+		t.Fatal("second palette row accepted")
 	}
 }

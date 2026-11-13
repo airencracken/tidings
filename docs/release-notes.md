@@ -31,6 +31,8 @@ upgrade, and keep that copy if you might return to an older version.
   rejected invitation links.
 - Larger text and buttons, a Copy button for invitation links, and plain error
   pages.
+- Size limits are shown in binary units: OPML files up to 1 MiB, reading-data
+  files up to 16 MiB.
 
 Operators:
 
@@ -45,7 +47,7 @@ Operators:
   stories, so earlier versions still import them.
 - Upgrading deletes the per-account sign-in and story-open records kept by
   0.7.0 and 0.8.0, including in restored backups.
-- Requires Comfylib 0.7.0, which provides site-health metrics, the shared
+- Requires Comfylib 0.7.1, which provides site-health metrics, the shared
   colour tokens, palettes and theme picker, error pages, and the password rule
   (12 or more characters, at most 72 bytes).
 - Saved theme choices carry over. The owner's palette is stored in a new

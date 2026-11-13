@@ -213,7 +213,7 @@ func TestTemplateVoiceUsesPlainHouseholdWords(t *testing.T) {
 		all.Write(data)
 	}
 	source := all.String()
-	for _, retired := range []string{"gathering", "Your place here", "'s place", "usual seat", "open seat", "A place at the table", "Tridactyl", "MiB", "12–72", "bytes", "Set aside", "set aside"} {
+	for _, retired := range []string{"gathering", "Your place here", "'s place", "usual seat", "open seat", "A place at the table", "Tridactyl", "12–72", "bytes", " MB", "Set aside", "set aside"} {
 		if strings.Contains(source, retired) {
 			t.Errorf("templates still say %q", retired)
 		}

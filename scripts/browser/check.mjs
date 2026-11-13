@@ -221,7 +221,7 @@ db.commit()
   const data=await exported.json();
   assert.equal(data.username,'host');assert.equal(data.version,1);assert.equal(data.stories.length,1);assert.equal(data.feed_groups[0].name,'AI research');
   await member.goto(origin+'/account');
-  await act(member.getByLabel('Tidings JSON file, up to 16.8 MB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+  await act(member.getByLabel('Tidings JSON file, up to 16 MiB'), 'setInputFiles', {name:'tidings.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
   await member.getByLabel('Merge this file into my personal reading data').check();
   await act(member.getByRole('button',{name:'Merge reading data',exact:true}), 'click');
   await member.goto(origin+'/?view=saved');
