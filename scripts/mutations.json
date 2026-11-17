@@ -234,8 +234,8 @@
   {
     "name": "restored markers follow publisher fetch",
     "file": "internal/reader/store.go",
-    "before": "WHERE own.feed_id=? AND own.original_key=? AND own.url=?",
-    "after": "WHERE 0 AND own.feed_id=? AND own.original_key=? AND own.url=?",
+    "before": "JOIN states st ON st.entry_id=own.id AND st.user_id=own.import_owner",
+    "after": "JOIN states st ON st.entry_id=own.id AND st.user_id=own.import_owner AND 1=0",
     "package": "./internal/reader",
     "run": "^TestRestoredStateFollowsLaterPublisherFetch$"
   },

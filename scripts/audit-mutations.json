@@ -46,5 +46,21 @@
     "after": "if false {",
     "package": "./internal/reader",
     "run": "^TestSecurityEventsAreCounted$"
+  },
+  {
+    "name": "restored article copy survives refresh",
+    "file": "internal/reader/store.go",
+    "before": "JOIN article_copies c ON c.entry_id=own.id AND c.user_id=own.import_owner",
+    "after": "JOIN article_copies c ON c.entry_id=own.id AND c.user_id=own.import_owner AND 1=0",
+    "package": "./internal/reader",
+    "run": "^TestRestoredPrivateArticleSurvivesFeedRefresh$"
+  },
+  {
+    "name": "export parts respect the import byte limit",
+    "file": "internal/reader/export_download.go",
+    "before": "size+len(data)+1 > MaxRestoreBytes",
+    "after": "size+len(data)+1 > 2*MaxRestoreBytes",
+    "package": "./internal/reader",
+    "run": "^TestLargeReadingDownloadCanBeImported$"
   }
 ]

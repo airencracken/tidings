@@ -4,7 +4,7 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
-## 0.9.2
+## 0.9.3
 
 - Restored full-text stories stay with the reader when the publisher's entry arrives on a feed refresh.
 - Large reading-data downloads contain numbered JSON files that can be imported one at a time.
