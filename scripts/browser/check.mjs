@@ -75,7 +75,16 @@ db.commit()
   const cacheDirectory=path.join(env.TIDINGS_DATA_DIR,'cache','images');await mkdir(cacheDirectory,{recursive:true,mode:0o700});
   await writeFile(path.join(cacheDirectory,createHash('sha256').update('https://example.org/preview.png').digest('hex')+'.jpg'),Buffer.from(preview,'base64'),{mode:0o600});
   await signIn(page,origin);
-  await checkSuiteControls(page, { apps: true, density: true });
+  await checkSuiteControls(page, { apps: true });
+  const spacing = page.locator('[data-density-controls]');
+  assert.equal(await spacing.isVisible(), false);
+  await act(spacing.locator('[data-density-choice="compact"]'), 'click');
+  assert.equal(await page.locator('html').getAttribute('data-density'), 'compact');
+  await page.reload();
+  assert.equal(await page.locator('html').getAttribute('data-density'), 'compact');
+  assert.equal(await spacing.locator('[data-density-choice="compact"]').getAttribute('aria-pressed'), 'true');
+  await act(spacing.locator('[data-density-choice="comfortable"]'), 'click');
+  await page.locator('.filter-disclosure > summary').click();
   const administration = page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link', { name: 'Admin', exact: true });
   assert.equal(await administration.isVisible(), true);
   await act(administration, 'click');

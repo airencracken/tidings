@@ -44,5 +44,5 @@ progress expire after five minutes and are lost when the server restarts.
 
 ## Reading layout
 
-The **Comfortable** and **Compact** buttons above the story list set story
+The **Comfortable** and **Compact** buttons under **Filter** set story
 spacing. The choice is saved in this browser and shared between its tabs.

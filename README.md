@@ -13,7 +13,7 @@ feed groups, saved stories and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.9.1](https://github.com/airencracken/tidings/releases/tag/v0.9.1)** · [What's new](docs/release-notes.md)
+Current release: **[0.9.2](https://github.com/airencracken/tidings/releases/tag/v0.9.2)** · [What's new](docs/release-notes.md)
 
 ## Install
 
@@ -103,11 +103,12 @@ markers stay yours. Stories you saved for later are kept when you stop following
 
 ## Your data
 
-Under **Your account** you can download your subscriptions as OPML, or all your
-reading data as JSON: subscriptions, tags, groups, read, saved and skipped
-markers, and the text
-of stories you marked. You can merge a Tidings JSON export from another
-instance, up to 16 MiB, 10,000 marked stories, 2,000 sources and 100 groups.
+Under **Your account** you can download your subscriptions as OPML or all your
+reading data, including subscriptions, tags, groups, reading markers and text
+from stories you marked. Small downloads are a single JSON file. For a large
+ZIP download, unzip it and merge the numbered JSON files in order.
+Each import supports up to 16 MiB, 10,000 marked stories, 2,000 sources and 100
+groups.
 Your existing choices win when they conflict. Exports never include passwords
 or other members' data.
 

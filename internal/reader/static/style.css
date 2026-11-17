@@ -129,7 +129,9 @@ dialog::backdrop { background: #0007; }
 .shelf-note a { font-size: 13px; }
 
 /* Search and filters */
-.filter-disclosure { margin: 0 0 25px; }
+.reading-tools { position: relative; margin-bottom: 14px; }
+.reading-tools .refresh-form { position: absolute; top: 4px; right: 0; margin: 0; }
+.filter-disclosure .comfy-density { margin-top: 12px; }
 .filter-disclosure > summary { display: inline-block; cursor: pointer; color: var(--green); font-size: 14px; font-weight: 600; padding: 4px 0; }
 .filter-disclosure[open] > summary { margin-bottom: 12px; }
 .filter-form { margin: 0; }
@@ -141,9 +143,6 @@ dialog::backdrop { background: #0007; }
 .filters > a { font-size: 14px; padding-bottom: 7px; }
 
 /* Story list */
-.list-heading { display: flex; justify-content: space-between; gap: 15px; color: var(--muted); font-size: 12px; margin: 0 0 11px; }
-.list-heading p { margin: 0; }
-.list-heading .refresh-form { margin: 0 auto 0 0; }
 .story-list { display: grid; gap: 20px; }
 .story-row { padding: 30px 32px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-columns: minmax(0, 1fr); }
 .story-row + .story-row { border-top: 1px solid var(--line); }
@@ -284,7 +283,6 @@ dialog::backdrop { background: #0007; }
   .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .site-footer { margin: 0 32px; }
   .header-inner { gap: 20px; }
-  .list-heading > span { display: none; }
 }
 
 @media (max-width: 760px) {
@@ -299,10 +297,10 @@ dialog::backdrop { background: #0007; }
   .empty-state { padding: 40px 24px; }
   .source-list { padding: 0; }
   .demo-notice { font-size: 12px; }
-  .reading-grid { grid-template-columns: 1fr; gap: 24px; }
+  .reading-grid { grid-template-columns: 1fr; gap: 12px; }
   .shelves { padding: 0; }
   .shelves > .eyebrow, .shelf-note, .shelves > .field-help { display: none; }
-  .shelves nav { flex-direction: row; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+  .shelves nav { flex-direction: row; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
   .shelves nav a { font-size: 13px; padding: 8px 10px; }
   .skipped-link { padding: 0 10px; }
   .filters { gap: 12px; }
@@ -337,7 +335,6 @@ dialog::backdrop { background: #0007; }
   .catalog-grid { grid-template-columns: 1fr; }
   .story-meta { gap: 6px 10px; }
   .story-meta > time { margin-left: 0; }
-  .list-heading span { display: none; }
   .reading-paper { padding: 23px; }
   .search-row button { padding: 10px 14px; }
   .welcome-copy h1 { font-size: 42px; }

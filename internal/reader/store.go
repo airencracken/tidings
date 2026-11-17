@@ -489,11 +489,19 @@ func (s *Store) ApplyFetch(ctx context.Context, f Feed, r FetchResult) error {
 			}
 
 			// When the publisher later supplies a restored story, move the
-			// reader's markers onto that canonical entry, without publishing
-			// any uploaded text. Existing canonical markers take precedence.
+			// reader's markers and private copy onto the canonical entry.
+			// Existing canonical markers and copies take precedence.
 			if _, err = tx.ExecContext(ctx, `INSERT INTO states(user_id,entry_id,read,saved,skipped)
               SELECT st.user_id,real.id,st.read,st.saved,st.skipped FROM entries own
               JOIN states st ON st.entry_id=own.id AND st.user_id=own.import_owner
+              JOIN entries real ON real.feed_id=own.feed_id AND real.key=own.original_key AND real.url=own.url AND real.import_owner IS NULL
+              WHERE own.feed_id=? AND own.original_key=? AND own.url=?
+              ON CONFLICT(user_id,entry_id) DO NOTHING`, f.ID, e.Key, e.URL); err != nil {
+				return err
+			}
+			if _, err = tx.ExecContext(ctx, `INSERT INTO article_copies(user_id,entry_id,body,body_html,fetched)
+              SELECT c.user_id,real.id,c.body,c.body_html,c.fetched FROM entries own
+              JOIN article_copies c ON c.entry_id=own.id AND c.user_id=own.import_owner
               JOIN entries real ON real.feed_id=own.feed_id AND real.key=own.original_key AND real.url=own.url AND real.import_owner IS NULL
               WHERE own.feed_id=? AND own.original_key=? AND own.url=?
               ON CONFLICT(user_id,entry_id) DO NOTHING`, f.ID, e.Key, e.URL); err != nil {

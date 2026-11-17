@@ -4,6 +4,13 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
+## 0.9.2
+
+- Restored full-text stories stay with the reader when the publisher's entry arrives on a feed refresh.
+- Large reading-data downloads contain numbered JSON files that can be imported one at a time.
+- The reading table keeps refresh visible and groups spacing and filters together.
+- Uses Comfylib 0.7.3. No database migration is needed.
+
 ## 0.9.1
 
 - Reading-data exports restore correctly for sources whose topic migration produced thirteen tags. All tags and their order are kept.

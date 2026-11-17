@@ -17,6 +17,7 @@ import (
 )
 
 const MaxRestoreBytes = 16 << 20
+const maxRestoredStories = 10000
 
 func DecodeExport(b []byte) (Export, error) {
 	var data Export
@@ -37,7 +38,7 @@ func validateExport(data Export) error {
 	if data.Version != 1 {
 		return errors.New("unsupported reading-data version")
 	}
-	if len(data.Feeds)+len(data.GroupFeeds) > 4000 || len(data.StorySources) > 2000 || len(data.Stories) > 10000 || len(data.Groups) > 100 {
+	if len(data.Feeds)+len(data.GroupFeeds) > 4000 || len(data.StorySources) > 2000 || len(data.Stories) > maxRestoredStories || len(data.Groups) > 100 {
 		return errors.New("reading-data file has too many sources, stories, or groups")
 	}
 	sources := map[int64]string{}

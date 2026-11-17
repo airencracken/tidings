@@ -337,6 +337,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("POST /sources/import", a.importOPML)
 	a.mux.HandleFunc("GET /subscriptions.opml", a.exportOPML)
 	a.mux.HandleFunc("GET /api/v1/export", a.export)
+	a.mux.HandleFunc("GET /account/export", a.downloadReadingData)
 	a.mux.HandleFunc("GET /account", a.account)
 	a.mux.HandleFunc("POST /account/timezone", a.saveTimezone)
 	a.mux.HandleFunc("GET /admin/metrics", a.metrics)
