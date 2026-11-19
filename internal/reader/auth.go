@@ -78,22 +78,34 @@ func (s *Store) SetPassword(ctx context.Context, username, password string) erro
 }
 
 func (s *Store) Login(ctx context.Context, username, password string) (string, error) {
+	id, hash, err := s.checkCredentials(ctx, username, password)
+	if err != nil {
+		return "", err
+	}
+	return s.passwordSession(ctx, id, hash)
+}
+
+func (s *Store) checkCredentials(ctx context.Context, username, password string) (int64, string, error) {
 	if !comfypassword.Fits(password) {
-		return "", ErrCredentials
+		return 0, "", ErrCredentials
 	}
 	var id int64
 	var hash []byte
 	err := s.DB.QueryRowContext(ctx, "SELECT id,password FROM users WHERE username=? AND suspended=0", username).Scan(&id, &hash)
 	if err != nil && err != sql.ErrNoRows {
-		return "", err
+		return 0, "", err
 	}
 	if err == sql.ErrNoRows {
 		hash = []byte("$2a$10$7EqJtq98hPqEX7fNZaFWoO5Uj3G1QYtO.JcH6r1e1V9x1sJzHth5q")
 	}
 	compare := bcrypt.CompareHashAndPassword(hash, []byte(password))
 	if err != nil || compare != nil {
-		return "", ErrCredentials
+		return 0, "", ErrCredentials
 	}
+	return id, string(hash), nil
+}
+
+func (s *Store) passwordSession(ctx context.Context, id int64, hash string) (string, error) {
 	raw, digest := token.New()
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -103,8 +115,16 @@ func (s *Store) Login(ctx context.Context, username, password string) (string, e
 	if _, err = tx.ExecContext(ctx, "DELETE FROM sessions WHERE expires<=?", time.Now().Unix()); err != nil {
 		return "", err
 	}
-	if _, err = tx.ExecContext(ctx, "INSERT INTO sessions(token,user_id,expires) VALUES(?,?,?)", digest, id, time.Now().Add(30*24*time.Hour).Unix()); err != nil {
+	result, err := tx.ExecContext(ctx, "INSERT INTO sessions(token,user_id,expires) SELECT ?,id,? FROM users WHERE id=? AND CAST(password AS TEXT)=? AND suspended=0", digest, time.Now().Add(30*24*time.Hour).Unix(), id, hash)
+	if err != nil {
 		return "", err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return "", err
+	}
+	if count != 1 {
+		return "", ErrCredentials
 	}
 	return raw, tx.Commit()
 }

@@ -200,7 +200,7 @@ func TestSkipMigrationAddsColumnAndKeepsState(t *testing.T) {
 	}
 	defer upgraded.Close()
 	var version, read, saved, skipped int
-	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
+	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != currentSchema {
 		t.Fatal(version, err)
 	}
 	if err = upgraded.DB.QueryRow("SELECT read,saved,skipped FROM states WHERE user_id=1 AND entry_id=1").Scan(&read, &saved, &skipped); err != nil || read != 1 || saved != 1 || skipped != 0 {
@@ -210,7 +210,7 @@ func TestSkipMigrationAddsColumnAndKeepsState(t *testing.T) {
 		t.Fatal("skipped accepts a non-boolean value")
 	}
 	// A newer database refuses to open in this version.
-	if _, err = upgraded.DB.Exec("PRAGMA user_version=8"); err != nil {
+	if _, err = upgraded.DB.Exec("PRAGMA user_version=9"); err != nil {
 		t.Fatal(err)
 	}
 	upgraded.Close()

@@ -1,5 +1,13 @@
 [
   {
+    "name": "password sign-in requires the enrolled authenticator",
+    "file": "internal/reader/app.go",
+    "before": "if a.finishFirstFactor(w, r, id, hash) {",
+    "after": "if false && a.finishFirstFactor(w, r, id, hash) {",
+    "package": "./internal/reader",
+    "run": "^TestAuthenticatorSignIn$"
+  },
+  {
     "name": "household opt-in guard",
     "file": "internal/reader/store.go",
     "before": "WHERE u.group_optin=1 AND g.feed_id=e.feed_id))",

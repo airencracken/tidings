@@ -31,6 +31,9 @@ func (a *App) registerSharedSignIn(mux *http.ServeMux) error {
 }
 
 func (a *App) sharedSignIn(w http.ResponseWriter, r *http.Request, id int64) (string, error) {
+	if target, handled, err := a.factor.Start(w, r, id, ""); handled {
+		return target, err
+	}
 	raw, err := a.Store.LoginSession(r.Context(), id)
 	if err != nil {
 		return "", err

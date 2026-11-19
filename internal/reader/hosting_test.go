@@ -265,7 +265,7 @@ func TestV2MigrationPreservesDataAndStartsSuggestionsDisabled(t *testing.T) {
 	}
 	defer s.Close()
 	var version, users int
-	if err := s.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
+	if err := s.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != currentSchema {
 		t.Fatal(version, err)
 	}
 	if err := s.DB.QueryRow("SELECT count(*) FROM users WHERE username='existing'").Scan(&users); err != nil || users != 1 {

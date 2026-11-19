@@ -84,7 +84,7 @@ func TestTopicMigrationMakesTheTopicTheFirstTag(t *testing.T) {
 	}
 	defer s.Close()
 	var version int
-	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
+	if err = s.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != currentSchema {
 		t.Fatal(version, err)
 	}
 	full := []string{"overflow"}

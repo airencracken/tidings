@@ -4,6 +4,17 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
+## 0.10.0
+
+- Optional authenticator-app sign-in is available on the account page after
+  the operator sets `TIDINGS_TOTP_KEY`. Members can enroll, save recovery
+  codes, and choose whether to use the feature.
+- An enrolled account needs an authenticator or recovery code after password
+  or community sign-in. Enabling it signs out the account's other sessions.
+
+Back up the data directory before upgrading. This release adds a database
+migration for encrypted authenticator secrets and sign-in challenges.
+
 ## 0.9.3
 
 - Restored full-text stories stay with the reader when the publisher's entry arrives on a feed refresh.

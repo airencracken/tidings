@@ -13,6 +13,7 @@ import (
 	"github.com/airencracken/comfylib/displaytime"
 	"github.com/airencracken/comfylib/problem"
 	"github.com/airencracken/comfylib/suite"
+	"github.com/airencracken/comfylib/twofactor"
 	"html/template"
 	"io"
 	"log/slog"
@@ -42,6 +43,7 @@ type Config struct {
 	Demo           bool
 }
 type App struct {
+	factor              *twofactor.HTTP
 	activityHandler     http.Handler
 	monitor             *analytics.Monitor
 	Store               *Store
@@ -75,6 +77,8 @@ type requestContext struct {
 }
 type contextKey struct{}
 type page struct {
+	FactorEnabled                                      bool
+	FactorContent                                      template.HTML
 	TimezoneControl                                    displaytime.Preference
 	TimezoneInput                                      *string
 	TimezoneError, TimezoneNotice                      string
@@ -189,6 +193,9 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 	// Site health: requests, status classes and latency per route pattern.
 	a.monitor = analytics.NewMonitor(a.Store.DB)
 	a.activityHandler = analytics.Maintenance(a.Store.DB, a.monitor.Middleware(a.mux))
+	if err = a.registerTwoFactor(a.mux); err != nil {
+		return nil, err
+	}
 	if err = a.registerSharedSignIn(a.mux); err != nil {
 		return nil, err
 	}
@@ -251,7 +258,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			rc.Session = c.Value
 		}
 	}
-	public := r.URL.Path == "/login" || r.URL.Path == "/join" || r.URL.Path == "/auth/shared/start" || r.URL.Path == "/auth/shared/callback"
+	public := r.URL.Path == "/login" || a.factor.Enabled() && r.URL.Path == twofactor.LoginPath || r.URL.Path == "/join" || r.URL.Path == "/auth/shared/start" || r.URL.Path == "/auth/shared/callback"
 	if rc.User.ID == 0 && !public {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -363,6 +370,7 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, p page, status int)
 
 // withPageData fills the parts of a page every view shares.
 func (a *App) withPageData(r *http.Request, p page) page {
+	p.FactorEnabled = a.factor.Enabled()
 	p.Demo = a.config.Demo
 	palette, err := a.Store.SitePalette(r.Context())
 	if err != nil {
@@ -958,7 +966,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, page{Title: "Welcome back", Kind: "login", Error: tooManyAttempts}, http.StatusTooManyRequests)
 		return
 	}
-	raw, err := a.Store.Login(r.Context(), r.PostFormValue("username"), r.PostFormValue("password"))
+	id, hash, err := a.Store.checkCredentials(r.Context(), r.PostFormValue("username"), r.PostFormValue("password"))
 	if err != nil {
 		if !errors.Is(err, ErrCredentials) {
 			a.fail(w, r, err)
@@ -966,6 +974,14 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		}
 		a.recordSecurity(r, analytics.RecordFailedSignIn)
 		a.render(w, r, page{Title: "Welcome back", Kind: "login", Error: err.Error()}, 401)
+		return
+	}
+	if a.finishFirstFactor(w, r, id, hash) {
+		return
+	}
+	raw, err := a.Store.passwordSession(r.Context(), id, hash)
+	if err != nil {
+		a.fail(w, r, err)
 		return
 	}
 	a.cookie(w, a.cookieName(), raw, 30*24*3600)

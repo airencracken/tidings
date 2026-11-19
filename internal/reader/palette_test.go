@@ -117,7 +117,7 @@ func TestSitePaletteReachesUpgradedDatabases(t *testing.T) {
 	}
 	defer upgraded.Close()
 	var version, tables int
-	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
+	if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != currentSchema {
 		t.Fatal(version, err)
 	}
 	if err = upgraded.DB.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='site_palette'").Scan(&tables); err != nil || tables != 1 {

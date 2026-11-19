@@ -4,6 +4,21 @@ Native services listen on `127.0.0.1:8085` and keep data in `/var/lib/tidings`.
 The data directory is private (0700) and only one server can use it at a time.
 Never serve it from your reverse proxy.
 
+## Authenticator sign-in
+
+Set `TIDINGS_TOTP_KEY` to a unique 32-byte key encoded as hex. You can
+generate one with `openssl rand -hex 32`. Put it in the service's private
+environment configuration, or in the private environment file used by
+Docker Compose, then restart the app.
+
+Members can then open **Two-factor sign-in** from their account page. Add the
+setup key to an authenticator and enter a current code to confirm. Save the
+single-use recovery codes somewhere safe. After enrollment, both password and
+community sign-in ask for an authenticator or recovery code.
+
+Keep the original instance key with your server's private configuration
+backups. A restored database with enrolled accounts requires the same key.
+
 ## Public address and proxy
 
 Set the public HTTPS address before you invite anyone:

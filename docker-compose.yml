@@ -1,6 +1,6 @@
 services:
   tidings:
-    image: ghcr.io/airencracken/tidings:v0.9.3
+    image: ghcr.io/airencracken/tidings:v0.10.0
     ports:
       - "127.0.0.1:8085:8080"
     environment:
@@ -9,6 +9,7 @@ services:
       TIDINGS_SHARED_CLIENT_ID: "${TIDINGS_SHARED_CLIENT_ID:-}"
       TIDINGS_SHARED_CLIENT_SECRET: "${TIDINGS_SHARED_CLIENT_SECRET:-}"
       TIDINGS_BASE_URL: "${TIDINGS_BASE_URL:-https://tidings.example.org}"
+      TIDINGS_TOTP_KEY: "${TIDINGS_TOTP_KEY:-}"
     volumes:
       - tidings-data:/data
     read_only: true

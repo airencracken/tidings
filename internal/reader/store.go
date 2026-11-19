@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/airencracken/comfylib/analytics"
 	"github.com/airencracken/comfylib/displaytime"
+	"github.com/airencracken/comfylib/twofactor"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -36,6 +37,8 @@ var migrationV5 string
 
 //go:embed migration_v6.sql
 var migrationV6 string
+
+const currentSchema = 8
 
 type Store struct {
 	DB        *sql.DB
@@ -128,7 +131,7 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, err
 	}
-	if version > 7 {
+	if version > currentSchema {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
@@ -152,8 +155,19 @@ func OpenStore(dir string) (store *Store, failure error) {
 	if err == nil && version < 7 {
 		err = migrateTopicsToTags(context.Background(), tx)
 	}
+	if err == nil && version < 8 {
+		err = twofactor.Install(context.Background(), tx)
+		if err == nil {
+			_, err = tx.Exec(`CREATE TRIGGER IF NOT EXISTS twofactor_invalidated_login AFTER UPDATE OF password,suspended ON users
+WHEN OLD.password IS NOT NEW.password OR OLD.suspended IS NOT NEW.suspended
+BEGIN
+ DELETE FROM twofactor_challenges WHERE user_id=NEW.id;
+ DELETE FROM twofactor_secrets WHERE user_id=NEW.id AND last_step IS NULL;
+END;`)
+		}
+	}
 	if err == nil {
-		_, err = tx.Exec("PRAGMA user_version=7")
+		_, err = tx.Exec("PRAGMA user_version=8")
 	}
 	if err == nil {
 		err = tx.Commit()

@@ -288,7 +288,7 @@ func TestReadingMigrationAtomicity(t *testing.T) {
 				if err = upgraded.DB.QueryRow("SELECT keyboard_shortcuts FROM users WHERE username='before'").Scan(&enabled); err != nil || enabled {
 					t.Fatal(enabled, err)
 				}
-				if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 7 {
+				if err = upgraded.DB.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != currentSchema {
 					t.Fatal(version, err)
 				}
 				return
