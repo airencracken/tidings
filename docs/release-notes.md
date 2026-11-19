@@ -4,7 +4,7 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
-## 0.10.0
+## 0.10.1
 
 - Optional authenticator-app sign-in is available on the account page after
   the operator sets `TIDINGS_TOTP_KEY`. Members can enroll, save recovery

@@ -17,7 +17,7 @@
   },
   {
     "name": "community sign-in refuses suspended accounts",
-    "file": "internal/reader/analytics.go",
+    "file": "internal/reader/two_factor.go",
     "before": "FROM users WHERE id=? AND suspended=0",
     "after": "FROM users WHERE id=?",
     "package": "./internal/reader",

@@ -205,7 +205,7 @@
     "before": "WHERE username=? AND suspended=0",
     "after": "WHERE username=?",
     "package": "./internal/reader",
-    "run": "^TestMemberActionsAndRevokedInvitations$"
+    "run": "^TestSuspendedPasswordCannotAdvanceSignIn$"
   },
   {
     "name": "backup checksum checked",

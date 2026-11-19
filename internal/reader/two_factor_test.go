@@ -3,6 +3,7 @@
 package reader
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -16,4 +17,14 @@ func TestAuthenticatorSignIn(t *testing.T) {
 		Handler: h.app, Origin: "https://tidings.example.test",
 		Username: "alice", Password: testPassword, Home: "/",
 	})
+}
+
+func TestSuspendedPasswordCannotAdvanceSignIn(t *testing.T) {
+	s := testStore(t)
+	if _, err := s.DB.Exec("UPDATE users SET suspended=1 WHERE username='alice'"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.checkCredentials(t.Context(), "alice", testPassword); !errors.Is(err, ErrCredentials) {
+		t.Fatalf("suspended password check returned %v", err)
+	}
 }
