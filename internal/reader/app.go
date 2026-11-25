@@ -50,6 +50,7 @@ type App struct {
 	Fetcher             *Fetcher
 	images              *imageCache
 	articleSlots        chan struct{}
+	previewSlots        chan struct{}
 	config              Config
 	templates           *displaytime.Templates
 	mux                 *http.ServeMux
@@ -66,10 +67,6 @@ type App struct {
 	ctx                 context.Context
 	wg                  sync.WaitGroup
 	Catalog             []Suggestion
-}
-type Suggestion struct {
-	Title, URL, Category, Description string
-	Verified                          string `json:"verified"`
 }
 type requestContext struct {
 	User          User
@@ -94,7 +91,12 @@ type page struct {
 	More                                               bool
 	Previous, Next                                     string
 	Tags                                               []string
-	Suggestions                                        []Suggestion
+	CatalogSections                                    []catalogSection
+	CatalogRecommendations                             []catalogSource
+	CatalogLanguages                                   []string
+	CatalogPreview                                     catalogSource
+	CatalogBack                                        string
+	CatalogTotal                                       int
 	GroupScope                                         bool
 	Date                                               string
 	Groups                                             []FeedGroup
@@ -108,7 +110,7 @@ type page struct {
 	Members                                            []User
 	Invitations                                        []Invitation
 	Discovered                                         []DiscoveredFeed
-	CatalogQuery                                       string
+	CatalogFilter                                      catalogFilter
 	CatalogCategories                                  []CatalogCategory
 	SuggestionsEnabled                                 bool
 	Demo                                               bool
@@ -119,15 +121,28 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 	if suiteErr != nil {
 		return nil, suiteErr
 	}
-	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), config: c, ctx: ctx, mux: http.NewServeMux()}
+	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), previewSlots: make(chan struct{}, 3), config: c, ctx: ctx, mux: http.NewServeMux()}
 	funcs := template.FuncMap{"timezonePreference": displaytime.RenderPreference, "adminSummary": admin.Render,
 		"themePicker": func() template.HTML { return ui.ThemePicker(true) },
 		"palettes":    ui.Palettes,
 		"uploadLimit": func(name string) string {
 			return map[string]string{"opml": ui.Size(MaxOPMLBytes), "restore": ui.Size(MaxRestoreBytes)}[name]
 		},
-		"article":   renderArticle,
-		"cleanLink": CleanArticleURL,
+		"article":         renderArticle,
+		"cleanLink":       CleanArticleURL,
+		"catalogLocation": catalogLocation,
+		"catalogCategory": func(f catalogFilter, category string, group bool) string {
+			f.Category, f.Page = category, 0
+			return catalogLocation(f, group, "")
+		},
+		"catalogPage": func(f catalogFilter, delta int, group bool) string {
+			f.Page += delta
+			return catalogLocation(f, group, "")
+		},
+		"catalogPageNumber": func(f catalogFilter) int { return f.Page + 1 },
+		"catalogCard": func(p page, source catalogSource) catalogCardView {
+			return catalogCardView{catalogSource: source, CSRF: p.CSRF, GroupScope: p.GroupScope, Filter: p.CatalogFilter}
+		},
 		"checked": func(n int64) string {
 			if n == 0 {
 				return "Not fetched yet"
@@ -182,11 +197,7 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 		return nil, err
 	}
 
-	data, err := assets.ReadFile("catalog.json")
-	if err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(data, &a.Catalog); err != nil {
+	if a.Catalog, err = loadCatalog(); err != nil {
 		return nil, err
 	}
 	a.routes()
@@ -331,6 +342,7 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /sources", a.sources)
 	a.mux.HandleFunc("POST /sources", a.subscribe)
 	a.mux.HandleFunc("POST /sources/discover", a.discover)
+	a.mux.HandleFunc("POST /sources/preview", a.previewSource)
 	a.mux.HandleFunc("POST /groups/{id}/rename", a.renameGroup)
 	a.mux.HandleFunc("POST /account/members/{id}", a.memberAction)
 	a.mux.HandleFunc("POST /account/invitations/revoke", a.revokeInvite)
@@ -469,8 +481,13 @@ func parseFilter(r *http.Request) (Filter, error) {
 	if f.View == "" {
 		f.View = "unread"
 	}
-	if f.View != "unread" && f.View != "all" && f.View != "saved" && f.View != "group" && f.View != "skipped" {
+	switch f.View {
+	case "unread", "all", "saved", "group", "skipped", "for-you":
+	default:
 		return f, errors.New("unknown reading shelf")
+	}
+	if f.View == "for-you" && (q.Has("page") || q.Has("cursor") || q.Has("direction")) {
+		return f, errors.New("For You shows a single selection")
 	}
 	if len(f.Query) > 300 || len(f.Tag) > 160 {
 		return f, errors.New("search or tag is too long")
@@ -593,6 +610,9 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 	if f.View == "group" {
 		p.Title = "The household table"
 	}
+	if f.View == "for-you" {
+		p.Title = "For You"
+	}
 	p.Groups, err = a.Store.Groups(r.Context(), u)
 	if err != nil {
 		a.fail(w, r, err)
@@ -627,6 +647,10 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	sort.Strings(p.Tags)
+	if f.View == "for-you" {
+		a.render(w, r, p, 200)
+		return
+	}
 	query := r.URL.Query()
 	if len(p.Entries) > 0 {
 		last := p.Entries[len(p.Entries)-1]
@@ -720,22 +744,15 @@ func (a *App) readPage(w http.ResponseWriter, r *http.Request) {
 func (a *App) sources(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User
 	p := page{Title: "Your sources", Kind: "sources", GroupScope: scope(r), Notice: notice(r)}
-	p.CatalogQuery = strings.TrimSpace(r.URL.Query().Get("catalog_q"))
-	if len(p.CatalogQuery) > 200 {
-		a.bad(w, r, "Search is too long")
-		return
-	}
-	query := strings.ToLower(p.CatalogQuery)
-	enabled, err := a.Store.CatalogCategories(r.Context())
+	values, err := url.ParseQuery(r.URL.RawQuery)
 	if err != nil {
-		a.fail(w, r, err)
+		a.bad(w, r, "Invalid source filters")
 		return
 	}
-	p.SuggestionsEnabled = len(enabled) > 0
-	for _, item := range a.Catalog {
-		if enabled[item.Category] && (query == "" || strings.Contains(strings.ToLower(item.Title+" "+item.Description+" "+item.Category), query)) {
-			p.Suggestions = append(p.Suggestions, item)
-		}
+	p.CatalogFilter, err = readCatalogFilter(values)
+	if err != nil {
+		a.bad(w, r, err.Error())
+		return
 	}
 	if p.GroupScope {
 		p.Title = "Household sources"
@@ -744,6 +761,28 @@ func (a *App) sources(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.fail(w, r, err)
 		return
+	}
+	if !p.GroupScope || u.Owner {
+		enabled, err := a.Store.CatalogCategories(r.Context())
+		if err != nil {
+			a.fail(w, r, err)
+			return
+		}
+		p.SuggestionsEnabled = len(enabled) > 0
+		p.CatalogCategories = catalogCategories(a.Catalog, enabled)
+		p.CatalogLanguages = catalogLanguages(a.Catalog, enabled)
+		p.CatalogSections = browseCatalog(a.Catalog, enabled, p.Feeds, p.CatalogFilter)
+		for _, section := range p.CatalogSections {
+			p.CatalogTotal += section.Count
+		}
+		if !p.GroupScope && !p.CatalogFilter.Active() && len(p.Feeds) > 0 {
+			feedback, err := a.Store.catalogFeedback(r.Context(), u.ID, time.Now())
+			if err != nil {
+				a.fail(w, r, err)
+				return
+			}
+			p.CatalogRecommendations = recommendCatalog(a.Catalog, enabled, p.Feeds, feedback)
+		}
 	}
 	a.render(w, r, p, 200)
 }
@@ -754,8 +793,12 @@ func (a *App) subscribe(w http.ResponseWriter, r *http.Request) {
 		a.problem(w, r, http.StatusForbidden, "", nil)
 		return
 	}
+	filter, err := readCatalogFilter(r.PostForm)
+	if err != nil {
+		a.bad(w, r, err.Error())
+		return
+	}
 	f := Feed{URL: r.PostFormValue("url")}
-	var err error
 	f.Tags, err = ParseTags(r.PostFormValue("tags"))
 	if err != nil {
 		a.bad(w, r, err.Error())
@@ -766,11 +809,16 @@ func (a *App) subscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.StartRefresh(u.ID, false)
-	to := "/sources?notice=subscribed"
-	if group {
-		to += "&scope=household"
+	values := url.Values{"notice": {"subscribed"}}
+	if r.PostForm.Has("catalog_q") {
+		http.Redirect(w, r, catalogLocation(filter, group, "subscribed"), http.StatusSeeOther)
+		return
 	}
-	http.Redirect(w, r, to, 303)
+	if group {
+		values.Set("scope", "household")
+	}
+	target := url.URL{Path: "/sources", RawQuery: values.Encode()}
+	http.Redirect(w, r, target.String(), 303)
 }
 func (a *App) unsubscribe(w http.ResponseWriter, r *http.Request) {
 	u := current(r).User

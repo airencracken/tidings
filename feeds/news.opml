@@ -4,7 +4,31 @@
     <title>Tidings News</title>
   </head>
   <body>
-    <outline text="BBC World News" title="BBC World News" type="rss" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" category="News" />
-    <outline text="NPR News" title="NPR News" type="rss" xmlUrl="https://feeds.npr.org/1001/rss.xml" category="News" />
+    <outline text="News" title="News">
+      <outline text="BBC World News" title="BBC World News" type="rss" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml" />
+      <outline text="NPR News" title="NPR News" type="rss" xmlUrl="https://feeds.npr.org/1001/rss.xml" />
+      <outline text="The Guardian World" title="The Guardian World" type="rss" xmlUrl="https://www.theguardian.com/world/rss" />
+      <outline text="ProPublica" title="ProPublica" type="rss" xmlUrl="https://www.propublica.org/feeds/propublica/main" />
+      <outline text="Al Jazeera English" title="Al Jazeera English" type="rss" xmlUrl="https://www.aljazeera.com/xml/rss/all.xml" />
+      <outline text="Le Monde in English" title="Le Monde in English" type="rss" xmlUrl="https://www.lemonde.fr/en/international/rss_full.xml" />
+      <outline text="The Marshall Project" title="The Marshall Project" type="rss" xmlUrl="https://www.themarshallproject.org/rss/recent.rss" />
+      <outline text="Rest of World" title="Rest of World" type="rss" xmlUrl="https://restofworld.org/feed/latest/" />
+      <outline text="Bellingcat" title="Bellingcat" type="rss" xmlUrl="https://www.bellingcat.com/feed/" />
+      <outline text="Christian Science Monitor" title="Christian Science Monitor" type="rss" xmlUrl="https://rss.csmonitor.com/feeds/all" />
+      <outline text="France 24 in English" title="France 24 in English" type="rss" xmlUrl="https://www.france24.com/en/rss" />
+      <outline text="The 19th" title="The 19th" type="rss" xmlUrl="https://19thnews.org/feed/" />
+      <outline text="PBS NewsHour" title="PBS NewsHour" type="rss" xmlUrl="https://www.pbs.org/newshour/feeds/rss/headlines" />
+      <outline text="ABC News Australia" title="ABC News Australia" type="rss" xmlUrl="https://www.abc.net.au/news/feed/45910/rss.xml" />
+      <outline text="RNZ News" title="RNZ News" type="rss" xmlUrl="https://www.rnz.co.nz/rss/national.xml" />
+      <outline text="UN News" title="UN News" type="rss" xmlUrl="https://news.un.org/feed/subscribe/en/news/all/rss.xml" />
+      <outline text="Global Voices" title="Global Voices" type="rss" xmlUrl="https://globalvoices.org/feed/" />
+      <outline text="ABC News US" title="ABC News US" type="rss" xmlUrl="https://abcnews.go.com/abcnews/topstories" />
+      <outline text="PBS NewsHour Politics" title="PBS NewsHour Politics" type="rss" xmlUrl="https://www.pbs.org/newshour/feeds/rss/politics" />
+      <outline text="El País" title="El País" type="rss" xmlUrl="https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada" />
+      <outline text="Ottawa Citizen" title="Ottawa Citizen" type="rss" xmlUrl="https://ottawacitizen.com/feed" />
+      <outline text="The Province" title="The Province" type="rss" xmlUrl="https://theprovince.com/feed" />
+      <outline text="La Presse" title="La Presse" type="rss" xmlUrl="https://www.lapresse.ca/actualites/rss" />
+      <outline text="Toronto Sun" title="Toronto Sun" type="rss" xmlUrl="https://torontosun.com/category/news/feed.xml" />
+    </outline>
   </body>
 </opml>

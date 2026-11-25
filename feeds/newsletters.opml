@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Newsletters</title>
+  </head>
+  <body>
+    <outline text="Newsletters" title="Newsletters">
+      <outline text="After School" title="After School" type="rss" xmlUrl="https://afterschool.substack.com/feed" />
+      <outline text="Asia Sentinel" title="Asia Sentinel" type="rss" xmlUrl="https://www.asiasentinel.com/feed" />
+      <outline text="Basketball Poetry" title="Basketball Poetry" type="rss" xmlUrl="https://www.basketballpoetry.com/feed" />
+      <outline text="Blackbird Spyplane" title="Blackbird Spyplane" type="rss" xmlUrl="https://www.blackbirdspyplane.com/feed" />
+      <outline text="Changelog News" title="Changelog News" type="rss" xmlUrl="https://changelog.com/news/feed" />
+      <outline text="ChinaTalk" title="ChinaTalk" type="rss" xmlUrl="https://www.chinatalk.media/feed" />
+      <outline text="Chinese Cooking Demystified" title="Chinese Cooking Demystified" type="rss" xmlUrl="https://chinesecookingdemystified.substack.com/feed" />
+      <outline text="Computer Things" title="Computer Things" type="rss" xmlUrl="https://buttondown.com/hillelwayne/rss" />
+      <outline text="Console Newsletter" title="Console Newsletter" type="rss" xmlUrl="https://console.substack.com/feed" />
+      <outline text="Culture Study" title="Culture Study" type="rss" xmlUrl="https://annehelen.substack.com/feed" />
+      <outline text="Embedded" title="Embedded" type="rss" xmlUrl="https://embedded.substack.com/feed" />
+      <outline text="Flow State" title="Flow State" type="rss" xmlUrl="https://www.flowstate.fm/feed" />
+      <outline text="Frontend Focus" title="Frontend Focus" type="rss" xmlUrl="https://frontendfoc.us/rss/" />
+      <outline text="Go Weekly" title="Go Weekly" type="rss" xmlUrl="https://golangweekly.com/rss/" />
+      <outline text="Hearing Things" title="Hearing Things" type="rss" xmlUrl="https://www.hearingthings.co/rss/" />
+      <outline text="House of Strauss" title="House of Strauss" type="rss" xmlUrl="https://www.houseofstrauss.com/feed" />
+      <outline text="JavaScript Weekly" title="JavaScript Weekly" type="rss" xmlUrl="https://javascriptweekly.com/rss/" />
+      <outline text="Letters from an American" title="Letters from an American" type="rss" xmlUrl="https://heathercoxrichardson.substack.com/feed" />
+      <outline text="Link in Bio" title="Link in Bio" type="rss" xmlUrl="https://linkinbio.substack.com/feed" />
+      <outline text="Lit Hub Daily" title="Lit Hub Daily" type="rss" xmlUrl="https://lithub.com/category/lit-hub-daily/feed/" />
+      <outline text="Not Boring" title="Not Boring" type="rss" xmlUrl="https://www.notboring.co/feed" />
+      <outline text="Own Your Web" title="Own Your Web" type="rss" xmlUrl="https://buttondown.com/ownyourweb/rss" />
+      <outline text="Pekingnology" title="Pekingnology" type="rss" xmlUrl="https://www.pekingnology.com/feed" />
+      <outline text="Platformer" title="Platformer" type="rss" xmlUrl="https://www.platformer.news/rss/" />
+      <outline text="Popular Information" title="Popular Information" type="rss" xmlUrl="https://popular.info/feed" />
+      <outline text="Postgres Weekly" title="Postgres Weekly" type="rss" xmlUrl="https://postgresweekly.com/rss/" />
+      <outline text="Python on Microcontrollers Newsletter" title="Python on Microcontrollers Newsletter" type="rss" xmlUrl="https://blog.adafruit.com/category/circuitpython-newsletter/feed/" />
+      <outline text="Risky Bulletin" title="Risky Bulletin" type="rss" xmlUrl="https://news.risky.biz/rss/" />
+      <outline text="Scope of Work" title="Scope of Work" type="rss" xmlUrl="https://www.scopeofwork.net/rss/" />
+      <outline text="Sinocism" title="Sinocism" type="rss" xmlUrl="https://sinocism.com/feed" />
+      <outline text="Tangle" title="Tangle" type="rss" xmlUrl="https://www.readtangle.com/rss/" />
+      <outline text="The Diff" title="The Diff" type="rss" xmlUrl="https://www.thediff.co/rss/" />
+      <outline text="The Honest Broker" title="The Honest Broker" type="rss" xmlUrl="https://www.honest-broker.com/feed" />
+      <outline text="The Morning Dispatch" title="The Morning Dispatch" type="rss" xmlUrl="https://thedispatch.com/newsletter/morning/feed/" />
+      <outline text="The New Consumer" title="The New Consumer" type="rss" xmlUrl="https://newconsumer.com/feed/" />
+      <outline text="The Overspill" title="The Overspill" type="rss" xmlUrl="https://theoverspill.blog/feed/" />
+      <outline text="The Pragmatic Engineer" title="The Pragmatic Engineer" type="rss" xmlUrl="https://newsletter.pragmaticengineer.com/feed" />
+      <outline text="The Two Percent" title="The Two Percent" type="rss" xmlUrl="https://www.twopct.com/feed" />
+      <outline text="This Week in Rust" title="This Week in Rust" type="rss" xmlUrl="https://this-week-in-rust.org/rss.xml" />
+      <outline text="Unsupervised Learning" title="Unsupervised Learning" type="rss" xmlUrl="https://danielmiessler.com/feed" />
+      <outline text="Vietnam Weekly" title="Vietnam Weekly" type="rss" xmlUrl="https://vietnamweekly.substack.com/feed" />
+      <outline text="Volts" title="Volts" type="rss" xmlUrl="https://www.volts.wtf/feed" />
+      <outline text="Why Is This Interesting?" title="Why Is This Interesting?" type="rss" xmlUrl="https://whyisthisinteresting.substack.com/feed" />
+      <outline text="Works in Progress" title="Works in Progress" type="rss" xmlUrl="https://worksinprogress.news/feed" />
+    </outline>
+  </body>
+</opml>

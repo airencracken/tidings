@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Gardening</title>
+  </head>
+  <body>
+    <outline text="Gardening" title="Gardening">
+      <outline text="Epic Gardening" title="Epic Gardening" type="rss" xmlUrl="https://www.epicgardening.com/feed/" />
+      <outline text="Gardenista" title="Gardenista" type="rss" xmlUrl="https://www.gardenista.com/feed/" />
+      <outline text="Savvy Gardening" title="Savvy Gardening" type="rss" xmlUrl="https://savvygardening.com/feed/" />
+      <outline text="Empress of Dirt" title="Empress of Dirt" type="rss" xmlUrl="https://empressofdirt.net/feed/" />
+      <outline text="Fine Gardening" title="Fine Gardening" type="rss" xmlUrl="https://www.finegardening.com/feed" />
+      <outline text="Growing with Plants" title="Growing with Plants" type="rss" xmlUrl="https://growingwithplants.com/feed/" />
+      <outline text="Mother Earth News" title="Mother Earth News" type="rss" xmlUrl="https://www.motherearthnews.com/feed/" />
+    </outline>
+  </body>
+</opml>

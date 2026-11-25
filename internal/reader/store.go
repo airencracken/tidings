@@ -135,6 +135,13 @@ func OpenStore(dir string) (store *Store, failure error) {
 		db.Close()
 		return nil, errors.New("database schema is newer than this application")
 	}
+	var fresh bool
+	if version == 0 {
+		if err = tx.QueryRow("SELECT NOT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name='users')").Scan(&fresh); err != nil {
+			db.Close()
+			return nil, err
+		}
+	}
 	if _, err = tx.Exec(schema); err == nil && version < 2 {
 		_, err = tx.Exec(migrationV2)
 	}
@@ -166,6 +173,9 @@ BEGIN
 END;`)
 		}
 	}
+	if err == nil && fresh {
+		err = seedCatalogCategories(context.Background(), tx)
+	}
 	if err == nil {
 		_, err = tx.Exec("PRAGMA user_version=8")
 	}
@@ -188,8 +198,8 @@ END;`)
 
 // Subscriptions, including an entire OPML import, are committed together.
 func (s *Store) Subscribe(ctx context.Context, uid int64, feeds []Feed, group bool) error {
-	if len(feeds) > 200 {
-		return errors.New("import at most 200 feeds at a time")
+	if len(feeds) > maxOPMLFeeds {
+		return fmt.Errorf("import at most %d feeds at a time", maxOPMLFeeds)
 	}
 	for i := range feeds {
 		var err error
@@ -327,7 +337,7 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 		args = nil
 	case "skipped":
 		where += " AND coalesce(st.skipped,0)=1"
-	case "unread", "":
+	case "unread", "", "for-you":
 		where += " AND coalesce(st.read,0)=0 AND coalesce(st.skipped,0)=0"
 	default:
 		where += " AND coalesce(st.skipped,0)=0"
@@ -367,6 +377,10 @@ func entryWhere(uid int64, f Filter) (string, []any) {
 }
 
 func (s *Store) Entries(ctx context.Context, uid int64, f Filter) ([]Entry, bool, error) {
+	if f.View == "for-you" {
+		entries, err := s.recommendations(ctx, uid, f, time.Now())
+		return entries, false, err
+	}
 	where, args := entryWhere(uid, f)
 	order := "DESC"
 	offset := f.Page * 30

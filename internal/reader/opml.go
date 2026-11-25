@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 
 // MaxOPMLBytes bounds an uploaded OPML file.
 const MaxOPMLBytes = 1 << 20
+
+const maxOPMLFeeds = 1000
 
 type outline struct {
 	Text     string    `xml:"text,attr"`
@@ -83,8 +86,8 @@ func ParseOPML(data []byte) ([]Feed, error) {
 					return err
 				}
 				out = append(out, Feed{URL: u, Title: label, Category: c})
-				if len(out) > 200 {
-					return errors.New("import at most 200 feeds at a time")
+				if len(out) > maxOPMLFeeds {
+					return fmt.Errorf("import at most %d feeds at a time", maxOPMLFeeds)
 				}
 			} else {
 				if err := walk(o.Children, label); err != nil {

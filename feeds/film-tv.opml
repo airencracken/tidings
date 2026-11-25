@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Film &amp; TV</title>
+  </head>
+  <body>
+    <outline text="Film &amp; TV" title="Film &amp; TV">
+      <outline text="Variety" title="Variety" type="rss" xmlUrl="https://variety.com/feed/" />
+      <outline text="The Hollywood Reporter" title="The Hollywood Reporter" type="rss" xmlUrl="https://www.hollywoodreporter.com/feed/" />
+      <outline text="Deadline" title="Deadline" type="rss" xmlUrl="https://deadline.com/feed/" />
+      <outline text="IndieWire" title="IndieWire" type="rss" xmlUrl="https://www.indiewire.com/feed/" />
+      <outline text="RogerEbert.com" title="RogerEbert.com" type="rss" xmlUrl="https://www.rogerebert.com/feed" />
+      <outline text="Film Comment" title="Film Comment" type="rss" xmlUrl="https://www.filmcomment.com/feed/" />
+      <outline text="Anime News Network" title="Anime News Network" type="rss" xmlUrl="https://www.animenewsnetwork.com/all/rss.xml" />
+      <outline text="Anime Feminist" title="Anime Feminist" type="rss" xmlUrl="https://www.animefeminist.com/feed/" />
+      <outline text="Anime UK News" title="Anime UK News" type="rss" xmlUrl="https://animeuknews.net/feed/" />
+      <outline text="Cartoon Brew" title="Cartoon Brew" type="rss" xmlUrl="https://www.cartoonbrew.com/feed" />
+      <outline text="The A.V. Club" title="The A.V. Club" type="rss" xmlUrl="https://www.avclub.com/rss" />
+      <outline text="/Film" title="/Film" type="rss" xmlUrl="https://feeds2.feedburner.com/slashfilm" />
+      <outline text="ComingSoon.net" title="ComingSoon.net" type="rss" xmlUrl="https://www.comingsoon.net/feed" />
+      <outline text="FirstShowing.net" title="FirstShowing.net" type="rss" xmlUrl="https://www.firstshowing.net/feed/" />
+      <outline text="TVLine" title="TVLine" type="rss" xmlUrl="https://www.tvline.com/feed/" />
+    </outline>
+  </body>
+</opml>

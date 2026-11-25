@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Health</title>
+  </head>
+  <body>
+    <outline text="Health" title="Health">
+      <outline text="STAT" title="STAT" type="rss" xmlUrl="https://www.statnews.com/feed/" />
+      <outline text="KFF Health News" title="KFF Health News" type="rss" xmlUrl="https://kffhealthnews.org/feed/" />
+      <outline text="Cochrane" title="Cochrane" type="rss" xmlUrl="https://www.cochrane.org/news/rss" />
+      <outline text="NPR Shots" title="NPR Shots" type="rss" xmlUrl="https://feeds.npr.org/1128/rss.xml" />
+      <outline text="Sawbones" title="Sawbones" type="rss" xmlUrl="https://feeds.simplecast.com/y1LF_sn2" />
+    </outline>
+  </body>
+</opml>

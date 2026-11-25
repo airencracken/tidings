@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Photography</title>
+  </head>
+  <body>
+    <outline text="Photography" title="Photography">
+      <outline text="DPReview" title="DPReview" type="rss" xmlUrl="https://www.dpreview.com/feeds/news.xml" />
+      <outline text="PetaPixel" title="PetaPixel" type="rss" xmlUrl="https://petapixel.com/feed/" />
+      <outline text="Fstoppers" title="Fstoppers" type="rss" xmlUrl="https://fstoppers.com/rss.xml" />
+      <outline text="DIY Photography" title="DIY Photography" type="rss" xmlUrl="https://www.diyphotography.net/feed/" />
+      <outline text="Photography Life" title="Photography Life" type="rss" xmlUrl="https://photographylife.com/feed" />
+      <outline text="The Phoblographer" title="The Phoblographer" type="rss" xmlUrl="https://www.thephoblographer.com/feed/" />
+      <outline text="Fuji X Weekly" title="Fuji X Weekly" type="rss" xmlUrl="https://fujixweekly.com/feed/" />
+      <outline text="35mmc" title="35mmc" type="rss" xmlUrl="https://www.35mmc.com/feed/" />
+      <outline text="EMULSIVE" title="EMULSIVE" type="rss" xmlUrl="https://emulsive.org/feed" />
+      <outline text="Outdoor Photographer" title="Outdoor Photographer" type="rss" xmlUrl="https://www.outdoorphotographer.com/feed/" />
+      <outline text="British Journal of Photography" title="British Journal of Photography" type="rss" xmlUrl="https://www.1854.photography/feed/" />
+      <outline text="Aperture" title="Aperture" type="rss" xmlUrl="https://aperture.org/feed/" />
+      <outline text="Lenscratch" title="Lenscratch" type="rss" xmlUrl="https://lenscratch.com/feed/" />
+      <outline text="500px" title="500px" type="rss" xmlUrl="https://iso.500px.com/feed/" />
+      <outline text="Light Stalking" title="Light Stalking" type="rss" xmlUrl="https://www.lightstalking.com/feed/" />
+      <outline text="Casual Photophile" title="Casual Photophile" type="rss" xmlUrl="https://casualphotophile.com/feed/" />
+      <outline text="Film Photography Project" title="Film Photography Project" type="rss" xmlUrl="https://filmphotographyproject.com/feed/" />
+      <outline text="The Darkroom Blog" title="The Darkroom Blog" type="rss" xmlUrl="https://thedarkroom.com/feed/" />
+      <outline text="Canon Rumors" title="Canon Rumors" type="rss" xmlUrl="https://www.canonrumors.com/feed/" />
+      <outline text="Sony Alpha Rumors" title="Sony Alpha Rumors" type="rss" xmlUrl="https://www.sonyalpharumors.com/feed/" />
+      <outline text="Fuji Rumors" title="Fuji Rumors" type="rss" xmlUrl="https://www.fujirumors.com/feed/" />
+      <outline text="The Lensrentals Blog" title="The Lensrentals Blog" type="rss" xmlUrl="https://www.lensrentals.com/blog/feed.xml" />
+      <outline text="Phototrend" title="Phototrend" type="rss" xmlUrl="https://phototrend.fr/feed/" />
+      <outline text="Photolari" title="Photolari" type="rss" xmlUrl="https://photolari.com/feed/" />
+    </outline>
+  </body>
+</opml>

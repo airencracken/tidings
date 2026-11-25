@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Education</title>
+  </head>
+  <body>
+    <outline text="Education" title="Education">
+      <outline text="Chalkbeat" title="Chalkbeat" type="rss" xmlUrl="https://www.chalkbeat.org/arc/outboundfeeds/rss/?outputType=xml" />
+      <outline text="The Hechinger Report" title="The Hechinger Report" type="rss" xmlUrl="https://hechingerreport.org/feed/" />
+      <outline text="Inside Higher Ed" title="Inside Higher Ed" type="rss" xmlUrl="https://www.insidehighered.com/rss.xml" />
+      <outline text="Library of Congress Teaching with Primary Sources" title="Library of Congress Teaching with Primary Sources" type="rss" xmlUrl="https://blogs.loc.gov/teachers/feed/" />
+      <outline text="The Learning Scientists" title="The Learning Scientists" type="rss" xmlUrl="https://www.learningscientists.org/blog?format=rss" />
+    </outline>
+  </body>
+</opml>

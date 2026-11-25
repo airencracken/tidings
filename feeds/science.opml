@@ -4,7 +4,35 @@
     <title>Tidings Science</title>
   </head>
   <body>
-    <outline text="NASA" title="NASA" type="rss" xmlUrl="https://www.nasa.gov/feed/" category="Science" />
-    <outline text="ScienceDaily" title="ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/top/science.xml" category="Science" />
+    <outline text="Science" title="Science">
+      <outline text="NASA" title="NASA" type="rss" xmlUrl="https://www.nasa.gov/feed/" />
+      <outline text="ScienceDaily" title="ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/top/science.xml" />
+      <outline text="Quanta Magazine" title="Quanta Magazine" type="rss" xmlUrl="https://www.quantamagazine.org/feed/" />
+      <outline text="Science News" title="Science News" type="rss" xmlUrl="https://www.sciencenews.org/feed" />
+      <outline text="Phys.org" title="Phys.org" type="rss" xmlUrl="https://phys.org/rss-feed/" />
+      <outline text="Eos" title="Eos" type="rss" xmlUrl="https://eos.org/feed" />
+      <outline text="Astrobites" title="Astrobites" type="rss" xmlUrl="https://astrobites.org/feed/" />
+      <outline text="Ars Technica Science" title="Ars Technica Science" type="rss" xmlUrl="https://arstechnica.com/science/feed/" />
+      <outline text="PLOS Biology" title="PLOS Biology" type="rss" xmlUrl="https://journals.plos.org/plosbiology/feed/atom" />
+      <outline text="University of California Research" title="University of California Research" type="rss" xmlUrl="https://www.universityofcalifornia.edu/rss.xml" />
+      <outline text="Nature News" title="Nature News" type="rss" xmlUrl="https://www.nature.com/nature.rss" />
+      <outline text="Science Magazine" title="Science Magazine" type="rss" xmlUrl="https://www.science.org/rss/news_current.xml" />
+      <outline text="eLife" title="eLife" type="rss" xmlUrl="https://elifesciences.org/rss/recent.xml" />
+      <outline text="MIT News" title="MIT News" type="rss" xmlUrl="https://news.mit.edu/rss/feed" />
+      <outline text="Penn Today" title="Penn Today" type="rss" xmlUrl="https://penntoday.upenn.edu/rss.xml" />
+      <outline text="Undark" title="Undark" type="rss" xmlUrl="https://undark.org/feed/" />
+      <outline text="Knowable Magazine" title="Knowable Magazine" type="rss" xmlUrl="https://knowablemagazine.org/rss" />
+      <outline text="Science-Based Medicine" title="Science-Based Medicine" type="rss" xmlUrl="https://sciencebasedmedicine.org/feed/" />
+      <outline text="Sapiens" title="Sapiens" type="rss" xmlUrl="https://www.sapiens.org/feed/" />
+      <outline text="Science Friday" title="Science Friday" type="rss" xmlUrl="https://www.sciencefriday.com/feed/" />
+      <outline text="PsyPost" title="PsyPost" type="rss" xmlUrl="https://www.psypost.org/feed/" />
+      <outline text="Popular Science" title="Popular Science" type="rss" xmlUrl="https://www.popsci.com/feed/" />
+      <outline text="Probably Science" title="Probably Science" type="rss" xmlUrl="https://rss.libsyn.com/shows/35408/destinations/88459.xml" />
+      <outline text="Science Latest" title="Science Latest" type="rss" xmlUrl="https://www.wired.com/feed/category/science/latest/rss" />
+      <outline text="Shirtloads of Science" title="Shirtloads of Science" type="rss" xmlUrl="https://rss.libsyn.com/shows/88719/destinations/436327.xml" />
+      <outline text="This Week in Science" title="This Week in Science" type="rss" xmlUrl="https://www.twis.org/feed/" />
+      <outline text="Știință &amp; Tehnică" title="Știință &amp; Tehnică" type="rss" xmlUrl="https://stiintasitehnica.com/feed/" />
+      <outline text="Descoperă" title="Descoperă" type="rss" xmlUrl="https://www.descopera.ro/feed" />
+    </outline>
   </body>
 </opml>

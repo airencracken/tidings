@@ -92,6 +92,7 @@ db.commit()
   for (const name of ['Suggested sources', 'Feed images', 'Feed fetching', 'Household members', 'Instance backups']) {
     assert.equal(await page.getByRole('heading', { name, exact: true }).isVisible(), true);
   }
+  assert.ok(await page.locator('input[name="category"]:checked').count() >= 42);
   await act(page.getByRole('button', { name: 'Save suggested categories', exact: true }), 'click');
   assert.equal(new URL(page.url()).pathname, '/admin');
   await page.goto(origin + '/');
@@ -181,15 +182,40 @@ db.commit()
   await page.goto(origin+'/?view=group');
   assert.equal(await page.getByRole('heading',{name:'A shared test story',exact:true}).count(),1);
 
-  // The host enables categories without subscribing any household member.
+  // Browse a large default directory and choose which categories members see.
   await page.goto(origin+'/sources');
-  assert.equal(await page.locator('.catalog-card').count(),0);
+  assert.ok(await page.getByRole('heading',{name:'Sources you might like',exact:true}).isVisible());
+  await act(page.getByRole('link',{name:/^East Asia .* sources$/}), 'click');
+  assert.ok(await page.getByRole('heading',{name:'SoraNews24 (formerly RocketNews24)',exact:true}).isVisible());
+  assert.ok(await page.getByRole('button',{name:'Preview SoraNews24 (formerly RocketNews24)',exact:true}).isVisible());
+  await page.setViewportSize({width:390,height:850});
+  assert.ok(await page.locator('#suggested-sources').evaluate(section => section.scrollWidth <= section.clientWidth));
+  await page.setViewportSize({width:1440,height:1000});
+  await page.getByLabel('Language',{exact:true}).selectOption('Japanese');
+  await page.getByLabel('Hide followed',{exact:true}).check();
+  await act(page.getByRole('button',{name:'Find sources',exact:true}), 'click');
+  assert.ok(await page.getByRole('heading',{name:'RocketNews24 Japan',exact:true}).isVisible());
+  assert.equal(await page.getByRole('heading',{name:'SoraNews24 (formerly RocketNews24)',exact:true}).count(),0);
+  await page.goto(origin+'/sources');
+  assert.ok(await page.locator('.catalog-topics').isVisible());
+  await act(page.getByRole('link',{name:/^Newsletters .* sources$/}), 'click');
+  await act(page.getByLabel('Search suggested sources',{exact:true}), 'fill', 'Vietnam Weekly');
+  await act(page.getByRole('button',{name:'Find sources',exact:true}), 'click');
+  assert.ok(await page.getByRole('heading',{name:'Vietnam Weekly',exact:true}).isVisible());
   await page.goto(origin+'/admin');
+  for(const box of await page.locator('input[name="category"]').all()) await box.uncheck();
   for(const category of ['Tech','Science']) await page.locator(`input[name="category"][value="${category}"]`).check();
   await act(page.getByRole('button',{name:'Save suggested categories',exact:true}), 'click');
   await page.goto(origin+'/sources');
+  assert.equal(await page.locator('.catalog-topic').count(),2);
+  await act(page.getByRole('link',{name:/^Science .* sources$/}), 'click');
   assert.ok(await page.locator('.catalog-card').count()>0);
   assert.equal(await page.getByRole('heading',{name:'Simon Willison',exact:true}).count(),0);
+  await page.goto(origin+'/');
+  await act(page.getByRole('link',{name:'For You',exact:true}), 'click');
+  assert.equal(await page.getByRole('heading',{name:'For You',exact:true}).count(),1);
+  assert.equal(await page.locator('.story-row').count(),12);
+  assert.equal(await page.getByRole('link',{name:'Next page',exact:true}).count(),0);
   await page.goto(origin+'/account/invitations');
   for(const theme of ['light','dark']) {
     await act(page.getByLabel('Color theme',{exact:true}), 'selectOption', theme);

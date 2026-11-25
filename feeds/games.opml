@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Games</title>
+  </head>
+  <body>
+    <outline text="Games" title="Games">
+      <outline text="Rock Paper Shotgun" title="Rock Paper Shotgun" type="rss" xmlUrl="https://www.rockpapershotgun.com/feed" />
+      <outline text="Game Developer" title="Game Developer" type="rss" xmlUrl="https://www.gamedeveloper.com/rss.xml" />
+      <outline text="PC Gamer" title="PC Gamer" type="rss" xmlUrl="https://www.pcgamer.com/rss/" />
+      <outline text="BoardGameGeek News" title="BoardGameGeek News" type="rss" xmlUrl="https://boardgamegeek.com/rss/blog/1" />
+      <outline text="Factorio Friday Facts" title="Factorio Friday Facts" type="rss" xmlUrl="https://factorio.com/blog/rss" />
+      <outline text="Eurogamer" title="Eurogamer" type="rss" xmlUrl="https://www.eurogamer.net/feed" />
+      <outline text="Polygon" title="Polygon" type="rss" xmlUrl="https://www.polygon.com/rss/index.xml" />
+      <outline text="Kotaku" title="Kotaku" type="rss" xmlUrl="https://kotaku.com/rss" />
+      <outline text="Destructoid" title="Destructoid" type="rss" xmlUrl="https://www.destructoid.com/feed/" />
+      <outline text="IGN" title="IGN" type="rss" xmlUrl="https://feeds.ign.com/ign/all" />
+      <outline text="GameSpot" title="GameSpot" type="rss" xmlUrl="https://www.gamespot.com/feeds/mashup/" />
+      <outline text="Gematsu" title="Gematsu" type="rss" xmlUrl="https://www.gematsu.com/feed" />
+      <outline text="Siliconera" title="Siliconera" type="rss" xmlUrl="https://www.siliconera.com/feed/" />
+      <outline text="Nintendo Life" title="Nintendo Life" type="rss" xmlUrl="https://www.nintendolife.com/feeds/latest" />
+      <outline text="Push Square" title="Push Square" type="rss" xmlUrl="https://www.pushsquare.com/feeds/latest" />
+      <outline text="Pure Xbox" title="Pure Xbox" type="rss" xmlUrl="https://www.purexbox.com/feeds/latest" />
+      <outline text="GamingOnLinux" title="GamingOnLinux" type="rss" xmlUrl="https://www.gamingonlinux.com/article_rss.php" />
+      <outline text="Steam Deck HQ" title="Steam Deck HQ" type="rss" xmlUrl="https://steamdeckhq.com/feed/" />
+      <outline text="Godot Engine News" title="Godot Engine News" type="rss" xmlUrl="https://godotengine.org/rss.xml" />
+      <outline text="Indie Games Plus" title="Indie Games Plus" type="rss" xmlUrl="https://indiegamesplus.com/feed/" />
+      <outline text="Gaming Trend" title="Gaming Trend" type="rss" xmlUrl="https://gamingtrend.com/feed/" />
+      <outline text="Shut Up &amp; Sit Down" title="Shut Up &amp; Sit Down" type="rss" xmlUrl="https://www.shutupandsitdown.com/feed/" />
+      <outline text="Better Chess" title="Better Chess" type="rss" xmlUrl="https://betterchess.net/feed/" />
+      <outline text="ChessBase" title="ChessBase" type="rss" xmlUrl="https://en.chessbase.com/feed" />
+      <outline text="Chess.com News" title="Chess.com News" type="rss" xmlUrl="https://www.chess.com/rss/news" />
+      <outline text="Chessable Blog" title="Chessable Blog" type="rss" xmlUrl="https://www.chessable.com/blog/feed/" />
+      <outline text="Lichess" title="Lichess" type="rss" xmlUrl="https://lichess.org/@/Lichess/blog.atom" />
+      <outline text="The Week in Chess" title="The Week in Chess" type="rss" xmlUrl="https://theweekinchess.com/twic-rss-feed" />
+      <outline text="The Escapist" title="The Escapist" type="rss" xmlUrl="https://www.escapistmagazine.com/feed/" />
+    </outline>
+  </body>
+</opml>

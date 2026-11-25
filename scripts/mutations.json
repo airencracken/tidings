@@ -265,9 +265,9 @@
   },
   {
     "name": "suggestions honor enabled categories",
-    "file": "internal/reader/app.go",
-    "before": "enabled[item.Category] &&",
-    "after": "true &&",
+    "file": "internal/reader/catalog.go",
+    "before": "!enabled[item.Category] ||",
+    "after": "false ||",
     "package": "./internal/reader",
     "run": "^TestSuggestionCategoriesDefaultAuthorizationAndAtomicity$"
   },
@@ -306,8 +306,8 @@
   {
     "name": "following starts the first fetch immediately",
     "file": "internal/reader/app.go",
-    "before": "a.StartRefresh(u.ID, false)\n\tto := \"/sources?notice=subscribed\"",
-    "after": "to := \"/sources?notice=subscribed\"",
+    "before": "a.StartRefresh(u.ID, false)\n\tvalues := url.Values{\"notice\": {\"subscribed\"}}",
+    "after": "values := url.Values{\"notice\": {\"subscribed\"}}",
     "package": "./internal/reader",
     "run": "^TestFetchStatusTransitionsAndImmediateFollow$"
   },
@@ -710,5 +710,77 @@
     "after": "const maxSourceTags = 12",
     "package": "./internal/reader",
     "run": "^TestMigratedTopicsExportRoundTrip$"
+  },
+  {
+    "name": "recommendations honor saves and skips",
+    "file": "internal/reader/recommendations.go",
+    "before": "CASE WHEN st.skipped THEN -3 ELSE 4 END",
+    "after": "0",
+    "package": "./internal/reader",
+    "run": "^TestRecommendationsRespectPrivateFeedbackAndVisibility$"
+  },
+  {
+    "name": "recommendations use related tags",
+    "file": "internal/reader/recommendations.go",
+    "before": "coalesce(r.affinity,0)/2",
+    "after": "0",
+    "package": "./internal/reader",
+    "run": "^TestRecommendationsRespectPrivateFeedbackAndVisibility$"
+  },
+  {
+    "name": "recommendations diversify sources",
+    "file": "internal/reader/recommendations.go",
+    "before": "- 9*(c.source_rank-1)",
+    "after": "",
+    "package": "./internal/reader",
+    "run": "^TestRecommendationsLimitAndSourceVariety$"
+  },
+  {
+    "name": "catalog language narrows the directory",
+    "file": "internal/reader/catalog.go",
+    "before": "(f.Language != \"\" && f.Language != item.Language)",
+    "after": "false",
+    "package": "./internal/reader",
+    "run": "^TestCatalogLanguageFollowStatusAndPages$"
+  },
+  {
+    "name": "catalog can hide the reader's follows",
+    "file": "internal/reader/catalog.go",
+    "before": "(f.Unfollowed && followedIDs[item.URL] != 0)",
+    "after": "false",
+    "package": "./internal/reader",
+    "run": "^TestCatalogLanguageFollowStatusAndPages$"
+  },
+  {
+    "name": "catalog pages advance by the page size",
+    "file": "internal/reader/catalog.go",
+    "before": "min(f.Page*catalogPageSize, count)",
+    "after": "0",
+    "package": "./internal/reader",
+    "run": "^TestCatalogLanguageFollowStatusAndPages$"
+  },
+  {
+    "name": "catalog previews honor enabled topics",
+    "file": "internal/reader/catalog_preview.go",
+    "before": "&& enabled[item.Category]",
+    "after": "&& (enabled[item.Category] || true)",
+    "package": "./internal/reader",
+    "run": "^TestCatalogPreviewContractAndIsolation$"
+  },
+  {
+    "name": "source recommendations honor reading feedback",
+    "file": "internal/reader/catalog_recommendations.go",
+    "before": "CASE WHEN st.skipped THEN -1 ELSE 2 END",
+    "after": "0",
+    "package": "./internal/reader",
+    "run": "^TestCatalogPicksUseOnlyReaderFeedback$"
+  },
+  {
+    "name": "For You collapses duplicate article links",
+    "file": "internal/reader/recommendations.go",
+    "before": "WHERE copy_rank=1",
+    "after": "WHERE copy_rank>=1",
+    "package": "./internal/reader",
+    "run": "^TestRecommendationsCollapseDuplicateLinks$"
   }
 ]

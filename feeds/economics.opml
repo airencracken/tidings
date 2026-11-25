@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Economics</title>
+  </head>
+  <body>
+    <outline text="Economics" title="Economics">
+      <outline text="Marginal Revolution" title="Marginal Revolution" type="rss" xmlUrl="https://marginalrevolution.com/feed" />
+      <outline text="Conversable Economist" title="Conversable Economist" type="rss" xmlUrl="https://conversableeconomist.com/feed/" />
+      <outline text="Calculated Risk" title="Calculated Risk" type="rss" xmlUrl="https://www.calculatedriskblog.com/feeds/posts/default" />
+      <outline text="Bruegel" title="Bruegel" type="rss" xmlUrl="https://www.bruegel.org/rss.xml" />
+      <outline text="Our World in Data" title="Our World in Data" type="rss" xmlUrl="https://ourworldindata.org/atom.xml" />
+      <outline text="Liberty Street Economics" title="Liberty Street Economics" type="rss" xmlUrl="https://libertystreeteconomics.newyorkfed.org/feed/" />
+      <outline text="Econlib" title="Econlib" type="rss" xmlUrl="https://www.econlib.org/feed/" />
+      <outline text="FRED Blog" title="FRED Blog" type="rss" xmlUrl="https://fredblog.stlouisfed.org/feed/" />
+      <outline text="Bank of Canada News" title="Bank of Canada News" type="rss" xmlUrl="https://www.bankofcanada.ca/feed/" />
+      <outline text="Bank Underground" title="Bank Underground" type="rss" xmlUrl="https://bankunderground.co.uk/feed/" />
+      <outline text="VoxDev" title="VoxDev" type="rss" xmlUrl="https://voxdev.org/rss.xml" />
+      <outline text="Economic Policy Institute" title="Economic Policy Institute" type="rss" xmlUrl="https://www.epi.org/feed/" />
+      <outline text="Center for Economic and Policy Research" title="Center for Economic and Policy Research" type="rss" xmlUrl="https://cepr.net/feed/" />
+      <outline text="American Institute for Economic Research" title="American Institute for Economic Research" type="rss" xmlUrl="https://aier.org/feed/" />
+      <outline text="Noahpinion" title="Noahpinion" type="rss" xmlUrl="https://www.noahpinion.blog/feed" />
+      <outline text="Construction Physics" title="Construction Physics" type="rss" xmlUrl="https://www.construction-physics.com/feed" />
+    </outline>
+  </body>
+</opml>

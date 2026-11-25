@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Electronics</title>
+  </head>
+  <body>
+    <outline text="Electronics" title="Electronics">
+      <outline text="All About Circuits" title="All About Circuits" type="rss" xmlUrl="https://www.allaboutcircuits.com/rss/" />
+      <outline text="EDN" title="EDN" type="rss" xmlUrl="https://www.edn.com/feed/" />
+      <outline text="EE Times" title="EE Times" type="rss" xmlUrl="https://www.eetimes.com/feed/" />
+      <outline text="Electronic Design" title="Electronic Design" type="rss" xmlUrl="https://www.electronicdesign.com/rss.xml" />
+      <outline text="Embedded.com" title="Embedded.com" type="rss" xmlUrl="https://www.embedded.com/feed/" />
+      <outline text="Embedded Artistry" title="Embedded Artistry" type="rss" xmlUrl="https://embeddedartistry.com/feed/" />
+      <outline text="Interrupt" title="Interrupt" type="rss" xmlUrl="https://interrupt.memfault.com/feed.xml" />
+      <outline text="CNX Software" title="CNX Software" type="rss" xmlUrl="https://www.cnx-software.com/feed/" />
+      <outline text="LinuxGizmos" title="LinuxGizmos" type="rss" xmlUrl="https://linuxgizmos.com/feed/" />
+      <outline text="KiCad News" title="KiCad News" type="rss" xmlUrl="https://www.kicad.org/blog/index.xml" />
+      <outline text="OSH Park Blog" title="OSH Park Blog" type="rss" xmlUrl="https://blog.oshpark.com/feed/" />
+      <outline text="GreatScott!" title="GreatScott!" type="rss" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UC6mIxFTvXkWQVEHPsEdflzQ" />
+      <outline text="Espressif Developer Portal" title="Espressif Developer Portal" type="rss" xmlUrl="https://developer.espressif.com/index.xml" />
+      <outline text="Colin O’Flynn" title="Colin O’Flynn" type="rss" xmlUrl="https://colinoflynn.com/index.xml" />
+      <outline text="EE Power" title="EE Power" type="rss" xmlUrl="https://eepower.com/rss/" />
+      <outline text="SnapEDA Blog" title="SnapEDA Blog" type="rss" xmlUrl="https://blog.snapeda.com/feed/" />
+      <outline text="Altium Resources" title="Altium Resources" type="rss" xmlUrl="https://resources.altium.com/rss.xml" />
+      <outline text="Circuit Cellar" title="Circuit Cellar" type="rss" xmlUrl="https://circuitcellar.com/feed/" />
+      <outline text="Eleccelerator" title="Eleccelerator" type="rss" xmlUrl="https://eleccelerator.com/feed/" />
+    </outline>
+  </body>
+</opml>

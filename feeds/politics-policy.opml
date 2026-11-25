@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Politics &amp; Policy</title>
+  </head>
+  <body>
+    <outline text="Politics &amp; Policy" title="Politics &amp; Policy">
+      <outline text="The Conversation" title="The Conversation" type="rss" xmlUrl="https://theconversation.com/us/articles.atom" />
+      <outline text="Reason" title="Reason" type="rss" xmlUrl="https://reason.com/feed/" />
+      <outline text="The Dispatch" title="The Dispatch" type="rss" xmlUrl="https://thedispatch.com/feed/" />
+      <outline text="Mother Jones" title="Mother Jones" type="rss" xmlUrl="https://www.motherjones.com/feed/" />
+      <outline text="Jacobin" title="Jacobin" type="rss" xmlUrl="https://jacobin.com/feed/" />
+      <outline text="Current Affairs" title="Current Affairs" type="rss" xmlUrl="https://www.currentaffairs.org/news/rss.xml" />
+      <outline text="National Review" title="National Review" type="rss" xmlUrl="https://www.nationalreview.com/feed/" />
+      <outline text="The American Conservative" title="The American Conservative" type="rss" xmlUrl="https://www.theamericanconservative.com/feed/" />
+      <outline text="The Bulwark" title="The Bulwark" type="rss" xmlUrl="https://www.thebulwark.com/feed" />
+      <outline text="American Enterprise Institute" title="American Enterprise Institute" type="rss" xmlUrl="https://www.aei.org/feed/" />
+      <outline text="Foreign Policy" title="Foreign Policy" type="rss" xmlUrl="https://foreignpolicy.com/feed/" />
+      <outline text="European Council on Foreign Relations" title="European Council on Foreign Relations" type="rss" xmlUrl="https://ecfr.eu/feed/" />
+      <outline text="Institute for Fiscal Studies" title="Institute for Fiscal Studies" type="rss" xmlUrl="https://ifs.org.uk/rss.xml" />
+      <outline text="American Prospect" title="American Prospect" type="rss" xmlUrl="https://prospect.org/feed/" />
+      <outline text="Democracy Now!" title="Democracy Now!" type="rss" xmlUrl="https://www.democracynow.org/democracynow.rss" />
+      <outline text="In These Times" title="In These Times" type="rss" xmlUrl="https://inthesetimes.com/rss" />
+      <outline text="Washington Examiner" title="Washington Examiner" type="rss" xmlUrl="https://www.washingtonexaminer.com/feed" />
+      <outline text="Washington Free Beacon" title="Washington Free Beacon" type="rss" xmlUrl="https://freebeacon.com/feed/" />
+      <outline text="Commentary Magazine" title="Commentary Magazine" type="rss" xmlUrl="https://www.commentary.org/feed/" />
+      <outline text="UnHerd" title="UnHerd" type="rss" xmlUrl="https://unherd.com/feed/" />
+      <outline text="Spiked" title="Spiked" type="rss" xmlUrl="https://www.spiked-online.com/feed/" />
+      <outline text="Novara Media" title="Novara Media" type="rss" xmlUrl="https://novaramedia.com/feed/" />
+      <outline text="Byline Times" title="Byline Times" type="rss" xmlUrl="https://bylinetimes.com/feed/" />
+      <outline text="ConservativeHome" title="ConservativeHome" type="rss" xmlUrl="https://conservativehome.com/feed/" />
+      <outline text="FactCheck.org" title="FactCheck.org" type="rss" xmlUrl="https://www.factcheck.org/feed/" />
+      <outline text="Just Security" title="Just Security" type="rss" xmlUrl="https://www.justsecurity.org/feed/" />
+      <outline text="The Diplomat" title="The Diplomat" type="rss" xmlUrl="https://thediplomat.com/feed/" />
+      <outline text="War on the Rocks" title="War on the Rocks" type="rss" xmlUrl="https://warontherocks.com/feed/" />
+      <outline text="Lowy Institute Interpreter" title="Lowy Institute Interpreter" type="rss" xmlUrl="https://www.lowyinstitute.org/the-interpreter/rss.xml" />
+      <outline text="Ballotpedia News" title="Ballotpedia News" type="rss" xmlUrl="https://news.ballotpedia.org/feed/" />
+    </outline>
+  </body>
+</opml>

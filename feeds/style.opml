@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Style</title>
+  </head>
+  <body>
+    <outline text="Style" title="Style">
+      <outline text="ELLE Beauty" title="ELLE Beauty" type="rss" xmlUrl="https://www.elle.com/rss/beauty.xml/" />
+      <outline text="Fashionista" title="Fashionista" type="rss" xmlUrl="https://fashionista.com/.rss/feed/28e21eb8-20ac-4617-a448-e845081591ca.xml" />
+      <outline text="POPSUGAR Beauty" title="POPSUGAR Beauty" type="rss" xmlUrl="https://www.popsugar.com/beauty/feed" />
+      <outline text="Refinery29" title="Refinery29" type="rss" xmlUrl="https://www.refinery29.com/beauty/rss.xml" />
+      <outline text="The Beauty Look Book" title="The Beauty Look Book" type="rss" xmlUrl="https://thebeautylookbook.com/feed" />
+      <outline text="ELLE Fashion" title="ELLE Fashion" type="rss" xmlUrl="https://www.elle.com/rss/fashion.xml/" />
+      <outline text="Who What Wear" title="Who What Wear" type="rss" xmlUrl="https://www.whowhatwear.com/feeds.xml" />
+      <outline text="The New York Times Style" title="The New York Times Style" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/FashionandStyle.xml" />
+    </outline>
+  </body>
+</opml>

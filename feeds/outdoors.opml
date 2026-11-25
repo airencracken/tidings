@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Outdoors</title>
+  </head>
+  <body>
+    <outline text="Outdoors" title="Outdoors">
+      <outline text="Outside Magazine" title="Outside Magazine" type="rss" xmlUrl="https://www.outsideonline.com/feed/?scope=anon" />
+      <outline text="SectionHiker" title="SectionHiker" type="rss" xmlUrl="https://sectionhiker.com/feed/" />
+      <outline text="Adventure Alan" title="Adventure Alan" type="rss" xmlUrl="https://www.adventurealan.com/feed/" />
+      <outline text="Trail Runner Magazine" title="Trail Runner Magazine" type="rss" xmlUrl="https://www.trailrunnermag.com/feed/?scope=anon" />
+      <outline text="Backpacker" title="Backpacker" type="rss" xmlUrl="https://www.backpacker.com/feed/?scope=anon" />
+      <outline text="WildSnow" title="WildSnow" type="rss" xmlUrl="https://wildsnow.com/feed/" />
+      <outline text="Pinkbike" title="Pinkbike" type="rss" xmlUrl="https://www.pinkbike.com/pinkbike_xml_feed.php" />
+    </outline>
+  </body>
+</opml>

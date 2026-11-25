@@ -23,6 +23,7 @@ func legacyStore(t *testing.T, setup string) string {
 		t.Fatal(err)
 	}
 	if _, err = s.DB.Exec(`ALTER TABLE subscription_tags DROP COLUMN position; ALTER TABLE household_tags DROP COLUMN position;
+	DELETE FROM catalog_categories;
 	INSERT INTO users(id,username,password,owner,group_optin) VALUES(1,'host','x',1,1),(2,'reader','x',0,1);` + setup + `; PRAGMA user_version=6`); err != nil {
 		t.Fatal(err)
 	}

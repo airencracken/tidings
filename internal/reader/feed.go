@@ -35,9 +35,10 @@ type Entry struct {
 	Saved     bool   `json:"saved"`
 	// Skipped is omitted when false, so exports without skips still import
 	// into earlier Tidings versions, and older exports import here.
-	Skipped  bool   `json:"skipped,omitempty"`
-	Source   string `json:"source"`
-	Category string `json:"category"`
+	Skipped              bool   `json:"skipped,omitempty"`
+	Source               string `json:"source"`
+	Category             string `json:"category"`
+	RecommendationReason string `json:"-"`
 }
 
 type ParsedFeed struct {

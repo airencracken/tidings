@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings History</title>
+  </head>
+  <body>
+    <outline text="History" title="History">
+      <outline text="Library of Congress Blog" title="Library of Congress Blog" type="rss" xmlUrl="https://blogs.loc.gov/loc/feed/" />
+      <outline text="Smithsonian History" title="Smithsonian History" type="rss" xmlUrl="https://www.smithsonianmag.com/rss/history/" />
+      <outline text="History Extra" title="History Extra" type="rss" xmlUrl="https://www.historyextra.com/feed/" />
+      <outline text="Lapham’s Quarterly Archive" title="Lapham’s Quarterly Archive" type="rss" xmlUrl="https://www.laphamsquarterly.org/rss.xml" />
+      <outline text="Circulating Now" title="Circulating Now" type="rss" xmlUrl="https://circulatingnow.nlm.nih.gov/feed/" />
+      <outline text="Archaeology Magazine" title="Archaeology Magazine" type="rss" xmlUrl="https://archaeology.org/feed/" />
+      <outline text="History in 28-minutes" title="History in 28-minutes" type="rss" xmlUrl="https://www.historyisnowmagazine.com/blog?format=RSS" />
+    </outline>
+  </body>
+</opml>

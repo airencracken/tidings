@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Comics &amp; Anime</title>
+  </head>
+  <body>
+    <outline text="Comics &amp; Anime" title="Comics &amp; Anime">
+      <outline text="Comics Beat" title="Comics Beat" type="rss" xmlUrl="https://www.comicsbeat.com/feed/" />
+      <outline text="The Comics Journal" title="The Comics Journal" type="rss" xmlUrl="https://www.tcj.com/feed/" />
+      <outline text="Broken Frontier" title="Broken Frontier" type="rss" xmlUrl="https://www.brokenfrontier.com/feed/" />
+      <outline text="Manga Mavericks" title="Manga Mavericks" type="rss" xmlUrl="https://mangamavericks.com/feed/" />
+      <outline text="Manga Bookshelf" title="Manga Bookshelf" type="rss" xmlUrl="https://mangabookshelf.com/feed/" />
+      <outline text="Anime Herald" title="Anime Herald" type="rss" xmlUrl="https://animeherald.com/feed/" />
+      <outline text="Ogiue Maniax" title="Ogiue Maniax" type="rss" xmlUrl="https://ogiuemaniax.com/feed/" />
+    </outline>
+  </body>
+</opml>

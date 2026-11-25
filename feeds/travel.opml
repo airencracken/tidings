@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Travel</title>
+  </head>
+  <body>
+    <outline text="Travel" title="Travel">
+      <outline text="Rick Steves’ Travel Blog" title="Rick Steves’ Travel Blog" type="rss" xmlUrl="https://blog.ricksteves.com/feed/" />
+      <outline text="Bikepacking.com" title="Bikepacking.com" type="rss" xmlUrl="https://bikepacking.com/feed/" />
+      <outline text="Adventure Journal" title="Adventure Journal" type="rss" xmlUrl="https://www.adventure-journal.com/feed/" />
+      <outline text="Nomadic Matt" title="Nomadic Matt" type="rss" xmlUrl="https://www.nomadicmatt.com/feed/" />
+      <outline text="One Mile at a Time" title="One Mile at a Time" type="rss" xmlUrl="https://onemileatatime.com/feed/" />
+      <outline text="The Points Guy" title="The Points Guy" type="rss" xmlUrl="https://thepointsguy.com/feed/" />
+      <outline text="Amateur Traveler" title="Amateur Traveler" type="rss" xmlUrl="https://amateurtraveler.com/feed/" />
+      <outline text="Uncornered Market" title="Uncornered Market" type="rss" xmlUrl="https://uncorneredmarket.com/feed/" />
+      <outline text="Atlas &amp; Boots" title="Atlas &amp; Boots" type="rss" xmlUrl="https://www.atlasandboots.com/feed/" />
+      <outline text="Adventure.com" title="Adventure.com" type="rss" xmlUrl="https://adventure.com/feed/" />
+      <outline text="Travel Dudes" title="Travel Dudes" type="rss" xmlUrl="https://traveldudes.com/feed/" />
+    </outline>
+  </body>
+</opml>

@@ -13,7 +13,7 @@ feed groups, saved stories and reading state.
 
 [Comfyware](https://comfyware.org/) · [Project page](https://comfyware.org/tidings/) · [Help and bugs](https://github.com/airencracken/tidings/issues)
 
-Current release: **[0.10.1](https://github.com/airencracken/tidings/releases/tag/v0.10.1)** · [What's new](docs/release-notes.md)
+Current release: **[0.11.0](https://github.com/airencracken/tidings/releases/tag/v0.11.0)** · [What's new](docs/release-notes.md)
 
 ## Install
 
@@ -51,7 +51,13 @@ browser instead, see [setup](docs/setup.md).
 ## Reading
 
 Add sources under **Sources**: paste an RSS or Atom address, find a feed from a
-website address, choose from the suggested sources, or import an OPML file.
+website address, browse suggested sources by category, or import an OPML file.
+Search the catalog by publisher, subject, or feed address, filter by language
+or hide sources you already follow. Preview a publisher's recent headlines
+from its feed before following. The personal Sources page uses your follows,
+tags, saves, and skips to suggest publishers you might like.
+The **Newsletters** category collects public issues and link roundups you
+can follow in Tidings.
 New sources fetch right away. After that, Tidings checks each source on its own
 schedule, from every five minutes to once a day, depending on how often it
 publishes. **Refresh feeds** checks your sources now, skipping any checked in the
@@ -59,6 +65,11 @@ last five minutes.
 
 The reading table shows a finite page of stories, newest first. There are no
 unread counts. **Filter** holds search and the Tag and Source filters.
+**For You** picks up to 12 unread stories published in the last 30 days, with
+source tags and saves or skips on recent stories shaping the order. It draws from
+your subscriptions and any household sources you chose to follow. It shows one
+copy per article link and explains which picks came from your saves or related
+source tags. Tidings calculates the picks locally from your reading state.
 Opening a story does not mark it read; choose **Mark read** or **Mark read and
 return** when you are done. **Save for later** keeps a story on its own shelf.
 **Skip** a story that is not for you: it leaves your shelves without being
@@ -125,9 +136,11 @@ Owners have an **Admin** link in the main navigation:
   `tidings set-password --username NAME` on the server. There is no email.
 - **Household sources:** the shared sources behind the household table. Create
   household feed groups under **Feed groups**.
-- **Suggested sources:** choose which of the 45 catalog feeds members can browse,
-  by category. All categories start off. Enabling one never subscribes anyone.
-  The same feeds are in [feeds/](feeds/) as OPML.
+- **Suggested sources** lets owners choose which of the 907 feeds across 42
+  categories members can browse. New instances start with all categories
+  enabled. Existing instances keep their settings and can use **Enable all
+  categories** under **Admin**. Every subscription is a separate choice.
+  The same feeds are available as full and category [OPML bundles](feeds/).
 - **Feed images:** off by default. When on, Tidings fetches and caches pictures
   from feeds, so readers' browsers never contact publishers.
 - **Feed fetching:** **Fetch all feeds now** checks every source in the
@@ -137,6 +150,9 @@ Owners have an **Admin** link in the main navigation:
   database size and backup status, plus site health: requests, errors and
   response times per kind of page, and counts of failed sign-ins. Tidings does
   not record who signs in or what anyone reads.
+
+Some candidate feed URLs were found through [Plenary's public feed directory](https://github.com/plenaryapp/awesome-rss-feeds)
+and [OPML News Feeds](https://github.com/ajdelaguila/opml-news-feeds).
 
 ## Hosting
 

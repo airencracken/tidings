@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Music</title>
+  </head>
+  <body>
+    <outline text="Music" title="Music">
+      <outline text="Pitchfork" title="Pitchfork" type="rss" xmlUrl="https://pitchfork.com/feed/feed-news/rss" />
+      <outline text="Stereogum" title="Stereogum" type="rss" xmlUrl="https://www.stereogum.com/feed/" />
+      <outline text="BrooklynVegan" title="BrooklynVegan" type="rss" xmlUrl="https://www.brooklynvegan.com/feed/" />
+      <outline text="Bandcamp Daily" title="Bandcamp Daily" type="rss" xmlUrl="https://daily.bandcamp.com/feed" />
+      <outline text="The Quietus" title="The Quietus" type="rss" xmlUrl="https://thequietus.com/feed/" />
+      <outline text="Consequence" title="Consequence" type="rss" xmlUrl="https://consequence.net/feed/" />
+      <outline text="Metal Injection" title="Metal Injection" type="rss" xmlUrl="https://metalinjection.net/feed" />
+      <outline text="NPR Music" title="NPR Music" type="rss" xmlUrl="https://feeds.npr.org/10003/rss.xml" />
+      <outline text="Song Exploder" title="Song Exploder" type="rss" xmlUrl="https://songexploder.net/feed" />
+      <outline text="CDM Create Digital Music" title="CDM Create Digital Music" type="rss" xmlUrl="https://cdm.link/feed/" />
+      <outline text="Synthtopia" title="Synthtopia" type="rss" xmlUrl="https://www.synthtopia.com/feed/" />
+      <outline text="San Francisco Classical Voice" title="San Francisco Classical Voice" type="rss" xmlUrl="https://www.sfcv.org/rss.xml" />
+      <outline text="Guitar World" title="Guitar World" type="rss" xmlUrl="https://www.guitarworld.com/feeds/all" />
+      <outline text="Drumeo Beat" title="Drumeo Beat" type="rss" xmlUrl="https://www.drumeo.com/beat/feed/" />
+      <outline text="Music Business Worldwide" title="Music Business Worldwide" type="rss" xmlUrl="https://www.musicbusinessworldwide.com/feed/" />
+      <outline text="AllMusic Blog" title="AllMusic Blog" type="rss" xmlUrl="https://www.allmusic.com/rss/blog" />
+      <outline text="Ultimate Classic Rock" title="Ultimate Classic Rock" type="rss" xmlUrl="https://ultimateclassicrock.com/feed/" />
+      <outline text="The Needle Drop" title="The Needle Drop" type="rss" xmlUrl="https://theneedledrop.com/rss/" />
+      <outline text="Everything Is Noise" title="Everything Is Noise" type="rss" xmlUrl="https://everythingisnoise.net/feed/" />
+      <outline text="Aquarium Drunkard" title="Aquarium Drunkard" type="rss" xmlUrl="https://aquariumdrunkard.com/feed/" />
+      <outline text="Glide Magazine" title="Glide Magazine" type="rss" xmlUrl="https://glidemagazine.com/feed.xml" />
+      <outline text="Riff Magazine" title="Riff Magazine" type="rss" xmlUrl="https://riffmagazine.com/feed/" />
+      <outline text="MusicRadar" title="MusicRadar" type="rss" xmlUrl="https://www.musicradar.com/feeds.xml" />
+      <outline text="Post-Trash" title="Post-Trash" type="rss" xmlUrl="https://post-trash.com/news?format=rss" />
+    </outline>
+  </body>
+</opml>

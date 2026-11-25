@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Business</title>
+  </head>
+  <body>
+    <outline text="Business" title="Business">
+      <outline text="Financial Times World" title="Financial Times World" type="rss" xmlUrl="https://www.ft.com/world?format=rss" />
+      <outline text="BBC Business" title="BBC Business" type="rss" xmlUrl="https://feeds.bbci.co.uk/news/business/rss.xml" />
+      <outline text="CNBC Business" title="CNBC Business" type="rss" xmlUrl="https://www.cnbc.com/id/10001147/device/rss/rss.html" />
+      <outline text="MarketWatch" title="MarketWatch" type="rss" xmlUrl="https://feeds.content.dowjones.io/public/rss/mw_topstories" />
+      <outline text="Fortune" title="Fortune" type="rss" xmlUrl="https://fortune.com/feed/" />
+      <outline text="Fast Company" title="Fast Company" type="rss" xmlUrl="https://www.fastcompany.com/latest/rss" />
+      <outline text="Inc." title="Inc." type="rss" xmlUrl="https://www.inc.com/rss/" />
+      <outline text="Quartz" title="Quartz" type="rss" xmlUrl="https://qz.com/rss" />
+      <outline text="Slashdot Technology" title="Slashdot Technology" type="rss" xmlUrl="https://rss.slashdot.org/Slashdot/slashdot" />
+      <outline text="Entrepreneur" title="Entrepreneur" type="rss" xmlUrl="https://www.entrepreneur.com/latest.rss" />
+      <outline text="Afford Anything" title="Afford Anything" type="rss" xmlUrl="https://affordanything.com/feed/" />
+      <outline text="Budgets Are Sexy" title="Budgets Are Sexy" type="rss" xmlUrl="https://feeds2.feedburner.com/budgetsaresexy" />
+      <outline text="Financial Samurai" title="Financial Samurai" type="rss" xmlUrl="https://www.financialsamurai.com/feed/" />
+      <outline text="Making Sense Of Cents" title="Making Sense Of Cents" type="rss" xmlUrl="https://www.makingsenseofcents.com/feed" />
+      <outline text="Money Crashers" title="Money Crashers" type="rss" xmlUrl="https://www.moneycrashers.com/feed/" />
+      <outline text="Money Saving Mom" title="Money Saving Mom" type="rss" xmlUrl="https://moneysavingmom.com/feed/" />
+      <outline text="Money Under 30" title="Money Under 30" type="rss" xmlUrl="https://www.moneyunder30.com/feed/" />
+      <outline text="MyWifeQuitHerJob.com" title="MyWifeQuitHerJob.com" type="rss" xmlUrl="https://mywifequitherjob.com/feed/" />
+      <outline text="Nerd’s Eye View" title="Nerd’s Eye View" type="rss" xmlUrl="https://feeds.feedblitz.com/kitcesnerdseyeview&amp;x=1" />
+      <outline text="NerdWallet" title="NerdWallet" type="rss" xmlUrl="https://www.nerdwallet.com/blog/feed/" />
+      <outline text="Oblivious Investor" title="Oblivious Investor" type="rss" xmlUrl="https://obliviousinvestor.com/feed/" />
+      <outline text="SavingAdvice.com Blog" title="SavingAdvice.com Blog" type="rss" xmlUrl="https://www.savingadvice.com/feed/" />
+      <outline text="The College Investor" title="The College Investor" type="rss" xmlUrl="https://thecollegeinvestor.com/feed/" />
+      <outline text="Well Kept Wallet" title="Well Kept Wallet" type="rss" xmlUrl="https://wellkeptwallet.com/feed/" />
+      <outline text="Feld Thoughts" title="Feld Thoughts" type="rss" xmlUrl="https://feld.com/index.xml" />
+      <outline text="Steve Blank" title="Steve Blank" type="rss" xmlUrl="https://steveblank.com/feed/" />
+      <outline text="The Intercom Blog" title="The Intercom Blog" type="rss" xmlUrl="https://www.intercom.com/blog/feed" />
+      <outline text="The Startup Junkies Podcast" title="The Startup Junkies Podcast" type="rss" xmlUrl="https://feeds.transistor.fm/the-startup-junkies-podcast" />
+    </outline>
+  </body>
+</opml>

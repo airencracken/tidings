@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Making</title>
+  </head>
+  <body>
+    <outline text="Making" title="Making">
+      <outline text="Hackaday" title="Hackaday" type="rss" xmlUrl="https://hackaday.com/feed/" />
+      <outline text="Hackster.io" title="Hackster.io" type="rss" xmlUrl="https://www.hackster.io/news.atom" />
+      <outline text="Make Magazine" title="Make Magazine" type="rss" xmlUrl="https://makezine.com/feed/" />
+      <outline text="Arduino Blog" title="Arduino Blog" type="rss" xmlUrl="https://blog.arduino.cc/feed/" />
+      <outline text="Raspberry Pi" title="Raspberry Pi" type="rss" xmlUrl="https://www.raspberrypi.com/news/feed/" />
+      <outline text="Adafruit Blog" title="Adafruit Blog" type="rss" xmlUrl="https://blog.adafruit.com/feed/" />
+      <outline text="Home Assistant" title="Home Assistant" type="rss" xmlUrl="https://www.home-assistant.io/atom.xml" />
+      <outline text="Prusa Blog" title="Prusa Blog" type="rss" xmlUrl="https://blog.prusa3d.com/feed/" />
+      <outline text="CNC Kitchen" title="CNC Kitchen" type="rss" xmlUrl="https://www.cnckitchen.com/blog?format=rss" />
+      <outline text="Lost Art Press" title="Lost Art Press" type="rss" xmlUrl="https://blog.lostartpress.com/feed/" />
+      <outline text="Popular Woodworking" title="Popular Woodworking" type="rss" xmlUrl="https://www.popularwoodworking.com/feed/" />
+      <outline text="Fine Woodworking" title="Fine Woodworking" type="rss" xmlUrl="https://www.finewoodworking.com/feed" />
+      <outline text="The DIY Life" title="The DIY Life" type="rss" xmlUrl="https://www.the-diy-life.com/feed/" />
+      <outline text="iFixit" title="iFixit" type="rss" xmlUrl="https://www.ifixit.com/News/rss" />
+      <outline text="3D Printing Industry" title="3D Printing Industry" type="rss" xmlUrl="https://3dprintingindustry.com/feed/" />
+      <outline text="Wood Whisperer" title="Wood Whisperer" type="rss" xmlUrl="https://thewoodwhisperer.com/feed/" />
+      <outline text="A Beautiful Mess" title="A Beautiful Mess" type="rss" xmlUrl="https://abeautifulmess.com/feed/" />
+      <outline text="Centsational Style" title="Centsational Style" type="rss" xmlUrl="https://centsationalstyle.com/feed/" />
+      <outline text="IKEA Hackers" title="IKEA Hackers" type="rss" xmlUrl="https://ikeahackers.net/feed" />
+    </outline>
+  </body>
+</opml>

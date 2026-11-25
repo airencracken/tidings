@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Transportation</title>
+  </head>
+  <body>
+    <outline text="Transportation" title="Transportation">
+      <outline text="Streetsblog USA" title="Streetsblog USA" type="rss" xmlUrl="https://usa.streetsblog.org/feed" />
+      <outline text="Human Transit" title="Human Transit" type="rss" xmlUrl="https://humantransit.org/feed" />
+      <outline text="The War on Cars" title="The War on Cars" type="rss" xmlUrl="https://thewaroncars.org/feed/" />
+      <outline text="The Transport Politic" title="The Transport Politic" type="rss" xmlUrl="https://www.thetransportpolitic.com/feed/" />
+      <outline text="BikePortland" title="BikePortland" type="rss" xmlUrl="https://bikeportland.org/feed" />
+      <outline text="Autocar" title="Autocar" type="rss" xmlUrl="https://www.autocar.co.uk/rss" />
+      <outline text="BikeEXIF" title="BikeEXIF" type="rss" xmlUrl="https://www.bikeexif.com/feed" />
+      <outline text="Car Body Design" title="Car Body Design" type="rss" xmlUrl="https://www.carbodydesign.com/feed/" />
+      <outline text="Carscoops" title="Carscoops" type="rss" xmlUrl="https://www.carscoops.com/feed/" />
+      <outline text="Jalopnik" title="Jalopnik" type="rss" xmlUrl="https://www.jalopnik.com/feed/" />
+      <outline text="Car and Driver" title="Car and Driver" type="rss" xmlUrl="https://www.caranddriver.com/rss/all.xml/" />
+      <outline text="Bring a Trailer" title="Bring a Trailer" type="rss" xmlUrl="https://bringatrailer.com/feed/" />
+      <outline text="TheTruthAboutCars" title="TheTruthAboutCars" type="rss" xmlUrl="https://www.thetruthaboutcars.com/rss/feed/all" />
+      <outline text="Top Gear Philippines" title="Top Gear Philippines" type="rss" xmlUrl="https://www.topgear.com.ph/feed/rss1" />
+    </outline>
+  </body>
+</opml>

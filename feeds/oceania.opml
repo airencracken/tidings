@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Oceania</title>
+  </head>
+  <body>
+    <outline text="Oceania" title="Oceania">
+      <outline text="Newsroom New Zealand" title="Newsroom New Zealand" type="rss" xmlUrl="https://newsroom.co.nz/feed/" />
+      <outline text="Crikey" title="Crikey" type="rss" xmlUrl="https://www.crikey.com.au/feed/" />
+      <outline text="Radio New Zealand Pacific" title="Radio New Zealand Pacific" type="rss" xmlUrl="https://www.rnz.co.nz/rss/pacific.xml" />
+      <outline text="Matangi Tonga" title="Matangi Tonga" type="rss" xmlUrl="https://matangitonga.to/rss.xml" />
+      <outline text="The Sydney Morning Herald" title="The Sydney Morning Herald" type="rss" xmlUrl="https://www.smh.com.au/rss/feed.xml" />
+      <outline text="ABC Just In" title="ABC Just In" type="rss" xmlUrl="https://www.abc.net.au/news/feed/1948/rss.xml" />
+      <outline text="The Age" title="The Age" type="rss" xmlUrl="https://www.theage.com.au/rss/feed.xml" />
+      <outline text="PerthNow" title="PerthNow" type="rss" xmlUrl="https://www.perthnow.com.au/news/feed" />
+      <outline text="The Canberra Times" title="The Canberra Times" type="rss" xmlUrl="https://www.canberratimes.com.au/rss.xml" />
+      <outline text="Brisbane Times" title="Brisbane Times" type="rss" xmlUrl="https://www.brisbanetimes.com.au/rss/feed.xml" />
+      <outline text="Michael West" title="Michael West" type="rss" xmlUrl="https://michaelwest.com.au/feed/" />
+    </outline>
+  </body>
+</opml>

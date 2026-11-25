@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Europe</title>
+  </head>
+  <body>
+    <outline text="Europe" title="Europe">
+      <outline text="Deutsche Welle" title="Deutsche Welle" type="rss" xmlUrl="https://rss.dw.com/rdf/rss-en-all" />
+      <outline text="Meduza in English" title="Meduza in English" type="rss" xmlUrl="https://meduza.io/rss/en/all" />
+      <outline text="Balkan Insight" title="Balkan Insight" type="rss" xmlUrl="https://balkaninsight.com/feed/" />
+      <outline text="The Local Europe" title="The Local Europe" type="rss" xmlUrl="https://www.thelocal.com/feeds/rss.php" />
+      <outline text="RFI in English" title="RFI in English" type="rss" xmlUrl="https://www.rfi.fr/en/rss" />
+      <outline text="Público" title="Público" type="rss" xmlUrl="https://feeds.feedburner.com/PublicoRSS" />
+      <outline text="Tagesschau" title="Tagesschau" type="rss" xmlUrl="https://www.tagesschau.de/xml/rss2" />
+      <outline text="Euronews" title="Euronews" type="rss" xmlUrl="https://www.euronews.com/rss?format=mrss" />
+      <outline text="Politico Europe" title="Politico Europe" type="rss" xmlUrl="https://www.politico.eu/feed/" />
+      <outline text="Euractiv" title="Euractiv" type="rss" xmlUrl="https://www.euractiv.com/feed/" />
+      <outline text="The Local Germany" title="The Local Germany" type="rss" xmlUrl="https://www.thelocal.de/feeds/rss.php" />
+      <outline text="Swiss Public Radio SRF" title="Swiss Public Radio SRF" type="rss" xmlUrl="https://www.srf.ch/news/bnf/rss/1646" />
+      <outline text="DutchNews.nl" title="DutchNews.nl" type="rss" xmlUrl="https://www.dutchnews.nl/feed/" />
+      <outline text="Notes from Poland" title="Notes from Poland" type="rss" xmlUrl="https://notesfrompoland.com/feed/" />
+      <outline text="Croatia Week" title="Croatia Week" type="rss" xmlUrl="https://www.croatiaweek.com/feed/" />
+      <outline text="YLE News" title="YLE News" type="rss" xmlUrl="https://yle.fi/rss/t/18-34837/en" />
+      <outline text="Iceland Review" title="Iceland Review" type="rss" xmlUrl="https://www.icelandreview.com/feed/" />
+      <outline text="Portugal Resident" title="Portugal Resident" type="rss" xmlUrl="https://www.portugalresident.com/feed/" />
+      <outline text="Irish Times" title="Irish Times" type="rss" xmlUrl="https://www.irishtimes.com/arc/outboundfeeds/rss/?outputType=xml" />
+      <outline text="Swiss National Museum Blog" title="Swiss National Museum Blog" type="rss" xmlUrl="https://blog.nationalmuseum.ch/en/feed/" />
+      <outline text="Radio Romania International" title="Radio Romania International" type="rss" xmlUrl="https://www.rri.ro/en/feed" />
+      <outline text="Mediapart" title="Mediapart" type="rss" xmlUrl="https://www.mediapart.fr/articles/feed" />
+      <outline text="L’Obs" title="L’Obs" type="rss" xmlUrl="https://www.nouvelobs.com/a-la-une/rss.xml" />
+      <outline text="Franceinfo" title="Franceinfo" type="rss" xmlUrl="https://www.franceinfo.fr/titres.rss" />
+      <outline text="Le Huffington Post" title="Le Huffington Post" type="rss" xmlUrl="https://www.huffingtonpost.fr/rss/all_headline.xml" />
+      <outline text="La Dépêche du Midi" title="La Dépêche du Midi" type="rss" xmlUrl="https://www.ladepeche.fr/rss.xml" />
+      <outline text="L'essentiel" title="L'essentiel" type="rss" xmlUrl="https://www.sudouest.fr/essentiel/rss.xml" />
+      <outline text="Ouest-France" title="Ouest-France" type="rss" xmlUrl="https://www.ouest-france.fr/rss/une" />
+      <outline text="ZEIT ONLINE" title="ZEIT ONLINE" type="rss" xmlUrl="https://newsfeed.zeit.de/index" />
+      <outline text="Frankfurter Allgemeine Zeitung" title="Frankfurter Allgemeine Zeitung" type="rss" xmlUrl="https://www.faz.net/rss/aktuell/" />
+      <outline text="ANSA" title="ANSA" type="rss" xmlUrl="https://www.ansa.it/sito/ansait_rss.xml" />
+      <outline text="Il Mattino" title="Il Mattino" type="rss" xmlUrl="https://www.ilmattino.it/?sez=XML&amp;args&amp;p=search&amp;args[box]=Home&amp;limit=20&amp;layout=rss" />
+      <outline text="Adnkronos" title="Adnkronos" type="rss" xmlUrl="https://www.adnkronos.com/RSS_PrimaPagina.xml" />
+      <outline text="Internazionale" title="Internazionale" type="rss" xmlUrl="https://www.internazionale.it/sitemaps/rss.xml" />
+      <outline text="Panorama" title="Panorama" type="rss" xmlUrl="https://www.panorama.it/feed/gn" />
+      <outline text="La Repubblica" title="La Repubblica" type="rss" xmlUrl="https://www.repubblica.it/rss/homepage/rss2.0.xml" />
+      <outline text="TheJournal.ie" title="TheJournal.ie" type="rss" xmlUrl="https://www.thejournal.ie/feed/" />
+      <outline text="BreakingNews.ie" title="BreakingNews.ie" type="rss" xmlUrl="https://feeds.breakingnews.ie/bntopstories" />
+      <outline text="Irish Mirror" title="Irish Mirror" type="rss" xmlUrl="https://www.irishmirror.ie/?service=rss" />
+      <outline text="Newsweek Polska" title="Newsweek Polska" type="rss" xmlUrl="https://www.newsweek.pl/rss.xml" />
+      <outline text="Wirtualne Media" title="Wirtualne Media" type="rss" xmlUrl="https://www.wirtualnemedia.pl/rss/aktualnosci" />
+      <outline text="Rzeczpospolita" title="Rzeczpospolita" type="rss" xmlUrl="https://www.rp.pl/rss_main?unknown-old-rss" />
+      <outline text="RMF24.pl" title="RMF24.pl" type="rss" xmlUrl="https://www.rmf24.pl/feed" />
+      <outline text="elDiario.es" title="elDiario.es" type="rss" xmlUrl="https://www.eldiario.es/rss/" />
+      <outline text="Expansión" title="Expansión" type="rss" xmlUrl="https://e00-expansion.uecdn.es/rss/portada.xml" />
+      <outline text="HuffPost España" title="HuffPost España" type="rss" xmlUrl="https://www.huffingtonpost.es/feeds/index.xml" />
+      <outline text="Euro Weekly News Spain" title="Euro Weekly News Spain" type="rss" xmlUrl="https://euroweeklynews.com/feed/" />
+      <outline text="Цензор.НЕТ" title="Цензор.НЕТ" type="rss" xmlUrl="https://assets.censor.net/rss/censor.net/rss_ru_news.xml" />
+      <outline text="ТСН" title="ТСН" type="rss" xmlUrl="https://tsn.ua/rss/full.rss" />
+      <outline text="Українська правда" title="Українська правда" type="rss" xmlUrl="https://www.pravda.com.ua/rss/" />
+      <outline text="ГОРДОН" title="ГОРДОН" type="rss" xmlUrl="https://gordonua.com/api/media/out/rss/news-top.xml" />
+      <outline text="НВ" title="НВ" type="rss" xmlUrl="https://nv.ua/rss/all.xml" />
+      <outline text="УНИАН" title="УНИАН" type="rss" xmlUrl="https://rss.unian.net/site/news_rus.rss" />
+      <outline text="Еспресо" title="Еспресо" type="rss" xmlUrl="https://espreso.tv/rss" />
+      <outline text="Europa Press" title="Europa Press" type="rss" xmlUrl="https://www.europapress.es/rss/rss.aspx" />
+      <outline text="Euronews (ES)" title="Euronews (ES)" type="rss" xmlUrl="https://es.euronews.com/rss?level=theme&amp;name=news" />
+      <outline text="Digi24" title="Digi24" type="rss" xmlUrl="https://www.digi24.ro/rss" />
+      <outline text="G4Media" title="G4Media" type="rss" xmlUrl="https://www.g4media.ro/feed" />
+      <outline text="Economedia" title="Economedia" type="rss" xmlUrl="https://economedia.ro/feed" />
+      <outline text="Libertatea" title="Libertatea" type="rss" xmlUrl="https://www.libertatea.ro/feed" />
+      <outline text="Buletin de București" title="Buletin de București" type="rss" xmlUrl="https://buletin.de/bucuresti/feed/" />
+      <outline text="Diario de Almería" title="Diario de Almería" type="rss" xmlUrl="https://www.diariodealmeria.es/rss/" />
+      <outline text="Europa Press Andalucía" title="Europa Press Andalucía" type="rss" xmlUrl="https://www.europapress.es/rss/rss.aspx?canal=andalucia" />
+    </outline>
+  </body>
+</opml>

@@ -1,0 +1,163 @@
+{{define "source-catalog"}}
+{{if .SuggestionsEnabled}}
+<section class="catalog" id="suggested-sources">
+  <div class="section-heading">
+    <h2>Suggested sources</h2>
+    <form method="get" action="/sources#suggested-sources" class="catalog-filters">
+      {{if .GroupScope}}<input type="hidden" name="scope" value="household">{{end}}
+      <div class="catalog-field catalog-keywords">
+        <label for="catalog-search">Search suggested sources</label>
+        <input type="search" name="catalog_q" id="catalog-search" value="{{.CatalogFilter.Query}}" maxlength="200">
+      </div>
+      <div class="catalog-field">
+        <label for="catalog-category">Category</label>
+        <select name="catalog_category" id="catalog-category">
+          <option value="">All categories</option>
+          {{range .CatalogCategories}}{{if .Enabled}}
+          <option value="{{.Name}}"{{if eq .Name $.CatalogFilter.Category}} selected{{end}}>{{.Name}} ({{.Count}})</option>
+          {{end}}{{end}}
+        </select>
+      </div>
+      <div class="catalog-field">
+        <label for="catalog-language">Language</label>
+        <select name="catalog_language" id="catalog-language">
+          <option value="">All languages</option>
+          {{range .CatalogLanguages}}
+          <option value="{{.}}"{{if eq . $.CatalogFilter.Language}} selected{{end}}>{{.}}</option>
+          {{end}}
+        </select>
+      </div>
+      <label class="catalog-unfollowed"><input type="checkbox" name="catalog_unfollowed" value="1"{{if .CatalogFilter.Unfollowed}} checked{{end}}> Hide followed</label>
+      <button>Find sources</button>
+      {{if .CatalogFilter.Active}}
+      <a href="/sources{{if .GroupScope}}?scope=household{{end}}#suggested-sources">Clear filters</a>
+      {{end}}
+    </form>
+  </div>
+  {{if .CatalogFilter.Active}}
+  {{if .CatalogTotal}}<p class="catalog-count">{{.CatalogTotal}} matching {{if eq .CatalogTotal 1}}source{{else}}sources{{end}}</p>{{end}}
+  {{range .CatalogSections}}
+  <section class="catalog-category">
+    <div class="catalog-heading">
+      <h3>{{.Name}}</h3>
+      {{if and .HasMore (not $.CatalogFilter.Category)}}<a href="{{catalogCategory $.CatalogFilter .Name $.GroupScope}}">View all {{.Count}} matches <span class="sr-only">in {{.Name}}</span></a>{{end}}
+    </div>
+    <div class="catalog-grid">
+      {{range .Sources}}{{template "source-card" (catalogCard $ .)}}{{else}}<p>No sources on this page.</p>{{end}}
+    </div>
+    {{if and $.CatalogFilter.Category (or $.CatalogFilter.Page .HasMore)}}
+    <nav class="pagination catalog-pagination" aria-label="Sources pages">
+      {{if $.CatalogFilter.Page}}<a href="{{catalogPage $.CatalogFilter -1 $.GroupScope}}">Previous sources</a>{{end}}
+      {{if .HasMore}}<a href="{{catalogPage $.CatalogFilter 1 $.GroupScope}}">Next sources</a>{{end}}
+    </nav>
+    {{end}}
+  </section>
+  {{else}}<p>No suggested sources match your filters.</p>{{end}}
+  {{else}}
+  {{if .CatalogRecommendations}}
+  <section class="catalog-category catalog-recommendations" aria-labelledby="catalog-recommendations">
+    <div class="catalog-heading"><h3 id="catalog-recommendations">Sources you might like</h3></div>
+    <div class="catalog-grid">
+      {{range .CatalogRecommendations}}{{template "source-card" (catalogCard $ .)}}{{end}}
+    </div>
+  </section>
+  {{end}}
+  <ul class="catalog-topics" aria-label="Source categories">
+    {{range .CatalogSections}}
+    <li>
+      <a class="paper catalog-topic" href="/sources?catalog_category={{.Name | urlquery}}{{if $.GroupScope}}&amp;scope=household{{end}}#suggested-sources">
+        <strong>{{.Name}}</strong>
+        <span>{{.Count}} sources</span>
+      </a>
+    </li>
+    {{end}}
+  </ul>
+  {{end}}
+</section>
+{{else if .User.Owner}}
+<p class="field-help">Suggested sources are disabled. <a href="/admin#suggestions">Choose categories for this instance</a>.</p>
+{{end}}
+{{end}}
+
+{{define "source-card"}}
+<article class="paper catalog-card">
+  <h4>{{.Title}}</h4>
+  <p>{{.Description}}</p>
+  {{if .Reason}}<small>{{.Reason}}</small>{{end}}
+  {{if ne .Language "English"}}<small>{{.Language}}</small>{{end}}
+  <div class="catalog-bottom">
+    <form action="/sources/preview" method="post">
+      {{template "catalog-source-inputs" .}}
+      <button class="text-button" aria-label="Preview {{.Title}}">Preview</button>
+    </form>
+    {{template "catalog-follow" .}}
+  </div>
+</article>
+{{end}}
+
+{{define "catalog-source-inputs"}}
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="url" value="{{.URL}}">
+<input type="hidden" name="catalog_q" value="{{.Filter.Query}}">
+<input type="hidden" name="catalog_category" value="{{.Filter.Category}}">
+<input type="hidden" name="catalog_language" value="{{.Filter.Language}}">
+{{if .Filter.Unfollowed}}<input type="hidden" name="catalog_unfollowed" value="1">{{end}}
+{{if .Filter.Page}}<input type="hidden" name="catalog_page" value="{{catalogPageNumber .Filter}}">{{end}}
+{{if .GroupScope}}<input type="hidden" name="scope" value="household">{{end}}
+{{end}}
+
+{{define "catalog-follow"}}
+{{if .FollowedID}}
+<a href="/sources{{if .GroupScope}}?scope=household{{end}}#source-{{.FollowedID}}">Following <span class="sr-only">{{.Title}}</span></a>
+{{else}}
+<form action="/sources" method="post">
+  {{template "catalog-source-inputs" .}}
+  <input type="hidden" name="tags" value="{{.Category}}">
+  <button class="button secondary small" aria-label="Follow {{.Title}}">Follow</button>
+</form>
+{{end}}
+{{end}}
+
+{{define "catalog-preview"}}
+<section class="paper narrow catalog-preview">
+  <a href="{{.CatalogBack}}">Back to suggested sources</a>
+  <h1>{{.CatalogPreview.Title}}</h1>
+  <p>{{.CatalogPreview.Description}}</p>
+  <div class="catalog-bottom">
+    <a href="{{.CatalogPreview.URL}}" target="_blank" rel="noopener noreferrer">Open feed</a>
+    {{template "catalog-follow" (catalogCard . .CatalogPreview)}}
+  </div>
+  {{if .Error}}<p class="error" role="alert">{{.Error}}</p>
+  {{else if .Entries}}
+  <h2>Recent stories</h2>
+  <ol>
+    {{range .Entries}}
+    <li><a href="{{cleanLink .URL}}" target="_blank" rel="noopener noreferrer">{{.Title}}</a> <time datetime="{{isoDate .Published}}">{{date .Published}}</time></li>
+    {{end}}
+  </ol>
+  {{else}}<p>The publisher has no stories in this feed yet.</p>{{end}}
+</section>
+{{end}}
+
+{{define "catalog-settings"}}
+<section class="paper" id="suggestions">
+  <h2>Suggested sources</h2>
+  <p>Choose which categories members can browse.</p>
+  <form method="post" action="/account/suggestions">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <input type="hidden" name="return_to" value="{{.ReturnTo}}">
+    <fieldset class="catalog-settings">
+      <legend>Available categories</legend>
+      {{range .CatalogCategories}}
+      <label class="check"><input type="checkbox" name="category" value="{{.Name}}"{{if .Enabled}} checked{{end}}> {{.Name}} <span class="muted">({{.Count}})</span></label>
+      {{end}}
+    </fieldset>
+    <button>Save suggested categories</button>
+  </form>
+  <form method="post" action="/account/suggestions">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <input type="hidden" name="return_to" value="{{.ReturnTo}}">
+    <button class="button secondary" name="enable_all" value="true">Enable all categories</button>
+  </form>
+</section>
+{{end}}

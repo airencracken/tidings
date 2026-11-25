@@ -159,8 +159,19 @@ func TestSuggestionCategoriesDefaultAuthorizationAndAtomicity(t *testing.T) {
 	if err != nil || len(available) < 3 {
 		t.Fatal(available, err)
 	}
-	if enabled, err := h.store.CatalogCategories(ctx); err != nil || len(enabled) != 0 {
-		t.Fatal("suggestions must start disabled", enabled, err)
+	if enabled, err := h.store.CatalogCategories(ctx); err != nil || len(enabled) != len(available) {
+		t.Fatal("fresh instances should show all categories", enabled, err)
+	}
+	for _, category := range available {
+		if !category.Enabled {
+			t.Fatalf("fresh instance is missing %q", category.Name)
+		}
+	}
+	if feeds, err := h.store.Feeds(ctx, 2, false); err != nil || len(feeds) != 0 {
+		t.Fatal("enabling suggestions created subscriptions", feeds, err)
+	}
+	if w := h.request(1, "POST", "/account/suggestions", nil); w.Code != 303 {
+		t.Fatal("owner could not disable all categories", w.Code)
 	}
 	if w := h.request(2, "GET", "/sources?catalog_q=AI", nil); strings.Contains(w.Body.String(), "catalog-card") {
 		t.Fatal("disabled suggestion disclosed")
@@ -177,7 +188,15 @@ func TestSuggestionCategoriesDefaultAuthorizationAndAtomicity(t *testing.T) {
 	if w := h.request(1, "POST", "/account/suggestions", url.Values{"category": {"AI"}}); w.Code != 303 {
 		t.Fatal(w.Code, w.Body)
 	}
-	w := h.request(2, "GET", "/sources", nil)
+	w := h.request(2, "GET", "/sources?catalog_q=willison+krebs", nil)
+	if strings.Contains(w.Body.String(), "catalog-card") {
+		t.Fatal("catalog matched partial terms across sources")
+	}
+	w = h.request(2, "GET", "/sources?catalog_q=schneier&catalog_category=Infosec", nil)
+	if strings.Contains(w.Body.String(), "catalog-card") {
+		t.Fatal("disabled category leaked through a filter")
+	}
+	w = h.request(2, "GET", "/sources?catalog_category=AI", nil)
 	if !strings.Contains(w.Body.String(), "Simon Willison") || strings.Contains(w.Body.String(), "Krebs on Security") {
 		t.Fatal("enabled categories not enforced")
 	}

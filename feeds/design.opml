@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Design</title>
+  </head>
+  <body>
+    <outline text="Design" title="Design">
+      <outline text="Dezeen" title="Dezeen" type="rss" xmlUrl="https://www.dezeen.com/feed/" />
+      <outline text="Smashing Magazine" title="Smashing Magazine" type="rss" xmlUrl="https://www.smashingmagazine.com/feed/" />
+      <outline text="A List Apart" title="A List Apart" type="rss" xmlUrl="https://alistapart.com/main/feed/" />
+      <outline text="Design Milk" title="Design Milk" type="rss" xmlUrl="https://design-milk.com/feed/" />
+      <outline text="Core77" title="Core77" type="rss" xmlUrl="https://www.core77.com/rss.xml" />
+      <outline text="ArchDaily" title="ArchDaily" type="rss" xmlUrl="https://www.archdaily.com/feed" />
+      <outline text="99% Invisible" title="99% Invisible" type="rss" xmlUrl="https://feeds.simplecast.com/BqbsxVfO" />
+      <outline text="Brand New" title="Brand New" type="rss" xmlUrl="https://www.underconsideration.com/brandnew/atom.xml" />
+      <outline text="Architectural Digest" title="Architectural Digest" type="rss" xmlUrl="https://www.architecturaldigest.com/feed/rss" />
+      <outline text="The Architect’s Newspaper" title="The Architect’s Newspaper" type="rss" xmlUrl="https://www.archpaper.com/feed" />
+      <outline text="designboom Architecture" title="designboom Architecture" type="rss" xmlUrl="https://www.designboom.com/architecture/feed/" />
+      <outline text="decor8" title="decor8" type="rss" xmlUrl="https://www.decor8blog.com/blog?format=rss" />
+      <outline text="In My Own Style" title="In My Own Style" type="rss" xmlUrl="https://inmyownstyle.com/feed" />
+      <outline text="Interior Design Ideas" title="Interior Design Ideas" type="rss" xmlUrl="https://www.home-designing.com/feed" />
+      <outline text="Ideal Home" title="Ideal Home" type="rss" xmlUrl="https://www.idealhome.co.uk/feed" />
+      <outline text="The Inspired Room" title="The Inspired Room" type="rss" xmlUrl="https://theinspiredroom.net/feed/" />
+      <outline text="Trendir" title="Trendir" type="rss" xmlUrl="https://www.trendir.com/feed/" />
+      <outline text="Yatzer" title="Yatzer" type="rss" xmlUrl="https://www.yatzer.com/rss.xml" />
+      <outline text="Young House Love" title="Young House Love" type="rss" xmlUrl="https://www.younghouselove.com/feed/" />
+      <outline text="Nielsen Norman Group" title="Nielsen Norman Group" type="rss" xmlUrl="https://www.nngroup.com/feed/rss/" />
+      <outline text="FlowingData" title="FlowingData" type="rss" xmlUrl="https://flowingdata.com/feed" />
+    </outline>
+  </body>
+</opml>

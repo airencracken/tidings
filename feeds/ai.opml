@@ -4,20 +4,22 @@
     <title>Tidings AI</title>
   </head>
   <body>
-    <outline text="Simon Willison" title="Simon Willison" type="rss" xmlUrl="https://simonwillison.net/atom/everything/" category="AI" />
-    <outline text="Hugging Face" title="Hugging Face" type="rss" xmlUrl="https://huggingface.co/blog/feed.xml" category="AI" />
-    <outline text="Google Research" title="Google Research" type="rss" xmlUrl="https://research.google/blog/rss/" category="AI" />
-    <outline text="Google DeepMind" title="Google DeepMind" type="rss" xmlUrl="https://deepmind.google/blog/rss.xml" category="AI" />
-    <outline text="OpenAI" title="OpenAI" type="rss" xmlUrl="https://openai.com/news/rss.xml" category="AI" />
-    <outline text="Berkeley AI Research" title="Berkeley AI Research" type="rss" xmlUrl="https://bair.berkeley.edu/blog/feed.xml" category="AI" />
-    <outline text="Machine Learning at CMU" title="Machine Learning at CMU" type="rss" xmlUrl="https://blog.ml.cmu.edu/feed/" category="AI" />
-    <outline text="Lilian Weng" title="Lilian Weng" type="rss" xmlUrl="https://lilianweng.github.io/index.xml" category="AI" />
-    <outline text="Ahead of AI" title="Ahead of AI" type="rss" xmlUrl="https://magazine.sebastianraschka.com/feed" category="AI" />
-    <outline text="Interconnects" title="Interconnects" type="rss" xmlUrl="https://www.interconnects.ai/feed" category="AI" />
-    <outline text="Latent Space" title="Latent Space" type="rss" xmlUrl="https://www.latent.space/feed" category="AI" />
-    <outline text="Import AI" title="Import AI" type="rss" xmlUrl="https://importai.substack.com/feed" category="AI" />
-    <outline text="The Gradient" title="The Gradient" type="rss" xmlUrl="https://thegradient.pub/rss/" category="AI" />
-    <outline text="Chip Huyen" title="Chip Huyen" type="rss" xmlUrl="https://huyenchip.com/feed.xml" category="AI" />
-    <outline text="Microsoft Research" title="Microsoft Research" type="rss" xmlUrl="https://www.microsoft.com/en-us/research/feed/" category="AI" />
+    <outline text="AI" title="AI">
+      <outline text="Simon Willison" title="Simon Willison" type="rss" xmlUrl="https://simonwillison.net/atom/everything/" />
+      <outline text="Hugging Face" title="Hugging Face" type="rss" xmlUrl="https://huggingface.co/blog/feed.xml" />
+      <outline text="Google Research" title="Google Research" type="rss" xmlUrl="https://research.google/blog/rss/" />
+      <outline text="Google DeepMind" title="Google DeepMind" type="rss" xmlUrl="https://deepmind.google/blog/rss.xml" />
+      <outline text="OpenAI" title="OpenAI" type="rss" xmlUrl="https://openai.com/news/rss.xml" />
+      <outline text="Berkeley AI Research" title="Berkeley AI Research" type="rss" xmlUrl="https://bair.berkeley.edu/blog/feed.xml" />
+      <outline text="Machine Learning at CMU" title="Machine Learning at CMU" type="rss" xmlUrl="https://blog.ml.cmu.edu/feed/" />
+      <outline text="Lilian Weng" title="Lilian Weng" type="rss" xmlUrl="https://lilianweng.github.io/index.xml" />
+      <outline text="Ahead of AI" title="Ahead of AI" type="rss" xmlUrl="https://magazine.sebastianraschka.com/feed" />
+      <outline text="Interconnects" title="Interconnects" type="rss" xmlUrl="https://www.interconnects.ai/feed" />
+      <outline text="Latent Space" title="Latent Space" type="rss" xmlUrl="https://www.latent.space/feed" />
+      <outline text="Import AI" title="Import AI" type="rss" xmlUrl="https://importai.substack.com/feed" />
+      <outline text="The Gradient" title="The Gradient" type="rss" xmlUrl="https://thegradient.pub/rss/" />
+      <outline text="Chip Huyen" title="Chip Huyen" type="rss" xmlUrl="https://huyenchip.com/feed.xml" />
+      <outline text="Microsoft Research" title="Microsoft Research" type="rss" xmlUrl="https://www.microsoft.com/en-us/research/feed/" />
+    </outline>
   </body>
 </opml>

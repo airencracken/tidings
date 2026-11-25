@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Climate</title>
+  </head>
+  <body>
+    <outline text="Climate" title="Climate">
+      <outline text="Carbon Brief" title="Carbon Brief" type="rss" xmlUrl="https://www.carbonbrief.org/feed/" />
+      <outline text="Inside Climate News" title="Inside Climate News" type="rss" xmlUrl="https://insideclimatenews.org/feed/" />
+      <outline text="Grist" title="Grist" type="rss" xmlUrl="https://grist.org/feed/" />
+      <outline text="Canary Media" title="Canary Media" type="rss" xmlUrl="https://www.canarymedia.com/feed" />
+      <outline text="Yale Climate Connections" title="Yale Climate Connections" type="rss" xmlUrl="https://yaleclimateconnections.org/feed/" />
+      <outline text="Clean Energy Wire" title="Clean Energy Wire" type="rss" xmlUrl="https://www.cleanenergywire.org/rss.xml" />
+      <outline text="Climate Home News" title="Climate Home News" type="rss" xmlUrl="https://www.climatechangenews.com/feed/" />
+      <outline text="Heatmap" title="Heatmap" type="rss" xmlUrl="https://heatmap.news/feeds/feed.rss" />
+      <outline text="Energy Institute at Haas" title="Energy Institute at Haas" type="rss" xmlUrl="https://energyathaas.wordpress.com/feed/" />
+      <outline text="CleanTechnica" title="CleanTechnica" type="rss" xmlUrl="https://cleantechnica.com/feed/" />
+      <outline text="Electrek" title="Electrek" type="rss" xmlUrl="https://electrek.co/feed/" />
+      <outline text="PV Magazine" title="PV Magazine" type="rss" xmlUrl="https://www.pv-magazine.com/feed/" />
+      <outline text="RenewEconomy" title="RenewEconomy" type="rss" xmlUrl="https://reneweconomy.com.au/feed/" />
+      <outline text="Climate Central" title="Climate Central" type="rss" xmlUrl="https://www.climatecentral.org/rss" />
+      <outline text="Skeptical Science" title="Skeptical Science" type="rss" xmlUrl="https://skepticalscience.com/feed.xml" />
+      <outline text="RealClimate" title="RealClimate" type="rss" xmlUrl="https://www.realclimate.org/index.php/feed/" />
+      <outline text="DeSmog" title="DeSmog" type="rss" xmlUrl="https://www.desmog.com/feed/" />
+      <outline text="Oil Change International" title="Oil Change International" type="rss" xmlUrl="https://oilchange.org/feed/" />
+      <outline text="RMI" title="RMI" type="rss" xmlUrl="https://rmi.org/feed/" />
+      <outline text="Bionic Planet: Reversing Climate Change by Restoring Nature" title="Bionic Planet: Reversing Climate Change by Restoring Nature" type="rss" xmlUrl="https://rss.libsyn.com/shows/81028/destinations/375080.xml" />
+      <outline text="Prakati India" title="Prakati India" type="rss" xmlUrl="https://prakati.in/feed/" />
+    </outline>
+  </body>
+</opml>

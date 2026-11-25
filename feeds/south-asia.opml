@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings South Asia</title>
+  </head>
+  <body>
+    <outline text="South Asia" title="South Asia">
+      <outline text="The Hindu" title="The Hindu" type="rss" xmlUrl="https://www.thehindu.com/feeder/default.rss" />
+      <outline text="Dawn" title="Dawn" type="rss" xmlUrl="https://www.dawn.com/feeds/home" />
+      <outline text="The Indian Express" title="The Indian Express" type="rss" xmlUrl="https://indianexpress.com/feed/" />
+      <outline text="The News Minute" title="The News Minute" type="rss" xmlUrl="https://www.thenewsminute.com/feed" />
+      <outline text="Himal Southasian" title="Himal Southasian" type="rss" xmlUrl="https://www.himalmag.com/feed" />
+      <outline text="Nepali Times" title="Nepali Times" type="rss" xmlUrl="https://nepalitimes.com/feed" />
+      <outline text="India Today" title="India Today" type="rss" xmlUrl="https://www.indiatoday.in/rss/home" />
+      <outline text="News18" title="News18" type="rss" xmlUrl="https://www.news18.com/commonfeeds/v1/eng/rss/world.xml" />
+      <outline text="India News" title="India News" type="rss" xmlUrl="https://www.dnaindia.com/feeds/india.xml" />
+      <outline text="Free Press Journal" title="Free Press Journal" type="rss" xmlUrl="https://www.freepressjournal.in/stories.rss" />
+      <outline text="Economic Times" title="Economic Times" type="rss" xmlUrl="https://economictimes.indiatimes.com/rssfeedsdefault.cms" />
+      <outline text="The Hindu BusinessLine" title="The Hindu BusinessLine" type="rss" xmlUrl="https://www.thehindubusinessline.com/feeder/default.rss" />
+      <outline text="Swarajya" title="Swarajya" type="rss" xmlUrl="https://prod-qt-images.s3.amazonaws.com/production/swarajya/feed.xml" />
+      <outline text="Amar Ujala अमर उजाला" title="Amar Ujala अमर उजाला" type="rss" xmlUrl="https://www.amarujala.com/rss/breaking-news.xml" />
+      <outline text="Dainik Bhaskar दैनिक भास्कर" title="Dainik Bhaskar दैनिक भास्कर" type="rss" xmlUrl="https://www.bhaskar.com/rss-feed/1061/" />
+      <outline text="Divya Bhaskar દિવ્ય ભાસ્કર" title="Divya Bhaskar દિવ્ય ભાસ્કર" type="rss" xmlUrl="https://www.divyabhaskar.co.in/rss-feed/1037/" />
+      <outline text="The Daily Star" title="The Daily Star" type="rss" xmlUrl="https://www.thedailystar.net/taxonomy/term/107/rss.xml" />
+      <outline text="BD24Live.com" title="BD24Live.com" type="rss" xmlUrl="https://www.bd24live.com/feed/" />
+      <outline text="Jago News 24" title="Jago News 24" type="rss" xmlUrl="https://www.jagonews24.com/rss/rss.xml" />
+      <outline text="প্রথম আলো" title="প্রথম আলো" type="rss" xmlUrl="https://www.prothomalo.com/stories.rss" />
+      <outline text="The Express Tribune" title="The Express Tribune" type="rss" xmlUrl="https://tribune.com.pk/feed/home" />
+      <outline text="The Nation Pakistan" title="The Nation Pakistan" type="rss" xmlUrl="https://www.nation.com.pk/rss/top-stories" />
+      <outline text="Geo News Urdu" title="Geo News Urdu" type="rss" xmlUrl="https://jang.com.pk/rss/1/1" />
+      <outline text="UrduPoint" title="UrduPoint" type="rss" xmlUrl="https://www.urdupoint.com/rss/urdupoint.rss" />
+      <outline text="ایکسپریس اردو" title="ایکسپریس اردو" type="rss" xmlUrl="https://www.express.pk/feed/" />
+    </outline>
+  </body>
+</opml>

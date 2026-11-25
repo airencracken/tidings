@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Amateur Radio</title>
+  </head>
+  <body>
+    <outline text="Amateur Radio" title="Amateur Radio">
+      <outline text="ARRL News" title="ARRL News" type="rss" xmlUrl="https://www.arrl.org/news/rss" />
+      <outline text="Radio Society of Great Britain" title="Radio Society of Great Britain" type="rss" xmlUrl="https://rsgb.org/main/feed/" />
+      <outline text="AMSAT" title="AMSAT" type="rss" xmlUrl="https://www.amsat.org/feed/" />
+      <outline text="AmateurRadio.com" title="AmateurRadio.com" type="rss" xmlUrl="https://www.amateurradio.com/feed/" />
+      <outline text="Jeff KE9V" title="Jeff KE9V" type="rss" xmlUrl="https://ke9v.net/feed.xml" />
+      <outline text="SWLing Post" title="SWLing Post" type="rss" xmlUrl="https://swling.com/blog/feed/" />
+      <outline text="RTL-SDR Blog" title="RTL-SDR Blog" type="rss" xmlUrl="https://www.rtl-sdr.com/feed/" />
+      <outline text="The DXZone" title="The DXZone" type="rss" xmlUrl="https://www.dxzone.com/dxzone.xml" />
+      <outline text="OH8STN" title="OH8STN" type="rss" xmlUrl="https://oh8stn.org/feed/" />
+      <outline text="KB6NU" title="KB6NU" type="rss" xmlUrl="https://www.kb6nu.com/feed/" />
+      <outline text="Radio World" title="Radio World" type="rss" xmlUrl="https://www.radioworld.com/feed" />
+      <outline text="Amateur Radio Newsline" title="Amateur Radio Newsline" type="rss" xmlUrl="https://www.arnewsline.org/news?format=rss" />
+      <outline text="ICQ Amateur Radio Podcast" title="ICQ Amateur Radio Podcast" type="rss" xmlUrl="https://www.icqpodcast.com/news?format=rss" />
+      <outline text="Radio Amateurs of Canada" title="Radio Amateurs of Canada" type="rss" xmlUrl="https://www.rac.ca/feed/" />
+      <outline text="Deutscher Amateur-Radio-Club" title="Deutscher Amateur-Radio-Club" type="rss" xmlUrl="https://www.darc.de/home/rss.xml" />
+      <outline text="New Zealand Association of Radio Transmitters" title="New Zealand Association of Radio Transmitters" type="rss" xmlUrl="https://nzart.org.nz/feed/" />
+      <outline text="G0KYA Amateur Radio Blog" title="G0KYA Amateur Radio Blog" type="rss" xmlUrl="https://g0kya.blogspot.com/feeds/posts/default" />
+      <outline text="VE7SL’s Blog" title="VE7SL’s Blog" type="rss" xmlUrl="https://ve7sl.blogspot.com/feeds/posts/default" />
+    </outline>
+  </body>
+</opml>

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Africa &amp; Middle East</title>
+  </head>
+  <body>
+    <outline text="Africa &amp; Middle East" title="Africa &amp; Middle East">
+      <outline text="AllAfrica" title="AllAfrica" type="rss" xmlUrl="https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf" />
+      <outline text="Le Monde Afrique" title="Le Monde Afrique" type="rss" xmlUrl="https://www.lemonde.fr/afrique/rss_full.xml" />
+      <outline text="Africa Report" title="Africa Report" type="rss" xmlUrl="https://www.theafricareport.com/feed/" />
+      <outline text="Premium Times Nigeria" title="Premium Times Nigeria" type="rss" xmlUrl="https://www.premiumtimesng.com/feed" />
+      <outline text="TechCabal" title="TechCabal" type="rss" xmlUrl="https://techcabal.com/feed/" />
+      <outline text="Middle East Eye" title="Middle East Eye" type="rss" xmlUrl="https://www.middleeasteye.net/rss" />
+      <outline text="The Times of Israel" title="The Times of Israel" type="rss" xmlUrl="https://www.timesofisrael.com/feed/" />
+      <outline text="Arab News" title="Arab News" type="rss" xmlUrl="https://www.arabnews.com/rss.xml" />
+      <outline text="Al-Monitor" title="Al-Monitor" type="rss" xmlUrl="https://www.al-monitor.com/rss" />
+      <outline text="Legit.ng" title="Legit.ng" type="rss" xmlUrl="https://www.legit.ng/rss/all.rss" />
+      <outline text="Daily Post Nigeria" title="Daily Post Nigeria" type="rss" xmlUrl="https://dailypost.ng/feed/" />
+      <outline text="Information Nigeria" title="Information Nigeria" type="rss" xmlUrl="https://www.informationng.com/feed" />
+      <outline text="Tribune Online" title="Tribune Online" type="rss" xmlUrl="https://tribuneonlineng.com/feed/" />
+      <outline text="The Citizen" title="The Citizen" type="rss" xmlUrl="https://www.citizen.co.za/feed/" />
+      <outline text="Moneyweb" title="Moneyweb" type="rss" xmlUrl="https://www.moneyweb.co.za/feed/" />
+      <outline text="Independent Online" title="Independent Online" type="rss" xmlUrl="https://iol.co.za/rss/iol/news/" />
+      <outline text="The South African" title="The South African" type="rss" xmlUrl="https://www.thesouthafrican.com/feed/" />
+      <outline text="Young Journalists Club" title="Young Journalists Club" type="rss" xmlUrl="https://www.yjc.ir/fa/rss/allnews" />
+      <outline text="Tabnak" title="Tabnak" type="rss" xmlUrl="https://tabnak.ir/fa/rss/allnews" />
+      <outline text="Iranian Students’ News Agency" title="Iranian Students’ News Agency" type="rss" xmlUrl="https://www.isna.ir/rss" />
+      <outline text="Mehr News Agency" title="Mehr News Agency" type="rss" xmlUrl="https://www.mehrnews.com/rss" />
+      <outline text="Khabar Online" title="Khabar Online" type="rss" xmlUrl="https://www.khabaronline.ir/rss" />
+      <outline text="عصر ايران" title="عصر ايران" type="rss" xmlUrl="https://www.asriran.com/fa/rss/allnews" />
+    </outline>
+  </body>
+</opml>

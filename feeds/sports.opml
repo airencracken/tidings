@@ -4,6 +4,47 @@
     <title>Tidings Sports</title>
   </head>
   <body>
-    <outline text="BBC Sport" title="BBC Sport" type="rss" xmlUrl="https://feeds.bbci.co.uk/sport/rss.xml?edition=uk" category="Sports" />
+    <outline text="Sports" title="Sports">
+      <outline text="BBC Sport" title="BBC Sport" type="rss" xmlUrl="https://feeds.bbci.co.uk/sport/rss.xml?edition=uk" />
+      <outline text="ESPN" title="ESPN" type="rss" xmlUrl="https://www.espn.com/espn/rss/news" />
+      <outline text="The Guardian Sport" title="The Guardian Sport" type="rss" xmlUrl="https://www.theguardian.com/sport/rss" />
+      <outline text="FanGraphs" title="FanGraphs" type="rss" xmlUrl="https://blogs.fangraphs.com/feed/" />
+      <outline text="Cycling Weekly" title="Cycling Weekly" type="rss" xmlUrl="https://www.cyclingweekly.com/feeds/all" />
+      <outline text="World Athletics" title="World Athletics" type="rss" xmlUrl="https://worldathletics.org/rss" />
+      <outline text="MLB News" title="MLB News" type="rss" xmlUrl="https://www.mlb.com/feeds/news/rss.xml" />
+      <outline text="RaceFans" title="RaceFans" type="rss" xmlUrl="https://www.racefans.net/feed/" />
+      <outline text="Motorsport.com Formula 1" title="Motorsport.com Formula 1" type="rss" xmlUrl="https://www.motorsport.com/rss/f1/news/" />
+      <outline text="Running Shoes Guru" title="Running Shoes Guru" type="rss" xmlUrl="https://www.runningshoesguru.com/feed/" />
+      <outline text="ESPN Soccer" title="ESPN Soccer" type="rss" xmlUrl="https://www.espn.com/espn/rss/soccer/news" />
+      <outline text="The Guardian Football" title="The Guardian Football" type="rss" xmlUrl="https://www.theguardian.com/football/rss" />
+      <outline text="BBC Cricket" title="BBC Cricket" type="rss" xmlUrl="https://feeds.bbci.co.uk/sport/cricket/rss.xml" />
+      <outline text="BBC Rugby Union" title="BBC Rugby Union" type="rss" xmlUrl="https://feeds.bbci.co.uk/sport/rugby-union/rss.xml" />
+      <outline text="ESPNcricinfo" title="ESPNcricinfo" type="rss" xmlUrl="https://www.espncricinfo.com/rss/content/story/feeds/0.xml" />
+      <outline text="Cyclingnews" title="Cyclingnews" type="rss" xmlUrl="https://www.cyclingnews.com/feeds/all" />
+      <outline text="The Race" title="The Race" type="rss" xmlUrl="https://www.the-race.com/rss/" />
+      <outline text="Racer" title="Racer" type="rss" xmlUrl="https://racer.com/feed/" />
+      <outline text="Autosport" title="Autosport" type="rss" xmlUrl="https://www.autosport.com/rss/feed/all" />
+      <outline text="Defector" title="Defector" type="rss" xmlUrl="https://defector.com/feed" />
+      <outline text="Awful Announcing" title="Awful Announcing" type="rss" xmlUrl="https://awfulannouncing.com/feed" />
+      <outline text="Just Women’s Sports" title="Just Women’s Sports" type="rss" xmlUrl="https://justwomenssports.com/feed/" />
+      <outline text="SwimSwam" title="SwimSwam" type="rss" xmlUrl="https://swimswam.com/feed/" />
+      <outline text="LetsRun" title="LetsRun" type="rss" xmlUrl="https://www.letsrun.com/feed/" />
+      <outline text="Runner’s World" title="Runner’s World" type="rss" xmlUrl="https://www.runnersworld.com/rss/all.xml" />
+      <outline text="Climbing" title="Climbing" type="rss" xmlUrl="https://www.climbing.com/feed/" />
+      <outline text="BoxingScene" title="BoxingScene" type="rss" xmlUrl="https://www.boxingscene.com/rss" />
+      <outline text="Tachiai Sumo" title="Tachiai Sumo" type="rss" xmlUrl="https://tachiai.org/feed/" />
+      <outline text="The Times of India Cricket" title="The Times of India Cricket" type="rss" xmlUrl="https://timesofindia.indiatimes.com/rssfeeds/54829575.cms" />
+      <outline text="The Indian Express Cricket" title="The Indian Express Cricket" type="rss" xmlUrl="https://indianexpress.com/section/sports/cricket/feed/" />
+      <outline text="Stumped" title="Stumped" type="rss" xmlUrl="https://podcasts.files.bbci.co.uk/p02gsrmh.rss" />
+      <outline text="Switch Hit Podcast" title="Switch Hit Podcast" type="rss" xmlUrl="https://anchor.fm/s/1139baa00/podcast/rss" />
+      <outline text="Tailenders" title="Tailenders" type="rss" xmlUrl="https://podcasts.files.bbci.co.uk/p02pcb4w.rss" />
+      <outline text="The Hindu Football" title="The Hindu Football" type="rss" xmlUrl="https://www.thehindu.com/sport/football/feeder/default.rss" />
+      <outline text="The New York Times Soccer" title="The New York Times Soccer" type="rss" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/Soccer.xml" />
+      <outline text="Soccer News" title="Soccer News" type="rss" xmlUrl="https://www.soccernews.com/feed/" />
+      <outline text="Perfect Tennis" title="Perfect Tennis" type="rss" xmlUrl="https://www.perfect-tennis.com/feed/" />
+      <outline text="Sky Sports News" title="Sky Sports News" type="rss" xmlUrl="https://feeds.skynews.com/feeds/rss/sports.xml" />
+      <outline text="Hindustan Times Sports" title="Hindustan Times Sports" type="rss" xmlUrl="https://timesofindia.indiatimes.com/rssfeeds/4719148.cms" />
+      <outline text="The42" title="The42" type="rss" xmlUrl="https://www.the42.ie/feed/" />
+    </outline>
   </body>
 </opml>

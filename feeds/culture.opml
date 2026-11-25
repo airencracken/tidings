@@ -4,6 +4,25 @@
     <title>Tidings Culture</title>
   </head>
   <body>
-    <outline text="Smithsonian Magazine" title="Smithsonian Magazine" type="rss" xmlUrl="https://www.smithsonianmag.com/rss/latest_articles/" category="Culture" />
+    <outline text="Culture" title="Culture">
+      <outline text="Smithsonian Magazine" title="Smithsonian Magazine" type="rss" xmlUrl="https://www.smithsonianmag.com/rss/latest_articles/" />
+      <outline text="Kottke.org" title="Kottke.org" type="rss" xmlUrl="https://feeds.kottke.org/main" />
+      <outline text="Open Culture" title="Open Culture" type="rss" xmlUrl="https://www.openculture.com/feed" />
+      <outline text="Atlas Obscura" title="Atlas Obscura" type="rss" xmlUrl="https://www.atlasobscura.com/feeds/latest" />
+      <outline text="Colossal" title="Colossal" type="rss" xmlUrl="https://www.thisiscolossal.com/feed/" />
+      <outline text="Aeon" title="Aeon" type="rss" xmlUrl="https://aeon.co/feed.rss" />
+      <outline text="OpenVerse Blog" title="OpenVerse Blog" type="rss" xmlUrl="https://make.wordpress.org/openverse/feed/" />
+      <outline text="The Marginalian" title="The Marginalian" type="rss" xmlUrl="https://www.themarginalian.org/feed/" />
+      <outline text="The Creative Independent" title="The Creative Independent" type="rss" xmlUrl="https://thecreativeindependent.com/feed.xml" />
+      <outline text="The New Yorker Culture" title="The New Yorker Culture" type="rss" xmlUrl="https://www.newyorker.com/feed/culture" />
+      <outline text="The Paris Review Daily" title="The Paris Review Daily" type="rss" xmlUrl="https://www.theparisreview.org/blog/feed/" />
+      <outline text="Jezebel" title="Jezebel" type="rss" xmlUrl="https://www.jezebel.com/rss" />
+      <outline text="Artforum" title="Artforum" type="rss" xmlUrl="https://www.artforum.com/feed/" />
+      <outline text="Artnet News" title="Artnet News" type="rss" xmlUrl="https://news.artnet.com/feed" />
+      <outline text="Art Newspaper" title="Art Newspaper" type="rss" xmlUrl="https://www.theartnewspaper.com/rss.xml" />
+      <outline text="Public Books" title="Public Books" type="rss" xmlUrl="https://www.publicbooks.org/feed/" />
+      <outline text="The Conversation Arts" title="The Conversation Arts" type="rss" xmlUrl="https://theconversation.com/us/arts/articles.atom" />
+      <outline text="Good Good Good" title="Good Good Good" type="rss" xmlUrl="https://www.goodgoodgood.co/articles/rss.xml" />
+    </outline>
   </body>
 </opml>

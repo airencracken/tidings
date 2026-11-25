@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Books</title>
+  </head>
+  <body>
+    <outline text="Books" title="Books">
+      <outline text="The Public Domain Review" title="The Public Domain Review" type="rss" xmlUrl="https://publicdomainreview.org/rss.xml" />
+      <outline text="Literary Hub" title="Literary Hub" type="rss" xmlUrl="https://lithub.com/feed/" />
+      <outline text="Book Riot" title="Book Riot" type="rss" xmlUrl="https://bookriot.com/feed/" />
+      <outline text="JSTOR Daily" title="JSTOR Daily" type="rss" xmlUrl="https://daily.jstor.org/feed/" />
+      <outline text="Online Books Page" title="Online Books Page" type="rss" xmlUrl="https://onlinebooks.library.upenn.edu/newrss.xml" />
+      <outline text="Strange Horizons" title="Strange Horizons" type="rss" xmlUrl="https://strangehorizons.com/feed/" />
+      <outline text="The Millions" title="The Millions" type="rss" xmlUrl="https://themillions.com/feed" />
+      <outline text="A year of reading the world" title="A year of reading the world" type="rss" xmlUrl="https://ayearofreadingtheworld.com/feed/" />
+      <outline text="Kirkus Reviews" title="Kirkus Reviews" type="rss" xmlUrl="https://www.kirkusreviews.com/feeds/rss/" />
+      <outline text="NewInBooks" title="NewInBooks" type="rss" xmlUrl="https://www.newinbooks.com/feed/" />
+    </outline>
+  </body>
+</opml>

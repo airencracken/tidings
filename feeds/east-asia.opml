@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings East Asia</title>
+  </head>
+  <body>
+    <outline text="East Asia" title="East Asia">
+      <outline text="SoraNews24 (formerly RocketNews24)" title="SoraNews24 (formerly RocketNews24)" type="rss" xmlUrl="https://soranews24.com/feed/" />
+      <outline text="South China Morning Post" title="South China Morning Post" type="rss" xmlUrl="https://www.scmp.com/rss/91/feed" />
+      <outline text="Tokyo Cheapo" title="Tokyo Cheapo" type="rss" xmlUrl="https://tokyocheapo.com/feed/" />
+      <outline text="Soompi" title="Soompi" type="rss" xmlUrl="https://www.soompi.com/feed" />
+      <outline text="The Japan Times" title="The Japan Times" type="rss" xmlUrl="https://www.japantimes.co.jp/feed/" />
+      <outline text="Taipei Times" title="Taipei Times" type="rss" xmlUrl="https://www.taipeitimes.com/xml/index.rss" />
+      <outline text="RocketNews24 Japan" title="RocketNews24 Japan" type="rss" xmlUrl="https://rocketnews24.com/feed/" />
+      <outline text="Japan Cheapo" title="Japan Cheapo" type="rss" xmlUrl="https://japancheapo.com/feed/" />
+      <outline text="Tokyo Weekender" title="Tokyo Weekender" type="rss" xmlUrl="https://www.tokyoweekender.com/feed/" />
+      <outline text="Japan Today" title="Japan Today" type="rss" xmlUrl="https://japantoday.com/feed" />
+      <outline text="Spoon &amp; Tamago" title="Spoon &amp; Tamago" type="rss" xmlUrl="https://www.spoon-tamago.com/feed/" />
+      <outline text="Japan Forward" title="Japan Forward" type="rss" xmlUrl="https://japan-forward.com/feed/" />
+      <outline text="NHK Japanese News" title="NHK Japanese News" type="rss" xmlUrl="https://www3.nhk.or.jp/rss/news/cat0.xml" />
+      <outline text="The Mainichi in English" title="The Mainichi in English" type="rss" xmlUrl="https://mainichi.jp/english/rss/etc/mainichi.rss" />
+      <outline text="Metropolis Japan" title="Metropolis Japan" type="rss" xmlUrl="https://metropolisjapan.com/feed/" />
+      <outline text="China Digital Times" title="China Digital Times" type="rss" xmlUrl="https://chinadigitaltimes.net/feed/" />
+      <outline text="China Media Project" title="China Media Project" type="rss" xmlUrl="https://chinamediaproject.org/feed/" />
+      <outline text="Sixth Tone" title="Sixth Tone" type="rss" xmlUrl="https://www.sixthtone.com/rss" />
+      <outline text="Radii" title="Radii" type="rss" xmlUrl="https://radii.co/feed" />
+      <outline text="The Taiwan Gazette" title="The Taiwan Gazette" type="rss" xmlUrl="https://www.taiwangazette.org/news?format=rss" />
+      <outline text="Hong Kong Free Press" title="Hong Kong Free Press" type="rss" xmlUrl="https://hongkongfp.com/feed/" />
+      <outline text="The Korea Times" title="The Korea Times" type="rss" xmlUrl="https://www.koreatimes.co.kr/www/rss/rss.xml" />
+      <outline text="Asian Junkie" title="Asian Junkie" type="rss" xmlUrl="https://www.asianjunkie.com/feed/" />
+      <outline text="Dramabeans" title="Dramabeans" type="rss" xmlUrl="https://www.dramabeans.com/feed/" />
+      <outline text="少数派 SSPAI" title="少数派 SSPAI" type="rss" xmlUrl="https://sspai.com/feed" />
+      <outline text="爱范儿 ifanr" title="爱范儿 ifanr" type="rss" xmlUrl="https://www.ifanr.com/feed" />
+      <outline text="机核 GCORES" title="机核 GCORES" type="rss" xmlUrl="https://www.gcores.com/rss" />
+      <outline text="IT之家 IT Home" title="IT之家 IT Home" type="rss" xmlUrl="https://www.ithome.com/rss/" />
+      <outline text="香港獨立媒體 inmediahk" title="香港獨立媒體 inmediahk" type="rss" xmlUrl="https://www.inmediahk.net/rss.xml" />
+      <outline text="端傳媒 Initium Media" title="端傳媒 Initium Media" type="rss" xmlUrl="https://theinitium.com/rss/" />
+      <outline text="台灣科技新報 TechNews" title="台灣科技新報 TechNews" type="rss" xmlUrl="https://technews.tw/feed/" />
+      <outline text="INSIDE 硬塞的網路趨勢觀察" title="INSIDE 硬塞的網路趨勢觀察" type="rss" xmlUrl="https://www.inside.com.tw/feed/rss" />
+      <outline text="ITmedia NEWS" title="ITmedia NEWS" type="rss" xmlUrl="https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml" />
+      <outline text="GIGAZINE" title="GIGAZINE" type="rss" xmlUrl="https://gigazine.net/news/rss_2.0/" />
+      <outline text="Impress Watch" title="Impress Watch" type="rss" xmlUrl="https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf" />
+      <outline text="AV Watch" title="AV Watch" type="rss" xmlUrl="https://av.watch.impress.co.jp/data/rss/1.0/avw/feed.rdf" />
+      <outline text="Mogura VR" title="Mogura VR" type="rss" xmlUrl="https://www.moguravr.com/feed/" />
+      <outline text="한겨레 Hankyoreh" title="한겨레 Hankyoreh" type="rss" xmlUrl="https://www.hani.co.kr/rss" />
+      <outline text="경향신문 Kyunghyang Shinmun" title="경향신문 Kyunghyang Shinmun" type="rss" xmlUrl="https://www.khan.co.kr/rss/rssdata/total_news.xml" />
+      <outline text="Hong Kong News" title="Hong Kong News" type="rss" xmlUrl="https://feeds.hongkongnews.net/rss/b82693edf38ebff8" />
+      <outline text="News On Japan" title="News On Japan" type="rss" xmlUrl="https://www.newsonjapan.com/rss/top.xml" />
+      <outline text="朝日新聞デジタル" title="朝日新聞デジタル" type="rss" xmlUrl="https://rss.asahi.com/rss/asahi/newsheadlines.rdf" />
+    </outline>
+  </body>
+</opml>

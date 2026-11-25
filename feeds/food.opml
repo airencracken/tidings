@@ -4,6 +4,27 @@
     <title>Tidings Food</title>
   </head>
   <body>
-    <outline text="Good Food" title="Good Food" type="rss" xmlUrl="https://www.bbcgoodfood.com/feed" category="Food" />
+    <outline text="Food" title="Food">
+      <outline text="Good Food" title="Good Food" type="rss" xmlUrl="https://www.bbcgoodfood.com/feed" />
+      <outline text="Smitten Kitchen" title="Smitten Kitchen" type="rss" xmlUrl="https://smittenkitchen.com/feed/" />
+      <outline text="101 Cookbooks" title="101 Cookbooks" type="rss" xmlUrl="https://www.101cookbooks.com/feed" />
+      <outline text="Budget Bytes" title="Budget Bytes" type="rss" xmlUrl="https://www.budgetbytes.com/feed/" />
+      <outline text="Eater" title="Eater" type="rss" xmlUrl="https://www.eater.com/rss/index.xml" />
+      <outline text="David Lebovitz" title="David Lebovitz" type="rss" xmlUrl="https://www.davidlebovitz.com/feed/" />
+      <outline text="Just One Cookbook" title="Just One Cookbook" type="rss" xmlUrl="https://www.justonecookbook.com/feed/" />
+      <outline text="RecipeTin Eats" title="RecipeTin Eats" type="rss" xmlUrl="https://www.recipetineats.com/feed/" />
+      <outline text="Minimalist Baker" title="Minimalist Baker" type="rss" xmlUrl="https://minimalistbaker.com/feed/" />
+      <outline text="The Woks of Life" title="The Woks of Life" type="rss" xmlUrl="https://thewoksoflife.com/feed/" />
+      <outline text="Sally’s Baking Recipes" title="Sally’s Baking Recipes" type="rss" xmlUrl="https://sallysbakingaddiction.com/feed/" />
+      <outline text="Hot Thai Kitchen" title="Hot Thai Kitchen" type="rss" xmlUrl="https://hot-thai-kitchen.com/feed/" />
+      <outline text="Korean Bapsang" title="Korean Bapsang" type="rss" xmlUrl="https://www.koreanbapsang.com/feed/" />
+      <outline text="Maangchi" title="Maangchi" type="rss" xmlUrl="https://www.maangchi.com/feed" />
+      <outline text="Chocolate &amp; Zucchini" title="Chocolate &amp; Zucchini" type="rss" xmlUrl="https://cnz.to/feed/" />
+      <outline text="How Sweet Eats" title="How Sweet Eats" type="rss" xmlUrl="https://www.howsweeteats.com/feed/" />
+      <outline text="The Kitchn" title="The Kitchn" type="rss" xmlUrl="https://www.thekitchn.com/main.rss" />
+      <outline text="Love and Lemons" title="Love and Lemons" type="rss" xmlUrl="https://www.loveandlemons.com/feed/" />
+      <outline text="Love and Olive Oil" title="Love and Olive Oil" type="rss" xmlUrl="https://www.loveandoliveoil.com/feed" />
+      <outline text="Shutterbean" title="Shutterbean" type="rss" xmlUrl="https://www.shutterbean.com/feed/" />
+    </outline>
   </body>
 </opml>

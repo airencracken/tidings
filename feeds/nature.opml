@@ -4,6 +4,24 @@
     <title>Tidings Nature</title>
   </head>
   <body>
-    <outline text="Yale Environment 360" title="Yale Environment 360" type="rss" xmlUrl="https://e360.yale.edu/feed.xml" category="Nature" />
+    <outline text="Nature" title="Nature">
+      <outline text="Yale Environment 360" title="Yale Environment 360" type="rss" xmlUrl="https://e360.yale.edu/feed.xml" />
+      <outline text="Mongabay" title="Mongabay" type="rss" xmlUrl="https://news.mongabay.com/feed/" />
+      <outline text="Audubon" title="Audubon" type="rss" xmlUrl="https://www.audubon.org/rss.xml" />
+      <outline text="NOAA" title="NOAA" type="rss" xmlUrl="https://www.noaa.gov/rss.xml" />
+      <outline text="Cornell Lab of Ornithology" title="Cornell Lab of Ornithology" type="rss" xmlUrl="https://www.allaboutbirds.org/news/feed/" />
+      <outline text="National Wildlife Federation" title="National Wildlife Federation" type="rss" xmlUrl="https://blog.nwf.org/feed/" />
+      <outline text="The Wildlife Society" title="The Wildlife Society" type="rss" xmlUrl="https://wildlife.org/feed/" />
+      <outline text="iNaturalist" title="iNaturalist" type="rss" xmlUrl="https://www.inaturalist.org/blog.atom" />
+      <outline text="BirdLife International" title="BirdLife International" type="rss" xmlUrl="https://www.birdlife.org/feed/" />
+      <outline text="EarthSky" title="EarthSky" type="rss" xmlUrl="https://earthsky.org/feed/" />
+      <outline text="Nautilus" title="Nautilus" type="rss" xmlUrl="https://nautil.us/feed/" />
+      <outline text="Nature Conservancy Cool Green Science" title="Nature Conservancy Cool Green Science" type="rss" xmlUrl="https://blog.nature.org/feed/" />
+      <outline text="Rewilding Europe" title="Rewilding Europe" type="rss" xmlUrl="https://rewildingeurope.com/feed/" />
+      <outline text="Active Wild" title="Active Wild" type="rss" xmlUrl="https://www.activewild.com/feed/" />
+      <outline text="Mark Avery" title="Mark Avery" type="rss" xmlUrl="https://markavery.info/blog/feed/" />
+      <outline text="Reflections of the Natural World" title="Reflections of the Natural World" type="rss" xmlUrl="https://reflectionsofthenaturalworld.com/feed/" />
+      <outline text="Nature Canada" title="Nature Canada" type="rss" xmlUrl="https://naturecanada.ca/category/news/blog/feed/" />
+    </outline>
   </body>
 </opml>

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Local News</title>
+  </head>
+  <body>
+    <outline text="Local News" title="Local News">
+      <outline text="CalMatters" title="CalMatters" type="rss" xmlUrl="https://calmatters.org/feed/" />
+      <outline text="MinnPost" title="MinnPost" type="rss" xmlUrl="https://www.minnpost.com/feed/" />
+      <outline text="The Nevada Independent" title="The Nevada Independent" type="rss" xmlUrl="https://thenevadaindependent.com/feed" />
+      <outline text="VTDigger" title="VTDigger" type="rss" xmlUrl="https://vtdigger.org/feed/" />
+      <outline text="Voice of San Diego" title="Voice of San Diego" type="rss" xmlUrl="https://voiceofsandiego.org/feed/" />
+      <outline text="Mission Local" title="Mission Local" type="rss" xmlUrl="https://missionlocal.org/feed/" />
+      <outline text="Berkeleyside" title="Berkeleyside" type="rss" xmlUrl="https://www.berkeleyside.org/feed" />
+      <outline text="Oaklandside" title="Oaklandside" type="rss" xmlUrl="https://oaklandside.org/feed/" />
+      <outline text="Block Club Chicago" title="Block Club Chicago" type="rss" xmlUrl="https://blockclubchicago.org/feed/" />
+      <outline text="The City" title="The City" type="rss" xmlUrl="https://www.thecity.nyc/feed/" />
+      <outline text="Billy Penn" title="Billy Penn" type="rss" xmlUrl="https://billypenn.com/feed/" />
+      <outline text="West Seattle Blog" title="West Seattle Blog" type="rss" xmlUrl="https://westseattleblog.com/feed/" />
+      <outline text="Honolulu Civil Beat" title="Honolulu Civil Beat" type="rss" xmlUrl="https://www.civilbeat.org/feed/" />
+      <outline text="Alaska Beacon" title="Alaska Beacon" type="rss" xmlUrl="https://alaskabeacon.com/feed/" />
+      <outline text="Arizona Mirror" title="Arizona Mirror" type="rss" xmlUrl="https://azmirror.com/feed/" />
+      <outline text="Colorado Sun" title="Colorado Sun" type="rss" xmlUrl="https://coloradosun.com/feed/" />
+      <outline text="MLK50" title="MLK50" type="rss" xmlUrl="https://mlk50.com/feed/" />
+      <outline text="Outlier Media" title="Outlier Media" type="rss" xmlUrl="https://outliermedia.org/feed/" />
+    </outline>
+  </body>
+</opml>

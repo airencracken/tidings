@@ -4,17 +4,38 @@
     <title>Tidings Infosec</title>
   </head>
   <body>
-    <outline text="Krebs on Security" title="Krebs on Security" type="rss" xmlUrl="https://krebsonsecurity.com/feed/" category="Infosec" />
-    <outline text="Schneier on Security" title="Schneier on Security" type="rss" xmlUrl="https://www.schneier.com/feed/atom/" category="Infosec" />
-    <outline text="SANS Internet Storm Center" title="SANS Internet Storm Center" type="rss" xmlUrl="https://isc.sans.edu/rssfeed.xml" category="Infosec" />
-    <outline text="Google Project Zero" title="Google Project Zero" type="rss" xmlUrl="https://projectzero.google/feed.xml" category="Infosec" />
-    <outline text="Google Security Blog" title="Google Security Blog" type="rss" xmlUrl="https://security.googleblog.com/feeds/posts/default" category="Infosec" />
-    <outline text="Cisco Talos" title="Cisco Talos" type="rss" xmlUrl="https://blog.talosintelligence.com/rss/" category="Infosec" />
-    <outline text="The DFIR Report" title="The DFIR Report" type="rss" xmlUrl="https://thedfirreport.com/feed/" category="Infosec" />
-    <outline text="Trail of Bits" title="Trail of Bits" type="rss" xmlUrl="https://blog.trailofbits.com/feed/" category="Infosec" />
-    <outline text="PortSwigger Research" title="PortSwigger Research" type="rss" xmlUrl="https://portswigger.net/research/rss" category="Infosec" />
-    <outline text="BleepingComputer" title="BleepingComputer" type="rss" xmlUrl="https://www.bleepingcomputer.com/feed/" category="Infosec" />
-    <outline text="The Hacker News" title="The Hacker News" type="rss" xmlUrl="https://feeds.feedburner.com/TheHackersNews" category="Infosec" />
-    <outline text="Microsoft Security" title="Microsoft Security" type="rss" xmlUrl="https://www.microsoft.com/en-us/security/blog/feed/" category="Infosec" />
+    <outline text="Infosec" title="Infosec">
+      <outline text="Krebs on Security" title="Krebs on Security" type="rss" xmlUrl="https://krebsonsecurity.com/feed/" />
+      <outline text="Schneier on Security" title="Schneier on Security" type="rss" xmlUrl="https://www.schneier.com/feed/atom/" />
+      <outline text="SANS Internet Storm Center" title="SANS Internet Storm Center" type="rss" xmlUrl="https://isc.sans.edu/rssfeed.xml" />
+      <outline text="Google Project Zero" title="Google Project Zero" type="rss" xmlUrl="https://projectzero.google/feed.xml" />
+      <outline text="Google Security Blog" title="Google Security Blog" type="rss" xmlUrl="https://security.googleblog.com/feeds/posts/default" />
+      <outline text="Cisco Talos" title="Cisco Talos" type="rss" xmlUrl="https://blog.talosintelligence.com/rss/" />
+      <outline text="The DFIR Report" title="The DFIR Report" type="rss" xmlUrl="https://thedfirreport.com/feed/" />
+      <outline text="Trail of Bits" title="Trail of Bits" type="rss" xmlUrl="https://blog.trailofbits.com/feed/" />
+      <outline text="PortSwigger Research" title="PortSwigger Research" type="rss" xmlUrl="https://portswigger.net/research/rss" />
+      <outline text="BleepingComputer" title="BleepingComputer" type="rss" xmlUrl="https://www.bleepingcomputer.com/feed/" />
+      <outline text="The Hacker News" title="The Hacker News" type="rss" xmlUrl="https://feeds.feedburner.com/TheHackersNews" />
+      <outline text="Microsoft Security" title="Microsoft Security" type="rss" xmlUrl="https://www.microsoft.com/en-us/security/blog/feed/" />
+      <outline text="CISA Cybersecurity Advisories" title="CISA Cybersecurity Advisories" type="rss" xmlUrl="https://www.cisa.gov/cybersecurity-advisories/all.xml" />
+      <outline text="Cloudflare Security" title="Cloudflare Security" type="rss" xmlUrl="https://blog.cloudflare.com/tag/security/rss/" />
+      <outline text="Mozilla Security Blog" title="Mozilla Security Blog" type="rss" xmlUrl="https://blog.mozilla.org/security/feed/" />
+      <outline text="The Citizen Lab" title="The Citizen Lab" type="rss" xmlUrl="https://citizenlab.ca/feed/" />
+      <outline text="Privacy Guides" title="Privacy Guides" type="rss" xmlUrl="https://www.privacyguides.org/articles/feed_rss_created.xml" />
+      <outline text="EFF Deeplinks" title="EFF Deeplinks" type="rss" xmlUrl="https://www.eff.org/rss/updates.xml" />
+      <outline text="The Record" title="The Record" type="rss" xmlUrl="https://therecord.media/feed" />
+      <outline text="SecurityWeek" title="SecurityWeek" type="rss" xmlUrl="https://www.securityweek.com/feed/" />
+      <outline text="CSO Online" title="CSO Online" type="rss" xmlUrl="https://www.csoonline.com/feed/" />
+      <outline text="Dark Reading" title="Dark Reading" type="rss" xmlUrl="https://www.darkreading.com/rss.xml" />
+      <outline text="Securelist" title="Securelist" type="rss" xmlUrl="https://securelist.com/feed/" />
+      <outline text="Troy Hunt" title="Troy Hunt" type="rss" xmlUrl="https://www.troyhunt.com/rss/" />
+      <outline text="Malwarebytes Labs" title="Malwarebytes Labs" type="rss" xmlUrl="https://www.malwarebytes.com/blog/feed/index.xml" />
+      <outline text="NIST Cybersecurity Insights" title="NIST Cybersecurity Insights" type="rss" xmlUrl="https://www.nist.gov/blogs/cybersecurity-insights/rss.xml" />
+      <outline text="UK National Cyber Security Centre" title="UK National Cyber Security Centre" type="rss" xmlUrl="https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml" />
+      <outline text="CERT-FR Alerts" title="CERT-FR Alerts" type="rss" xmlUrl="https://cert.cyber.gouv.fr/alerte/feed/" />
+      <outline text="CERT-FR Advisories" title="CERT-FR Advisories" type="rss" xmlUrl="https://cert.cyber.gouv.fr/avis/feed/" />
+      <outline text="WeLiveSecurity" title="WeLiveSecurity" type="rss" xmlUrl="https://www.welivesecurity.com/en/rss/feed/" />
+      <outline text="Have I Been Pwned" title="Have I Been Pwned" type="rss" xmlUrl="https://feeds.feedburner.com/HaveIBeenPwnedLatestBreaches" />
+    </outline>
   </body>
 </opml>

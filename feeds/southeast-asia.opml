@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<opml version="2.0">
+  <head>
+    <title>Tidings Southeast Asia</title>
+  </head>
+  <body>
+    <outline text="Southeast Asia" title="Southeast Asia">
+      <outline text="Bangkok Post Life" title="Bangkok Post Life" type="rss" xmlUrl="https://www.bangkokpost.com/rss/data/life.xml" />
+      <outline text="VnExpress International" title="VnExpress International" type="rss" xmlUrl="https://e.vnexpress.net/rss/news.rss" />
+      <outline text="Channel News Asia" title="Channel News Asia" type="rss" xmlUrl="https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml" />
+      <outline text="Rappler" title="Rappler" type="rss" xmlUrl="https://www.rappler.com/feed/" />
+      <outline text="The Straits Times" title="The Straits Times" type="rss" xmlUrl="https://www.straitstimes.com/news/world/rss.xml" />
+      <outline text="Bangkok Post" title="Bangkok Post" type="rss" xmlUrl="https://www.bangkokpost.com/rss/data/topstories.xml" />
+      <outline text="Philstar" title="Philstar" type="rss" xmlUrl="https://www.philstar.com/rss/headlines" />
+      <outline text="The Vietnamese Magazine" title="The Vietnamese Magazine" type="rss" xmlUrl="https://www.thevietnamese.org/feed/" />
+      <outline text="Prachatai English" title="Prachatai English" type="rss" xmlUrl="https://prachataienglish.com/rss.xml" />
+      <outline text="Khaosod English" title="Khaosod English" type="rss" xmlUrl="https://www.khaosodenglish.com/feed/" />
+      <outline text="Coconuts" title="Coconuts" type="rss" xmlUrl="https://coconuts.co/feed/" />
+      <outline text="Malay Mail" title="Malay Mail" type="rss" xmlUrl="https://www.malaymail.com/feed/rss" />
+      <outline text="New Mandala" title="New Mandala" type="rss" xmlUrl="https://www.newmandala.org/feed/" />
+      <outline text="Fulcrum" title="Fulcrum" type="rss" xmlUrl="https://fulcrum.sg/feed/" />
+      <outline text="The Irrawaddy" title="The Irrawaddy" type="rss" xmlUrl="https://www.irrawaddy.com/feed" />
+      <outline text="The Laotian Times" title="The Laotian Times" type="rss" xmlUrl="https://laotiantimes.com/feed/" />
+      <outline text="Indonesia at Melbourne" title="Indonesia at Melbourne" type="rss" xmlUrl="https://indonesiaatmelbourne.unimelb.edu.au/feed/" />
+      <outline text="Project Multatuli" title="Project Multatuli" type="rss" xmlUrl="https://projectmultatuli.org/en/feed/" />
+      <outline text="The Smart Local" title="The Smart Local" type="rss" xmlUrl="https://thesmartlocal.com/feed/" />
+      <outline text="Juice Malaysia" title="Juice Malaysia" type="rss" xmlUrl="https://juiceonline.com/feed/" />
+      <outline text="The Cambodia Daily" title="The Cambodia Daily" type="rss" xmlUrl="https://english.cambodiadaily.com/feed/" />
+      <outline text="SEA Junction" title="SEA Junction" type="rss" xmlUrl="https://seajunction.org/feed/" />
+      <outline text="City Nomads" title="City Nomads" type="rss" xmlUrl="https://citynomads.com/feed/" />
+      <outline text="Saigoneer" title="Saigoneer" type="rss" xmlUrl="https://saigoneer.com/?format=feed&amp;type=rss" />
+      <outline text="VnExpress tiếng Việt" title="VnExpress tiếng Việt" type="rss" xmlUrl="https://vnexpress.net/rss/tin-moi-nhat.rss" />
+      <outline text="Tuổi Trẻ Online" title="Tuổi Trẻ Online" type="rss" xmlUrl="https://tuoitre.vn/home.rss" />
+      <outline text="Thanh Niên" title="Thanh Niên" type="rss" xmlUrl="https://thanhnien.vn/rss/home.rss" />
+      <outline text="The Bali Sun" title="The Bali Sun" type="rss" xmlUrl="https://thebalisun.com/feed/" />
+      <outline text="Republika" title="Republika" type="rss" xmlUrl="https://www.republika.co.id/rss/" />
+      <outline text="INQUIRER.net" title="INQUIRER.net" type="rss" xmlUrl="https://www.inquirer.net/fullfeed/" />
+      <outline text="Interaksyon" title="Interaksyon" type="rss" xmlUrl="https://interaksyon.philstar.com/feed/" />
+      <outline text="Current PH" title="Current PH" type="rss" xmlUrl="https://currentph.com/feed/" />
+      <outline text="BusinessMirror" title="BusinessMirror" type="rss" xmlUrl="https://businessmirror.com.ph/feed/" />
+    </outline>
+  </body>
+</opml>

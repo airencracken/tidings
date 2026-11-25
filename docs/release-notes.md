@@ -4,6 +4,23 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
+## 0.11.0
+
+- Browse 907 suggested RSS and Atom feeds across 42 categories and 20
+  languages, including regional publications, hobby feeds, and newsletters.
+- Search by publisher or subject, select a language, hide sources you already
+  follow, or preview five recent headlines before following a source.
+- Sources suggests publishers based on your follows, tags, saves, and skips.
+  **For You** uses the same reading signals to surface up to 12 recent unread
+  stories and shows one copy per article link.
+- Download the full directory or individual category OPML bundles. The full
+  bundle imports into Tidings and preserves each source's category as a tag.
+
+New installations display all catalog categories. Upgrades keep the existing
+category choices. Owners can enable the full directory under **Admin →
+Suggested sources → Enable all categories**. Version 0.11.0 uses the same
+database schema as 0.10.1.
+
 ## 0.10.1
 
 - Optional authenticator-app sign-in is available on the account page after
