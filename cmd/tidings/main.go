@@ -26,7 +26,7 @@ import (
 	"github.com/gofrs/flock"
 )
 
-var version = "0.11.0"
+var version = "0.12.0"
 
 var instanceCommands = map[string]bool{"setup": true, "create-owner": true, "set-password": true, "backup": true, "restore": true}
 var serviceSettings = []string{"TIDINGS_BASE_URL", "TIDINGS_ADDR", "TIDINGS_SECURE_COOKIES", "TIDINGS_TRUSTED_PROXIES", "TIDINGS_SEARXNG_URL", "TIDINGS_BACKUP_INTERVAL", "TIDINGS_BACKUP_KEEP", "TIDINGS_BACKUP_MAX_BYTES", "TIDINGS_BACKUP_COPY_MAX_BYTES"}

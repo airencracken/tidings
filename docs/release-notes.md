@@ -4,6 +4,22 @@ Each release lists what members and owners will notice, then notes for the
 person who runs the server. Back up the stopped data directory before any
 upgrade, and keep that copy if you might return to an older version.
 
+## 0.12.0
+
+- Open **Sources → Find feeds by interest** and enter your own search or choose
+  one of your source tags. Tidings checks for working RSS and Atom feeds,
+  previews recent headlines, and lets you follow several feeds at once.
+- **Local News** starts with a country or territory picker and lets you search
+  by city or region. The bundled catalog includes 62 local feeds across 23
+  countries and territories.
+
+Enable interest discovery by setting `TIDINGS_SEARXNG_URL` to a SearXNG
+search endpoint with JSON enabled. The search service receives the terms
+readers submit and an RSS keyword. The bundled catalog and direct feed
+entry are available with or without a search service.
+
+This release uses the same database schema as 0.11.0.
+
 ## 0.11.0
 
 - Browse 907 suggested RSS and Atom feeds across 42 categories and 20
