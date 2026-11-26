@@ -3512,108 +3512,394 @@
     "verified": "2026-11-25"
   },
   {
-    "Title": "CalMatters",
-    "URL": "https://calmatters.org/feed/",
+    "Title": "Region Canberra",
+    "URL": "https://region.com.au/feed/",
     "Category": "Local News",
-    "Description": "Nonprofit coverage of California policy and politics.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Local reporting, analysis, and community news from Canberra.",
+    "Country": "Australia",
+    "Area": "Canberra, Australian Capital Territory",
+    "Language": "English",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "MinnPost",
-    "URL": "https://www.minnpost.com/feed/",
+    "Title": "Marco Zero Conteúdo",
+    "URL": "https://marcozero.org/feed/",
     "Category": "Local News",
-    "Description": "Nonprofit coverage of Minnesota government and civic life.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Independent reporting on Recife and Pernambuco.",
+    "Country": "Brazil",
+    "Area": "Recife, Pernambuco",
+    "Language": "Portuguese",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "The Nevada Independent",
-    "URL": "https://thenevadaindependent.com/feed",
+    "Title": "Agência Mural",
+    "URL": "https://agenciamural.org.br/feed/",
     "Category": "Local News",
-    "Description": "Nevada government, elections, and public policy reporting.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Coverage of outlying neighborhoods of metropolitan São Paulo.",
+    "Country": "Brazil",
+    "Area": "São Paulo",
+    "Language": "Portuguese",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "VTDigger",
-    "URL": "https://vtdigger.org/feed/",
+    "Title": "The Tyee",
+    "URL": "https://thetyee.ca/rss2.xml",
     "Category": "Local News",
-    "Description": "Independent reporting on Vermont politics and communities.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Independent reporting with a British Columbia focus.",
+    "Country": "Canada",
+    "Area": "British Columbia",
+    "Language": "English",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Voice of San Diego",
-    "URL": "https://voiceofsandiego.org/feed/",
+    "Title": "Métro",
+    "URL": "https://journalmetro.com/feed/",
     "Category": "Local News",
-    "Description": "Investigations of local government and civic affairs in San Diego.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Local affairs and neighborhood news from Montréal.",
+    "Country": "Canada",
+    "Area": "Montréal, Québec",
+    "Language": "French",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Mission Local",
-    "URL": "https://missionlocal.org/feed/",
+    "Title": "The Local",
+    "URL": "https://thelocal.to/feed/",
     "Category": "Local News",
-    "Description": "Local reporting from San Francisco neighborhoods and City Hall.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Reporting on Toronto neighborhoods, health, education, and inequality.",
+    "Country": "Canada",
+    "Area": "Toronto",
+    "Language": "English",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Berkeleyside",
-    "URL": "https://www.berkeleyside.org/feed",
+    "Title": "El Colombiano Antioquia",
+    "URL": "https://www.elcolombiano.com/rss/antioquia.xml",
     "Category": "Local News",
-    "Description": "Berkeley news, local government, and community stories.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Reporting from Medellín and surrounding Antioquia.",
+    "Country": "Colombia",
+    "Area": "Antioquia",
+    "Language": "Spanish",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Oaklandside",
-    "URL": "https://oaklandside.org/feed/",
+    "Title": "Rue89 Bordeaux",
+    "URL": "https://rue89bordeaux.com/feed/",
     "Category": "Local News",
-    "Description": "Independent reporting on Oakland, California.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Independent local journalism from Bordeaux and its metropolitan area.",
+    "Country": "France",
+    "Area": "Bordeaux",
+    "Language": "French",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Block Club Chicago",
-    "URL": "https://blockclubchicago.org/feed/",
+    "Title": "Rue89 Lyon",
+    "URL": "https://www.rue89lyon.fr/feed/",
     "Category": "Local News",
-    "Description": "Neighborhood news and reporting from across Chicago.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Independent reporting on Lyon and surrounding communities.",
+    "Country": "France",
+    "Area": "Lyon",
+    "Language": "French",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "The City",
-    "URL": "https://www.thecity.nyc/feed/",
+    "Title": "Marsactu",
+    "URL": "https://marsactu.fr/feed/",
     "Category": "Local News",
-    "Description": "Nonprofit reporting on New York City government and communities.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Investigations and local reporting from Marseille and its metropolitan area.",
+    "Country": "France",
+    "Area": "Marseille",
+    "Language": "French",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Billy Penn",
-    "URL": "https://billypenn.com/feed/",
+    "Title": "Rue89 Strasbourg",
+    "URL": "https://www.rue89strasbourg.com/feed",
     "Category": "Local News",
-    "Description": "Philadelphia local affairs from WHYY.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Local politics, housing, culture, and other reporting from Strasbourg.",
+    "Country": "France",
+    "Area": "Strasbourg",
+    "Language": "French",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "West Seattle Blog",
-    "URL": "https://westseattleblog.com/feed/",
+    "Title": "Berliner Zeitung",
+    "URL": "https://www.berliner-zeitung.de/feed.xml",
     "Category": "Local News",
-    "Description": "Neighborhood reporting on West Seattle.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "Berlin newspapers' coverage of the city and wider affairs.",
+    "Country": "Germany",
+    "Area": "Berlin",
+    "Language": "German",
+    "verified": "2026-11-25"
   },
   {
-    "Title": "Honolulu Civil Beat",
-    "URL": "https://www.civilbeat.org/feed/",
+    "Title": "Hong Kong Free Press local news",
+    "URL": "https://hongkongfp.com/category/hong-kong/feed/",
     "Category": "Local News",
-    "Description": "Nonprofit reporting on Hawaii’s government and communities.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Description": "News on Hong Kong public affairs, courts, and communities.",
+    "Country": "Hong Kong",
+    "Area": "Hong Kong",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Citizen Matters",
+    "URL": "https://citizenmatters.in/feed/",
+    "Category": "Local News",
+    "Description": "Civic and neighborhood reporting from Bengaluru and other Indian cities.",
+    "Country": "India",
+    "Area": "Bengaluru and other cities",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The Hindu Bengaluru",
+    "URL": "https://www.thehindu.com/news/cities/bangalore/feeder/default.rss",
+    "Category": "Local News",
+    "Description": "Local coverage of Bengaluru from The Hindu.",
+    "Country": "India",
+    "Area": "Bengaluru, Karnataka",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The Hindu Chennai",
+    "URL": "https://www.thehindu.com/news/cities/chennai/feeder/default.rss",
+    "Category": "Local News",
+    "Description": "Local coverage of Chennai from The Hindu.",
+    "Country": "India",
+    "Area": "Chennai, Tamil Nadu",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Bali Discovery",
+    "URL": "https://balidiscovery.com/feed/",
+    "Category": "Local News",
+    "Description": "News on tourism, public affairs, and community life in Bali.",
+    "Country": "Indonesia",
+    "Area": "Bali",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "MilanoToday",
+    "URL": "https://www.milanotoday.it/rss",
+    "Category": "Local News",
+    "Description": "City news, local government, and events in Milan.",
+    "Country": "Italy",
+    "Area": "Milan",
+    "Language": "Italian",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "RomaToday",
+    "URL": "https://www.romatoday.it/rss",
+    "Category": "Local News",
+    "Description": "Reporting from Rome's neighborhoods and surrounding towns.",
+    "Country": "Italy",
+    "Area": "Rome",
+    "Language": "Italian",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Fukuoka Now",
+    "URL": "https://www.fukuoka-now.com/en/feed/",
+    "Category": "Local News",
+    "Description": "Local news, events, and community information in Fukuoka.",
+    "Country": "Japan",
+    "Area": "Fukuoka",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Kyoto Shimbun",
+    "URL": "https://www.kyoto-np.co.jp/list/feed/rss",
+    "Category": "Local News",
+    "Description": "Regional reporting from Kyoto and Shiga.",
+    "Country": "Japan",
+    "Area": "Kyoto and Shiga",
+    "Language": "Japanese",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Okinawa Times",
+    "URL": "https://www.okinawatimes.co.jp/list/feed/rss",
+    "Category": "Local News",
+    "Description": "Local reporting and public affairs in Okinawa.",
+    "Country": "Japan",
+    "Area": "Okinawa",
+    "Language": "Japanese",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Buletin Mutiara",
+    "URL": "https://www.buletinmutiara.com/feed/",
+    "Category": "Local News",
+    "Description": "Reporting from Penang on state government and communities.",
+    "Country": "Malaysia",
+    "Area": "Penang",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "ZonaDocs",
+    "URL": "https://www.zonadocs.mx/feed/",
+    "Category": "Local News",
+    "Description": "Independent reporting from Guadalajara, Jalisco, and western Mexico.",
+    "Country": "Mexico",
+    "Area": "Guadalajara, Jalisco",
+    "Language": "Spanish",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Greater Auckland",
+    "URL": "https://www.greaterauckland.org.nz/feed/",
+    "Category": "Local News",
+    "Description": "Local reporting and analysis on Auckland transport, housing, and public spaces.",
+    "Country": "New Zealand",
+    "Area": "Auckland",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Cebu Daily News",
+    "URL": "https://cebudailynews.inquirer.net/feed",
+    "Category": "Local News",
+    "Description": "Local affairs and community news from Cebu.",
+    "Country": "Philippines",
+    "Area": "Cebu",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "MindaNews",
+    "URL": "https://mindanews.com/feed/",
+    "Category": "Local News",
+    "Description": "Reporting on communities and government across Mindanao.",
+    "Country": "Philippines",
+    "Area": "Mindanao",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Mensagem de Lisboa",
+    "URL": "https://amensagem.pt/feed/",
+    "Category": "Local News",
+    "Description": "Reporting on Lisbon neighborhoods, people, and civic life.",
+    "Country": "Portugal",
+    "Area": "Lisbon",
+    "Language": "Portuguese",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Cape Town Etc",
+    "URL": "https://www.capetownetc.com/feed/",
+    "Category": "Local News",
+    "Description": "News, events, and daily life in Cape Town.",
+    "Country": "South Africa",
+    "Area": "Cape Town",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "DispatchLIVE",
+    "URL": "https://dailydispatch.co.za/rss/",
+    "Category": "Local News",
+    "Description": "News on the Eastern Cape and East London communities.",
+    "Country": "South Africa",
+    "Area": "Eastern Cape",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Jeju News",
+    "URL": "https://www.jejunews.com/rss/allArticle.xml",
+    "Category": "Local News",
+    "Description": "Local news and public affairs from Jeju.",
+    "Country": "South Korea",
+    "Area": "Jeju",
+    "Language": "Korean",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "betevé",
+    "URL": "https://beteve.cat/feed/",
+    "Category": "Local News",
+    "Description": "Civic affairs and neighborhood reporting from Barcelona's public broadcaster.",
+    "Country": "Spain",
+    "Area": "Barcelona",
+    "Language": "Catalan",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Nació",
+    "URL": "https://naciodigital.cat/rss/",
+    "Category": "Local News",
+    "Description": "News from Catalonia and its local editions.",
+    "Country": "Spain",
+    "Area": "Catalonia",
+    "Language": "Catalan",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Cordópolis",
+    "URL": "https://cordopolis.eldiario.es/rss",
+    "Category": "Local News",
+    "Description": "Local reporting from Córdoba and surrounding towns.",
+    "Country": "Spain",
+    "Area": "Córdoba, Andalusia",
+    "Language": "Spanish",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The Thaiger Phuket",
+    "URL": "https://thethaiger.com/news/phuket/feed",
+    "Category": "Local News",
+    "Description": "Island news and local reporting from Phuket.",
+    "Country": "Thailand",
+    "Area": "Phuket",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Belfast Live",
+    "URL": "https://www.belfastlive.co.uk/?service=rss",
+    "Category": "Local News",
+    "Description": "News and community stories from Belfast and nearby towns.",
+    "Country": "United Kingdom",
+    "Area": "Belfast",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The Bristol Cable",
+    "URL": "https://thebristolcable.org/feed/",
+    "Category": "Local News",
+    "Description": "Cooperative journalism and investigations in Bristol.",
+    "Country": "United Kingdom",
+    "Area": "Bristol",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The Mill",
+    "URL": "https://manchestermill.co.uk/rss/",
+    "Category": "Local News",
+    "Description": "Reporting and essays from across Greater Manchester.",
+    "Country": "United Kingdom",
+    "Area": "Greater Manchester",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "London Centric",
+    "URL": "https://www.londoncentric.media/feed",
+    "Category": "Local News",
+    "Description": "Independent reporting on London public services, politics, and culture.",
+    "Country": "United Kingdom",
+    "Area": "London",
+    "Language": "English",
+    "verified": "2026-11-25"
   },
   {
     "Title": "Alaska Beacon",
@@ -3621,7 +3907,9 @@
     "Category": "Local News",
     "Description": "Independent coverage of Alaska’s statehouse and public policy.",
     "verified": "2026-11-25",
-    "Language": "English"
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Alaska"
   },
   {
     "Title": "Arizona Mirror",
@@ -3629,7 +3917,49 @@
     "Category": "Local News",
     "Description": "Nonprofit reporting on Arizona politics and state policy.",
     "verified": "2026-11-25",
-    "Language": "English"
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Arizona"
+  },
+  {
+    "Title": "The Baltimore Banner",
+    "URL": "https://www.thebanner.com/arc/outboundfeeds/rss/?outputType=xml",
+    "Category": "Local News",
+    "Description": "Reporting on Baltimore neighborhoods, politics, and civic affairs.",
+    "Country": "United States",
+    "Area": "Baltimore, Maryland",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Berkeleyside",
+    "URL": "https://www.berkeleyside.org/feed",
+    "Category": "Local News",
+    "Description": "Berkeley news, local government, and community stories.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Berkeley, California"
+  },
+  {
+    "Title": "CalMatters",
+    "URL": "https://calmatters.org/feed/",
+    "Category": "Local News",
+    "Description": "Nonprofit coverage of California policy and politics.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "California"
+  },
+  {
+    "Title": "Block Club Chicago",
+    "URL": "https://blockclubchicago.org/feed/",
+    "Category": "Local News",
+    "Description": "Neighborhood news and reporting from across Chicago.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Chicago, Illinois"
   },
   {
     "Title": "Colorado Sun",
@@ -3637,15 +3967,9 @@
     "Category": "Local News",
     "Description": "Independent reporting on Colorado’s government, economy, and outdoors.",
     "verified": "2026-11-25",
-    "Language": "English"
-  },
-  {
-    "Title": "MLK50",
-    "URL": "https://mlk50.com/feed/",
-    "Category": "Local News",
-    "Description": "Memphis reporting on labor, poverty, and economic justice.",
-    "verified": "2026-11-25",
-    "Language": "English"
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Colorado"
   },
   {
     "Title": "Outlier Media",
@@ -3653,7 +3977,159 @@
     "Category": "Local News",
     "Description": "Detroit reporting on housing, public services, and accountability.",
     "verified": "2026-11-25",
-    "Language": "English"
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Detroit, Michigan"
+  },
+  {
+    "Title": "Honolulu Civil Beat",
+    "URL": "https://www.civilbeat.org/feed/",
+    "Category": "Local News",
+    "Description": "Nonprofit reporting on Hawaii’s government and communities.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Hawaii"
+  },
+  {
+    "Title": "MLK50",
+    "URL": "https://mlk50.com/feed/",
+    "Category": "Local News",
+    "Description": "Memphis reporting on labor, poverty, and economic justice.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Memphis, Tennessee"
+  },
+  {
+    "Title": "MinnPost",
+    "URL": "https://www.minnpost.com/feed/",
+    "Category": "Local News",
+    "Description": "Nonprofit coverage of Minnesota government and civic life.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Minnesota"
+  },
+  {
+    "Title": "Mississippi Today",
+    "URL": "https://mississippitoday.org/feed/",
+    "Category": "Local News",
+    "Description": "Public affairs and accountability reporting from Mississippi.",
+    "Country": "United States",
+    "Area": "Mississippi",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The Nevada Independent",
+    "URL": "https://thenevadaindependent.com/feed",
+    "Category": "Local News",
+    "Description": "Nevada government, elections, and public policy reporting.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Nevada"
+  },
+  {
+    "Title": "Source New Mexico",
+    "URL": "https://sourcenm.com/feed/",
+    "Category": "Local News",
+    "Description": "Public affairs and government reporting from New Mexico.",
+    "Country": "United States",
+    "Area": "New Mexico",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "The City",
+    "URL": "https://www.thecity.nyc/feed/",
+    "Category": "Local News",
+    "Description": "Nonprofit reporting on New York City government and communities.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "New York City, New York"
+  },
+  {
+    "Title": "Oaklandside",
+    "URL": "https://oaklandside.org/feed/",
+    "Category": "Local News",
+    "Description": "Independent reporting on Oakland, California.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Oakland, California"
+  },
+  {
+    "Title": "Billy Penn",
+    "URL": "https://billypenn.com/feed/",
+    "Category": "Local News",
+    "Description": "Philadelphia local affairs from WHYY.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Philadelphia, Pennsylvania"
+  },
+  {
+    "Title": "PublicSource",
+    "URL": "https://www.publicsource.org/feed/",
+    "Category": "Local News",
+    "Description": "Public-interest reporting on Pittsburgh and southwestern Pennsylvania.",
+    "Country": "United States",
+    "Area": "Pittsburgh, Pennsylvania",
+    "Language": "English",
+    "verified": "2026-11-25"
+  },
+  {
+    "Title": "Voice of San Diego",
+    "URL": "https://voiceofsandiego.org/feed/",
+    "Category": "Local News",
+    "Description": "Investigations of local government and civic affairs in San Diego.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "San Diego, California"
+  },
+  {
+    "Title": "Mission Local",
+    "URL": "https://missionlocal.org/feed/",
+    "Category": "Local News",
+    "Description": "Local reporting from San Francisco neighborhoods and City Hall.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "San Francisco, California"
+  },
+  {
+    "Title": "VTDigger",
+    "URL": "https://vtdigger.org/feed/",
+    "Category": "Local News",
+    "Description": "Independent reporting on Vermont politics and communities.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "Vermont"
+  },
+  {
+    "Title": "West Seattle Blog",
+    "URL": "https://westseattleblog.com/feed/",
+    "Category": "Local News",
+    "Description": "Neighborhood reporting on West Seattle.",
+    "verified": "2026-11-25",
+    "Language": "English",
+    "Country": "United States",
+    "Area": "West Seattle, Washington"
+  },
+  {
+    "Title": "Sài Gòn Giải Phóng",
+    "URL": "https://www.sggp.org.vn/rss/tphcm-20.rss",
+    "Category": "Local News",
+    "Description": "Local government, public services, and community news in Ho Chi Minh City.",
+    "Country": "Vietnam",
+    "Area": "Ho Chi Minh City",
+    "Language": "Vietnamese",
+    "verified": "2026-11-25"
   },
   {
     "Title": "Hackaday",

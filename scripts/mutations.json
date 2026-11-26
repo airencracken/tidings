@@ -1,5 +1,29 @@
 [
   {
+    "name": "Local News requires a matching place",
+    "file": "internal/reader/catalog.go",
+    "before": "if item.Category == localNewsCategory && requireCountry && (f.Country == \"\" || item.Country != f.Country) {",
+    "after": "if false && item.Category == localNewsCategory && requireCountry && (f.Country == \"\" || item.Country != f.Country) {",
+    "package": "./internal/reader",
+    "run": "^TestLocalNewsRequiresPlace$"
+  },
+  {
+    "name": "keep the selected place across source actions",
+    "file": "internal/reader/catalog.go",
+    "before": "values.Set(\"catalog_country\", f.Country)",
+    "after": "values.Del(\"catalog_country\")",
+    "package": "./internal/reader",
+    "run": "^TestLocalNewsPreviewAndFollowKeepPlace$"
+  },
+  {
+    "name": "general recommendations exclude unchosen local coverage",
+    "file": "internal/reader/catalog_recommendations.go",
+    "before": "|| !languages[item.Language] || item.Category == localNewsCategory {",
+    "after": "|| !languages[item.Language] {",
+    "package": "./internal/reader",
+    "run": "^TestLocalNewsStaysOutOfGeneralRecommendations$"
+  },
+  {
     "name": "password sign-in requires the enrolled authenticator",
     "file": "internal/reader/app.go",
     "before": "if a.finishFirstFactor(w, r, id, hash) {",

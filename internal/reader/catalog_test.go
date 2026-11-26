@@ -13,6 +13,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"unicode"
 )
 
 func TestCatalogSchema(t *testing.T) {
@@ -29,6 +30,7 @@ func TestCatalogSchema(t *testing.T) {
 	seen := map[string]bool{}
 	categories := map[string]int{}
 	languages := map[string]int{}
+	countries := map[string]int{}
 	if len(rows) < 900 {
 		t.Fatalf("expected a broad catalog, got %d", len(rows))
 	}
@@ -49,12 +51,25 @@ func TestCatalogSchema(t *testing.T) {
 		if seen[r.URL] {
 			t.Fatalf("duplicate %s", r.URL)
 		}
+		if r.Category == localNewsCategory {
+			for _, text := range []string{r.Country, r.Area} {
+				if text == "" || len(text) > 100 || text != strings.TrimSpace(text) || strings.ContainsFunc(text, unicode.IsControl) {
+					t.Errorf("%s has invalid coverage metadata: country %q, area %q", r.Title, r.Country, r.Area)
+				}
+			}
+			countries[r.Country]++
+		} else if r.Country != "" || r.Area != "" {
+			t.Errorf("%s includes Local News coverage metadata", r.Title)
+		}
 		seen[r.URL] = true
 		categories[r.Category]++
 		languages[r.Language]++
 	}
 	if len(languages) < 20 {
 		t.Fatalf("expected at least 20 languages, got %v", languages)
+	}
+	if len(countries) < 15 || categories[localNewsCategory]-countries["United States"] <= countries["United States"] {
+		t.Fatalf("expected a geographically broad Local News catalog, got %v", countries)
 	}
 	minimums := map[string]int{
 		"AI": 8, "Africa & Middle East": 5, "Amateur Radio": 8, "Books": 5, "Business": 5, "Climate": 10,

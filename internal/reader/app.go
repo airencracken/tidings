@@ -94,6 +94,7 @@ type page struct {
 	CatalogSections                                    []catalogSection
 	CatalogRecommendations                             []catalogSource
 	CatalogLanguages                                   []string
+	CatalogCountries                                   []string
 	CatalogPreview                                     catalogSource
 	CatalogBack                                        string
 	CatalogTotal                                       int
@@ -771,6 +772,9 @@ func (a *App) sources(w http.ResponseWriter, r *http.Request) {
 		p.SuggestionsEnabled = len(enabled) > 0
 		p.CatalogCategories = catalogCategories(a.Catalog, enabled)
 		p.CatalogLanguages = catalogLanguages(a.Catalog, enabled)
+		if p.CatalogFilter.LocalNews() && enabled[localNewsCategory] {
+			p.CatalogCountries = localNewsCountries(a.Catalog)
+		}
 		p.CatalogSections = browseCatalog(a.Catalog, enabled, p.Feeds, p.CatalogFilter)
 		for _, section := range p.CatalogSections {
 			p.CatalogTotal += section.Count

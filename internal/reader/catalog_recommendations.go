@@ -77,7 +77,7 @@ func recommendCatalog(catalog []Suggestion, enabled map[string]bool, followed []
 
 	var picks []catalogPick
 	for _, item := range catalog {
-		if followedURLs[item.URL] || !enabled[item.Category] || !languages[item.Language] {
+		if followedURLs[item.URL] || !enabled[item.Category] || !languages[item.Language] || item.Category == localNewsCategory {
 			continue
 		}
 		interest := interests[catalogWords(item.Category)]

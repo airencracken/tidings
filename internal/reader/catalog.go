@@ -10,11 +10,15 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 type Suggestion struct {
 	Title, URL, Category, Description string
 	Language                          string
+	Country                           string `json:",omitempty"`
+	Area                              string `json:",omitempty"`
 	Verified                          string `json:"verified"`
 }
 
@@ -25,9 +29,9 @@ type CatalogCategory struct {
 }
 
 type catalogFilter struct {
-	Query, Category, Language string
-	Unfollowed                bool
-	Page                      int
+	Query, Category, Language, Country string
+	Unfollowed                         bool
+	Page                               int
 }
 
 type catalogSource struct {
@@ -43,7 +47,10 @@ type catalogSection struct {
 	HasMore bool
 }
 
-const catalogPageSize = 24
+const (
+	catalogPageSize   = 24
+	localNewsCategory = "Local News"
+)
 
 func loadCatalog() ([]Suggestion, error) {
 	data, err := assets.ReadFile("catalog.json")
@@ -60,18 +67,23 @@ func readCatalogFilter(values url.Values) (catalogFilter, error) {
 		Query:      strings.TrimSpace(values.Get("catalog_q")),
 		Category:   strings.TrimSpace(values.Get("catalog_category")),
 		Language:   strings.TrimSpace(values.Get("catalog_language")),
+		Country:    strings.TrimSpace(values.Get("catalog_country")),
 		Unfollowed: values.Get("catalog_unfollowed") == "1",
 	}
-	if len(f.Query) > 200 || len(f.Category) > 160 || len(f.Language) > 40 {
+	if len(f.Query) > 200 || len(f.Category) > 160 || len(f.Language) > 40 || len(f.Country) > 100 ||
+		!utf8.ValidString(f.Country) || strings.ContainsFunc(f.Country, unicode.IsControl) {
 		return catalogFilter{}, errors.New("invalid catalog filters")
 	}
-	for _, key := range []string{"catalog_q", "catalog_category", "catalog_language", "catalog_unfollowed", "catalog_page"} {
+	for _, key := range []string{"catalog_q", "catalog_category", "catalog_language", "catalog_country", "catalog_unfollowed", "catalog_page"} {
 		if len(values[key]) > 1 {
 			return catalogFilter{}, errors.New("invalid catalog filters")
 		}
 	}
 	if v := values.Get("catalog_unfollowed"); v != "" && v != "1" {
 		return catalogFilter{}, errors.New("invalid catalog filters")
+	}
+	if !f.LocalNews() {
+		f.Country = ""
 	}
 	if raw := values.Get("catalog_page"); raw != "" {
 		n, err := strconv.Atoi(raw)
@@ -93,6 +105,9 @@ func (f catalogFilter) addTo(values url.Values) {
 	if f.Language != "" {
 		values.Set("catalog_language", f.Language)
 	}
+	if f.Country != "" {
+		values.Set("catalog_country", f.Country)
+	}
 	if f.Unfollowed {
 		values.Set("catalog_unfollowed", "1")
 	}
@@ -102,6 +117,8 @@ func (f catalogFilter) addTo(values url.Values) {
 }
 
 func (f catalogFilter) Active() bool { return f != (catalogFilter{}) }
+
+func (f catalogFilter) LocalNews() bool { return f.Category == localNewsCategory }
 
 type catalogCardView struct {
 	catalogSource
@@ -139,6 +156,21 @@ func catalogLanguages(catalog []Suggestion, enabled map[string]bool) []string {
 	return result
 }
 
+func localNewsCountries(catalog []Suggestion) []string {
+	countries := map[string]bool{}
+	for _, item := range catalog {
+		if item.Category == localNewsCategory && item.Country != "" {
+			countries[item.Country] = true
+		}
+	}
+	result := make([]string, 0, len(countries))
+	for country := range countries {
+		result = append(result, country)
+	}
+	sort.Strings(result)
+	return result
+}
+
 func catalogCategories(catalog []Suggestion, enabled map[string]bool) []CatalogCategory {
 	counts := map[string]int{}
 	for _, item := range catalog {
@@ -158,13 +190,18 @@ func browseCatalog(catalog []Suggestion, enabled map[string]bool, followed []Fee
 		followedIDs[feed.URL] = feed.ID
 	}
 	terms := strings.Fields(strings.ToLower(f.Query))
+	requireCountry := f.Active() && (f.LocalNews() || f.Query == "")
 	groups := map[string][]catalogSource{}
 	for _, item := range catalog {
 		if !enabled[item.Category] || (f.Category != "" && f.Category != item.Category) ||
 			(f.Language != "" && f.Language != item.Language) || (f.Unfollowed && followedIDs[item.URL] != 0) {
 			continue
 		}
-		haystack := strings.ToLower(item.Title + " " + item.Category + " " + item.Description + " " + item.URL)
+		if item.Category == localNewsCategory && requireCountry && (f.Country == "" || item.Country != f.Country) {
+			continue
+		}
+		haystack := strings.ToLower(item.Title + " " + item.Category + " " + item.Description + " " + item.URL +
+			" " + item.Area + " " + item.Country)
 		if !matchesCatalogTerms(haystack, terms) {
 			continue
 		}

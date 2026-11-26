@@ -202,6 +202,21 @@ db.commit()
   await act(page.getByLabel('Search suggested sources',{exact:true}), 'fill', 'Vietnam Weekly');
   await act(page.getByRole('button',{name:'Find sources',exact:true}), 'click');
   assert.ok(await page.getByRole('heading',{name:'Vietnam Weekly',exact:true}).isVisible());
+  await page.goto(origin+'/sources');
+  await act(page.getByRole('link',{name:/^Local News .* sources$/}), 'click');
+  const country = page.getByLabel('Country or territory',{exact:true});
+  assert.equal(await country.inputValue(),'');
+  assert.equal(await page.locator('.catalog-card').count(),0);
+  await page.setViewportSize({width:320,height:850});
+  await country.selectOption('France');
+  await act(page.getByRole('button',{name:'Find sources',exact:true}), 'click');
+  assert.equal(await country.inputValue(),'France');
+  assert.ok(await page.getByText('Marseille · France',{exact:true}).isVisible());
+  assert.equal(await page.getByRole('heading',{name:'CalMatters',exact:true}).count(),0);
+  assert.ok(await page.locator('#suggested-sources').evaluate(section => section.scrollWidth <= section.clientWidth));
+  await act(page.getByRole('link',{name:'Add a source',exact:true}), 'click');
+  assert.equal(new URL(page.url()).hash,'#add-source');
+  await page.setViewportSize({width:1440,height:1000});
   await page.goto(origin+'/admin');
   for(const box of await page.locator('input[name="category"]').all()) await box.uncheck();
   for(const category of ['Tech','Science']) await page.locator(`input[name="category"][value="${category}"]`).check();
@@ -384,6 +399,15 @@ db.commit()
     assert.ok(await plain.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await plain.goto(origin + '/');
   }
+
+  await plain.goto(origin+'/admin');
+  await plain.locator('input[name="category"][value="Local News"]').check();
+  await act(plain.getByRole('button',{name:'Save suggested categories',exact:true}), 'click');
+  await plain.goto(origin+'/sources?catalog_category=Local+News');
+  await plain.getByLabel('Country or territory',{exact:true}).selectOption('Philippines');
+  await act(plain.getByRole('button',{name:'Find sources',exact:true}), 'click');
+  assert.ok(await plain.getByRole('heading',{name:'Cebu Daily News',exact:true}).isVisible());
+  assert.equal(await plain.getByRole('heading',{name:'CalMatters',exact:true}).count(),0);
 
   await plain.goto(origin+'/groups');
   await act(plain.getByLabel('Name',{exact:true}), 'fill', 'Without JavaScript');

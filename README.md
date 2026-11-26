@@ -58,6 +58,9 @@ from its feed before following. The personal Sources page uses your follows,
 tags, saves, and skips to suggest publishers you might like.
 The **Newsletters** category collects public issues and link roundups you
 can follow in Tidings.
+In **Local News**, choose a country or territory, then search by city or
+region. The choice applies to the current catalog view and uses no device
+location. You can add a local outlet by its website or feed address.
 New sources fetch right away. After that, Tidings checks each source on its own
 schedule, from every five minutes to once a day, depending on how often it
 publishes. **Refresh feeds** checks your sources now, skipping any checked in the
@@ -136,8 +139,8 @@ Owners have an **Admin** link in the main navigation:
   `tidings set-password --username NAME` on the server. There is no email.
 - **Household sources:** the shared sources behind the household table. Create
   household feed groups under **Feed groups**.
-- **Suggested sources** lets owners choose which of the 907 feeds across 42
-  categories members can browse. New instances start with all categories
+- **Suggested sources** lets owners choose which of the 42 catalog categories
+  members can browse. New instances start with all categories
   enabled. Existing instances keep their settings and can use **Enable all
   categories** under **Admin**. Every subscription is a separate choice.
   The same feeds are available as full and category [OPML bundles](feeds/).

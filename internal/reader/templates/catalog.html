@@ -27,6 +27,17 @@
           {{end}}
         </select>
       </div>
+      {{if .CatalogCountries}}
+      <div class="catalog-field">
+        <label for="catalog-country">Country or territory</label>
+        <select name="catalog_country" id="catalog-country">
+          <option value="">Choose a place</option>
+          {{range .CatalogCountries}}
+          <option value="{{.}}"{{if eq . $.CatalogFilter.Country}} selected{{end}}>{{.}}</option>
+          {{end}}
+        </select>
+      </div>
+      {{end}}
       <label class="catalog-unfollowed"><input type="checkbox" name="catalog_unfollowed" value="1"{{if .CatalogFilter.Unfollowed}} checked{{end}}> Hide followed</label>
       <button>Find sources</button>
       {{if .CatalogFilter.Active}}
@@ -34,7 +45,10 @@
       {{end}}
     </form>
   </div>
-  {{if .CatalogFilter.Active}}
+  {{if .CatalogCountries}}<p class="field-help"><a href="#add-source">Add a source</a> if your local outlet is missing.</p>{{end}}
+  {{if and .CatalogCountries (not .CatalogFilter.Country)}}
+  <p>Choose a country or territory to see local sources. Use search to narrow the list by city or region.</p>
+  {{else if .CatalogFilter.Active}}
   {{if .CatalogTotal}}<p class="catalog-count">{{.CatalogTotal}} matching {{if eq .CatalogTotal 1}}source{{else}}sources{{end}}</p>{{end}}
   {{range .CatalogSections}}
   <section class="catalog-category">
@@ -83,6 +97,7 @@
 <article class="paper catalog-card">
   <h4>{{.Title}}</h4>
   <p>{{.Description}}</p>
+  {{if .Area}}<small>{{.Area}} · {{.Country}}</small>{{end}}
   {{if .Reason}}<small>{{.Reason}}</small>{{end}}
   {{if ne .Language "English"}}<small>{{.Language}}</small>{{end}}
   <div class="catalog-bottom">
@@ -101,6 +116,7 @@
 <input type="hidden" name="catalog_q" value="{{.Filter.Query}}">
 <input type="hidden" name="catalog_category" value="{{.Filter.Category}}">
 <input type="hidden" name="catalog_language" value="{{.Filter.Language}}">
+{{if .Filter.Country}}<input type="hidden" name="catalog_country" value="{{.Filter.Country}}">{{end}}
 {{if .Filter.Unfollowed}}<input type="hidden" name="catalog_unfollowed" value="1">{{end}}
 {{if .Filter.Page}}<input type="hidden" name="catalog_page" value="{{catalogPageNumber .Filter}}">{{end}}
 {{if .GroupScope}}<input type="hidden" name="scope" value="household">{{end}}
@@ -123,6 +139,7 @@
   <a href="{{.CatalogBack}}">Back to suggested sources</a>
   <h1>{{.CatalogPreview.Title}}</h1>
   <p>{{.CatalogPreview.Description}}</p>
+  {{if .CatalogPreview.Area}}<small>{{.CatalogPreview.Area}} · {{.CatalogPreview.Country}}</small>{{end}}
   <div class="catalog-bottom">
     <a href="{{.CatalogPreview.URL}}" target="_blank" rel="noopener noreferrer">Open feed</a>
     {{template "catalog-follow" (catalogCard . .CatalogPreview)}}

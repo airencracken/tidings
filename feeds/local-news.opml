@@ -5,24 +5,68 @@
   </head>
   <body>
     <outline text="Local News" title="Local News">
-      <outline text="CalMatters" title="CalMatters" type="rss" xmlUrl="https://calmatters.org/feed/" />
-      <outline text="MinnPost" title="MinnPost" type="rss" xmlUrl="https://www.minnpost.com/feed/" />
-      <outline text="The Nevada Independent" title="The Nevada Independent" type="rss" xmlUrl="https://thenevadaindependent.com/feed" />
-      <outline text="VTDigger" title="VTDigger" type="rss" xmlUrl="https://vtdigger.org/feed/" />
-      <outline text="Voice of San Diego" title="Voice of San Diego" type="rss" xmlUrl="https://voiceofsandiego.org/feed/" />
-      <outline text="Mission Local" title="Mission Local" type="rss" xmlUrl="https://missionlocal.org/feed/" />
-      <outline text="Berkeleyside" title="Berkeleyside" type="rss" xmlUrl="https://www.berkeleyside.org/feed" />
-      <outline text="Oaklandside" title="Oaklandside" type="rss" xmlUrl="https://oaklandside.org/feed/" />
-      <outline text="Block Club Chicago" title="Block Club Chicago" type="rss" xmlUrl="https://blockclubchicago.org/feed/" />
-      <outline text="The City" title="The City" type="rss" xmlUrl="https://www.thecity.nyc/feed/" />
-      <outline text="Billy Penn" title="Billy Penn" type="rss" xmlUrl="https://billypenn.com/feed/" />
-      <outline text="West Seattle Blog" title="West Seattle Blog" type="rss" xmlUrl="https://westseattleblog.com/feed/" />
-      <outline text="Honolulu Civil Beat" title="Honolulu Civil Beat" type="rss" xmlUrl="https://www.civilbeat.org/feed/" />
+      <outline text="Region Canberra" title="Region Canberra" type="rss" xmlUrl="https://region.com.au/feed/" />
+      <outline text="Marco Zero Conteúdo" title="Marco Zero Conteúdo" type="rss" xmlUrl="https://marcozero.org/feed/" />
+      <outline text="Agência Mural" title="Agência Mural" type="rss" xmlUrl="https://agenciamural.org.br/feed/" />
+      <outline text="The Tyee" title="The Tyee" type="rss" xmlUrl="https://thetyee.ca/rss2.xml" />
+      <outline text="Métro" title="Métro" type="rss" xmlUrl="https://journalmetro.com/feed/" />
+      <outline text="The Local" title="The Local" type="rss" xmlUrl="https://thelocal.to/feed/" />
+      <outline text="El Colombiano Antioquia" title="El Colombiano Antioquia" type="rss" xmlUrl="https://www.elcolombiano.com/rss/antioquia.xml" />
+      <outline text="Rue89 Bordeaux" title="Rue89 Bordeaux" type="rss" xmlUrl="https://rue89bordeaux.com/feed/" />
+      <outline text="Rue89 Lyon" title="Rue89 Lyon" type="rss" xmlUrl="https://www.rue89lyon.fr/feed/" />
+      <outline text="Marsactu" title="Marsactu" type="rss" xmlUrl="https://marsactu.fr/feed/" />
+      <outline text="Rue89 Strasbourg" title="Rue89 Strasbourg" type="rss" xmlUrl="https://www.rue89strasbourg.com/feed" />
+      <outline text="Berliner Zeitung" title="Berliner Zeitung" type="rss" xmlUrl="https://www.berliner-zeitung.de/feed.xml" />
+      <outline text="Hong Kong Free Press local news" title="Hong Kong Free Press local news" type="rss" xmlUrl="https://hongkongfp.com/category/hong-kong/feed/" />
+      <outline text="Citizen Matters" title="Citizen Matters" type="rss" xmlUrl="https://citizenmatters.in/feed/" />
+      <outline text="The Hindu Bengaluru" title="The Hindu Bengaluru" type="rss" xmlUrl="https://www.thehindu.com/news/cities/bangalore/feeder/default.rss" />
+      <outline text="The Hindu Chennai" title="The Hindu Chennai" type="rss" xmlUrl="https://www.thehindu.com/news/cities/chennai/feeder/default.rss" />
+      <outline text="Bali Discovery" title="Bali Discovery" type="rss" xmlUrl="https://balidiscovery.com/feed/" />
+      <outline text="MilanoToday" title="MilanoToday" type="rss" xmlUrl="https://www.milanotoday.it/rss" />
+      <outline text="RomaToday" title="RomaToday" type="rss" xmlUrl="https://www.romatoday.it/rss" />
+      <outline text="Fukuoka Now" title="Fukuoka Now" type="rss" xmlUrl="https://www.fukuoka-now.com/en/feed/" />
+      <outline text="Kyoto Shimbun" title="Kyoto Shimbun" type="rss" xmlUrl="https://www.kyoto-np.co.jp/list/feed/rss" />
+      <outline text="Okinawa Times" title="Okinawa Times" type="rss" xmlUrl="https://www.okinawatimes.co.jp/list/feed/rss" />
+      <outline text="Buletin Mutiara" title="Buletin Mutiara" type="rss" xmlUrl="https://www.buletinmutiara.com/feed/" />
+      <outline text="ZonaDocs" title="ZonaDocs" type="rss" xmlUrl="https://www.zonadocs.mx/feed/" />
+      <outline text="Greater Auckland" title="Greater Auckland" type="rss" xmlUrl="https://www.greaterauckland.org.nz/feed/" />
+      <outline text="Cebu Daily News" title="Cebu Daily News" type="rss" xmlUrl="https://cebudailynews.inquirer.net/feed" />
+      <outline text="MindaNews" title="MindaNews" type="rss" xmlUrl="https://mindanews.com/feed/" />
+      <outline text="Mensagem de Lisboa" title="Mensagem de Lisboa" type="rss" xmlUrl="https://amensagem.pt/feed/" />
+      <outline text="Cape Town Etc" title="Cape Town Etc" type="rss" xmlUrl="https://www.capetownetc.com/feed/" />
+      <outline text="DispatchLIVE" title="DispatchLIVE" type="rss" xmlUrl="https://dailydispatch.co.za/rss/" />
+      <outline text="Jeju News" title="Jeju News" type="rss" xmlUrl="https://www.jejunews.com/rss/allArticle.xml" />
+      <outline text="betevé" title="betevé" type="rss" xmlUrl="https://beteve.cat/feed/" />
+      <outline text="Nació" title="Nació" type="rss" xmlUrl="https://naciodigital.cat/rss/" />
+      <outline text="Cordópolis" title="Cordópolis" type="rss" xmlUrl="https://cordopolis.eldiario.es/rss" />
+      <outline text="The Thaiger Phuket" title="The Thaiger Phuket" type="rss" xmlUrl="https://thethaiger.com/news/phuket/feed" />
+      <outline text="Belfast Live" title="Belfast Live" type="rss" xmlUrl="https://www.belfastlive.co.uk/?service=rss" />
+      <outline text="The Bristol Cable" title="The Bristol Cable" type="rss" xmlUrl="https://thebristolcable.org/feed/" />
+      <outline text="The Mill" title="The Mill" type="rss" xmlUrl="https://manchestermill.co.uk/rss/" />
+      <outline text="London Centric" title="London Centric" type="rss" xmlUrl="https://www.londoncentric.media/feed" />
       <outline text="Alaska Beacon" title="Alaska Beacon" type="rss" xmlUrl="https://alaskabeacon.com/feed/" />
       <outline text="Arizona Mirror" title="Arizona Mirror" type="rss" xmlUrl="https://azmirror.com/feed/" />
+      <outline text="The Baltimore Banner" title="The Baltimore Banner" type="rss" xmlUrl="https://www.thebanner.com/arc/outboundfeeds/rss/?outputType=xml" />
+      <outline text="Berkeleyside" title="Berkeleyside" type="rss" xmlUrl="https://www.berkeleyside.org/feed" />
+      <outline text="CalMatters" title="CalMatters" type="rss" xmlUrl="https://calmatters.org/feed/" />
+      <outline text="Block Club Chicago" title="Block Club Chicago" type="rss" xmlUrl="https://blockclubchicago.org/feed/" />
       <outline text="Colorado Sun" title="Colorado Sun" type="rss" xmlUrl="https://coloradosun.com/feed/" />
-      <outline text="MLK50" title="MLK50" type="rss" xmlUrl="https://mlk50.com/feed/" />
       <outline text="Outlier Media" title="Outlier Media" type="rss" xmlUrl="https://outliermedia.org/feed/" />
+      <outline text="Honolulu Civil Beat" title="Honolulu Civil Beat" type="rss" xmlUrl="https://www.civilbeat.org/feed/" />
+      <outline text="MLK50" title="MLK50" type="rss" xmlUrl="https://mlk50.com/feed/" />
+      <outline text="MinnPost" title="MinnPost" type="rss" xmlUrl="https://www.minnpost.com/feed/" />
+      <outline text="Mississippi Today" title="Mississippi Today" type="rss" xmlUrl="https://mississippitoday.org/feed/" />
+      <outline text="The Nevada Independent" title="The Nevada Independent" type="rss" xmlUrl="https://thenevadaindependent.com/feed" />
+      <outline text="Source New Mexico" title="Source New Mexico" type="rss" xmlUrl="https://sourcenm.com/feed/" />
+      <outline text="The City" title="The City" type="rss" xmlUrl="https://www.thecity.nyc/feed/" />
+      <outline text="Oaklandside" title="Oaklandside" type="rss" xmlUrl="https://oaklandside.org/feed/" />
+      <outline text="Billy Penn" title="Billy Penn" type="rss" xmlUrl="https://billypenn.com/feed/" />
+      <outline text="PublicSource" title="PublicSource" type="rss" xmlUrl="https://www.publicsource.org/feed/" />
+      <outline text="Voice of San Diego" title="Voice of San Diego" type="rss" xmlUrl="https://voiceofsandiego.org/feed/" />
+      <outline text="Mission Local" title="Mission Local" type="rss" xmlUrl="https://missionlocal.org/feed/" />
+      <outline text="VTDigger" title="VTDigger" type="rss" xmlUrl="https://vtdigger.org/feed/" />
+      <outline text="West Seattle Blog" title="West Seattle Blog" type="rss" xmlUrl="https://westseattleblog.com/feed/" />
+      <outline text="Sài Gòn Giải Phóng" title="Sài Gòn Giải Phóng" type="rss" xmlUrl="https://www.sggp.org.vn/rss/tphcm-20.rss" />
     </outline>
   </body>
 </opml>
