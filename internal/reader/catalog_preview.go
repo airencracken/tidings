@@ -71,10 +71,11 @@ func (a *App) previewSource(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, p, http.StatusBadGateway)
 		return
 	}
-	p.Entries = fetched.Feed.Entries
-	sort.SliceStable(p.Entries, func(i, j int) bool { return p.Entries[i].Published > p.Entries[j].Published })
-	if len(p.Entries) > 5 {
-		p.Entries = p.Entries[:5]
-	}
+	p.Entries = recentHeadlines(fetched.Feed.Entries, 5)
 	a.render(w, r, p, http.StatusOK)
+}
+
+func recentHeadlines(entries []Entry, size int) []Entry {
+	sort.SliceStable(entries, func(i, j int) bool { return entries[i].Published > entries[j].Published })
+	return entries[:min(len(entries), size)]
 }

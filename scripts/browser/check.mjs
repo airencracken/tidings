@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
+import { createServer as createHTTPServer } from 'node:http';
 import { createServer } from 'node:net';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -22,9 +23,9 @@ const passwordFile = path.join(temporary, 'password');
 await writeFile(passwordFile, password + '\n', { mode: 0o600 });
 const port = await reservePort();
 const localOrigin='http://127.0.0.1:'+port;
-const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:'+port, TIDINGS_BASE_URL: localOrigin, TIDINGS_SECURE_COOKIES: '', TIDINGS_APPS: '[{"id":"witmoot","url":"https://suite.example.org"}]' };
+const env = { ...process.env, TIDINGS_DATA_DIR: path.join(temporary, 'data'), TIDINGS_ADDR: '127.0.0.1:'+port, TIDINGS_BASE_URL: localOrigin, TIDINGS_SECURE_COOKIES: '', TIDINGS_SEARXNG_URL: '', TIDINGS_APPS: '[{"id":"witmoot","url":"https://suite.example.org"}]' };
 const binary = path.join(root, 'bin/tidings');
-let server, browser;
+let server, browser, searchServer;
 const errors = [];
 const observed = new Set();
 async function signIn(page, origin, username='host') {
@@ -421,6 +422,38 @@ db.commit()
   await act(plain.getByLabel('Name',{exact:true}), 'fill', 'Quiet reading');
   await act(plain.getByRole('button',{name:'Save group name',exact:true}), 'click');
   assert.equal(await plain.getByRole('link',{name:'Quiet reading',exact:true}).count(),1);
+
+  const searches=[];
+  searchServer=createHTTPServer((request,response)=>{
+    let body='';
+    request.setEncoding('utf8');
+    request.on('data',chunk=>body+=chunk);
+    request.on('end',()=>{
+      searches.push({ method:request.method, path:request.url, fields:Object.fromEntries(new URLSearchParams(body)) });
+      response.writeHead(200,{'Content-Type':'application/json'});
+      response.end('{"results":[]}');
+    });
+  });
+  searchServer.listen(0,'127.0.0.1');
+  await once(searchServer,'listening');
+  await stopProcess(server);
+  server=undefined;
+  const searchEnv={...env,TIDINGS_SEARXNG_URL:'http://127.0.0.1:'+searchServer.address().port+'/search'};
+  server=await spawnServer(binary,['serve'],{env:searchEnv,health:origin+'/healthz'});
+  await plain.setViewportSize({width:320,height:1000});
+  await plain.goto(origin+'/sources');
+  assert.ok(await plain.getByRole('heading',{name:'Find feeds by interest',exact:true}).isVisible());
+  assert.equal(await plain.locator('.catalog-topics').count(),0);
+  assert.equal(searches.length,0);
+  assert.ok(await plain.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await plain.getByLabel('Source tag',{exact:true}).selectOption('research');
+  await act(plain.getByRole('button',{name:'Find more feeds',exact:true}),'click');
+  assert.ok(await plain.getByText('No working feeds found.',{exact:false}).isVisible());
+  await plain.getByLabel('Interest',{exact:true}).fill('community news in Cebu');
+  await act(plain.getByRole('button',{name:'Find feeds',exact:true}),'click');
+  assert.deepEqual(searches,['research','community news in Cebu'].map(q=>({
+    method:'POST',path:'/search',fields:{q:q+' RSS',format:'json',language:'all'},
+  })));
   await plainContext.close();
   assert.deepEqual(errors,[]);
   assert.ok([...observed].every(address => address.startsWith(origin+'/')),'browser contacted a third party');
@@ -428,5 +461,6 @@ db.commit()
 } finally {
   if(browser) await browser.close();
   await stopProcess(server);
+  if(searchServer) await new Promise(resolve=>searchServer.close(resolve));
   await rm(temporary,{recursive:true,force:true});
 }

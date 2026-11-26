@@ -40,6 +40,7 @@ type Config struct {
 	Backups        *autobackup.Runner
 	SecureCookies  bool
 	BaseURL        string
+	SearXNGURL     string
 	Demo           bool
 }
 type App struct {
@@ -51,6 +52,7 @@ type App struct {
 	images              *imageCache
 	articleSlots        chan struct{}
 	previewSlots        chan struct{}
+	interestSearch      *interestSearch
 	config              Config
 	templates           *displaytime.Templates
 	mux                 *http.ServeMux
@@ -114,6 +116,12 @@ type page struct {
 	CatalogFilter                                      catalogFilter
 	CatalogCategories                                  []CatalogCategory
 	SuggestionsEnabled                                 bool
+	ShowCatalog                                        bool
+	InterestSearchEnabled                              bool
+	InterestQuery                                      string
+	InterestTags                                       []string
+	InterestResults                                    []interestResult
+	InterestCanFollow                                  bool
 	Demo                                               bool
 }
 
@@ -122,7 +130,11 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 	if suiteErr != nil {
 		return nil, suiteErr
 	}
-	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), previewSlots: make(chan struct{}, 3), config: c, ctx: ctx, mux: http.NewServeMux()}
+	search, err := newInterestSearch(c.SearXNGURL)
+	if err != nil {
+		return nil, err
+	}
+	a := &App{Store: s, Fetcher: NewFetcher(), images: newImageCache(s.Directory), articleSlots: make(chan struct{}, 2), previewSlots: make(chan struct{}, 3), interestSearch: search, config: c, ctx: ctx, mux: http.NewServeMux()}
 	funcs := template.FuncMap{"timezonePreference": displaytime.RenderPreference, "adminSummary": admin.Render,
 		"themePicker": func() template.HTML { return ui.ThemePicker(true) },
 		"palettes":    ui.Palettes,
@@ -175,12 +187,10 @@ func NewApp(ctx context.Context, s *Store, c Config) (*App, error) {
 			return false
 		},
 	}
-	var err error
 	for k, v := range displaytime.New("UTC").Funcs() {
 		funcs[k] = v
 	}
-	var parsed *template.Template
-	parsed, err = template.New("pages").Funcs(suiteFuncs).Funcs(funcs).ParseFS(assets, "templates/*.html")
+	parsed, err := template.New("pages").Funcs(suiteFuncs).Funcs(funcs).ParseFS(assets, "templates/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -343,6 +353,8 @@ func (a *App) routes() {
 	a.mux.HandleFunc("GET /sources", a.sources)
 	a.mux.HandleFunc("POST /sources", a.subscribe)
 	a.mux.HandleFunc("POST /sources/discover", a.discover)
+	a.mux.HandleFunc("POST /sources/search", a.searchInterest)
+	a.mux.HandleFunc("POST /sources/search/follow", a.followInterest)
 	a.mux.HandleFunc("POST /sources/preview", a.previewSource)
 	a.mux.HandleFunc("POST /groups/{id}/rename", a.renameGroup)
 	a.mux.HandleFunc("POST /account/members/{id}", a.memberAction)
@@ -472,7 +484,7 @@ func back(r *http.Request) string {
 	return u.RequestURI()
 }
 func notice(r *http.Request) string {
-	return map[string]string{"keyboard": "Your reading preferences were saved.", "images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again.", "palette": "Site colours saved."}[r.URL.Query().Get("notice")]
+	return map[string]string{"keyboard": "Your reading preferences were saved.", "images": "Feed image settings saved.", "suggestions": "Suggested categories saved. Existing subscriptions were kept.", "restored": "Your reading data was merged. Existing choices were kept.", "subscribed": "Source added.", "feeds-followed": "Selected feeds followed.", "removed": "Source removed. Your saved stories are kept.", "imported": "Your subscriptions were imported.", "read": "These stories are marked as read.", "joined": "Your account is ready. You can sign in now.", "password": "Password changed. Please sign in again.", "palette": "Site colours saved."}[r.URL.Query().Get("notice")]
 }
 func scope(r *http.Request) bool { return r.FormValue("scope") == "household" }
 
@@ -770,6 +782,15 @@ func (a *App) sources(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		p.SuggestionsEnabled = len(enabled) > 0
+		p.InterestSearchEnabled = a.interestSearch != nil
+		p.ShowCatalog = !p.InterestSearchEnabled || p.CatalogFilter.Active() || values.Get("catalog") == "1"
+		if p.InterestSearchEnabled {
+			p.InterestTags = interestTags(p.Feeds)
+		}
+		if !p.ShowCatalog {
+			a.render(w, r, p, http.StatusOK)
+			return
+		}
 		p.CatalogCategories = catalogCategories(a.Catalog, enabled)
 		p.CatalogLanguages = catalogLanguages(a.Catalog, enabled)
 		if p.CatalogFilter.LocalNews() && enabled[localNewsCategory] {

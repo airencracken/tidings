@@ -52,6 +52,10 @@ browser instead, see [setup](docs/setup.md).
 
 Add sources under **Sources**: paste an RSS or Atom address, find a feed from a
 website address, browse suggested sources by category, or import an OPML file.
+When your host enables interest search, **Find feeds by interest** lets you
+enter any topic or start from one of your source tags. Include a place or
+language in your search to narrow it. You can preview a feed’s recent headlines
+before following it.
 Search the catalog by publisher, subject, or feed address, filter by language
 or hide sources you already follow. Preview a publisher's recent headlines
 from its feed before following. The personal Sources page uses your follows,
@@ -166,6 +170,7 @@ and [OPML News Feeds](https://github.com/ajdelaguila/opml-news-feeds).
 | `TIDINGS_BASE_URL` | unset | Public HTTPS address, used in invitation links |
 | `TIDINGS_SECURE_COOKIES` | on with an HTTPS base URL | Set `true` to require HTTPS cookies |
 | `TIDINGS_TRUSTED_PROXIES` | none | Proxy IPs or CIDRs whose forwarding headers to trust |
+| `TIDINGS_SEARXNG_URL` | unset | SearXNG search endpoint for finding feeds by interest |
 | `TIDINGS_BACKUP_INTERVAL` | `24h` | Automatic backup interval; `0` turns backups off |
 | `TIDINGS_BACKUP_KEEP` | `7` | Automatic backups to keep (1–30) |
 | `TIDINGS_BACKUP_MAX_BYTES` | `10737418240` | Total size cap for automatic backups |
@@ -177,6 +182,13 @@ work. Listening on anything other than loopback requires an HTTPS
 `TIDINGS_BASE_URL`. The [hosting guide](docs/deployment.md) covers service
 accounts, systemd and OpenRC, and logs. Optional app navigation and community
 sign-in are in [Comfyware connections](docs/suite.md).
+
+Set `TIDINGS_SEARXNG_URL` to the full search endpoint, for example
+`http://127.0.0.1:8080/search` when SearXNG and Tidings run on the same host.
+Enable `json` under `search.formats` in SearXNG’s settings. The endpoint must
+be reachable from Tidings, including from inside its container if applicable.
+Tidings sends the submitted search terms and an RSS keyword when the reader
+chooses to search. For provider setup, see the [SearXNG Search API](https://docs.searxng.org/dev/search_api.html).
 
 Things to know:
 

@@ -10,6 +10,7 @@ services:
       TIDINGS_SHARED_CLIENT_SECRET: "${TIDINGS_SHARED_CLIENT_SECRET:-}"
       TIDINGS_BASE_URL: "${TIDINGS_BASE_URL:-https://tidings.example.org}"
       TIDINGS_TOTP_KEY: "${TIDINGS_TOTP_KEY:-}"
+      TIDINGS_SEARXNG_URL: "${TIDINGS_SEARXNG_URL:-}"
     volumes:
       - tidings-data:/data
     read_only: true

@@ -1,5 +1,45 @@
 [
   {
+    "name": "interest search collects distinct publishers",
+    "file": "internal/reader/interest_search.go",
+    "before": "if seen[domain] {",
+    "after": "if false && seen[domain] {",
+    "package": "./internal/reader",
+    "run": "^TestInterestProviderContract$"
+  },
+  {
+    "name": "search sends the interest chosen by the reader",
+    "file": "internal/reader/interest_search.go",
+    "before": "query + \" RSS\"",
+    "after": "\"RSS\"",
+    "package": "./internal/reader",
+    "run": "^TestInterestProviderContract$"
+  },
+  {
+    "name": "interest search excludes feeds with no headlines",
+    "file": "internal/reader/interest_search.go",
+    "before": "if err != nil || len(result.Feed.Entries) == 0 {",
+    "after": "if err != nil {",
+    "package": "./internal/reader",
+    "run": "^TestInterestDiscoveryFlow$"
+  },
+  {
+    "name": "interest discovery skips comment feeds",
+    "file": "internal/reader/interest_search.go",
+    "before": " || strings.HasPrefix(strings.ToLower(result.Feed.Title), \"comments for \")",
+    "after": "",
+    "package": "./internal/reader",
+    "run": "^TestInterestDiscoveryFlow$"
+  },
+  {
+    "name": "selected search feeds follow in one transaction",
+    "file": "internal/reader/interest_search.go",
+    "before": "if err := a.Store.Subscribe(r.Context(), u.ID, feeds, group); err != nil {",
+    "after": "for _, feed := range feeds[:len(feeds)-1] { _ = a.Store.Subscribe(r.Context(), u.ID, []Feed{feed}, group) }; if err := a.Store.Subscribe(r.Context(), u.ID, feeds, group); err != nil {",
+    "package": "./internal/reader",
+    "run": "^TestInterestFollowIsAtomic$"
+  },
+  {
     "name": "Local News requires a matching place",
     "file": "internal/reader/catalog.go",
     "before": "if item.Category == localNewsCategory && requireCountry && (f.Country == \"\" || item.Country != f.Country) {",

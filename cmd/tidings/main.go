@@ -29,7 +29,7 @@ import (
 var version = "0.11.0"
 
 var instanceCommands = map[string]bool{"setup": true, "create-owner": true, "set-password": true, "backup": true, "restore": true}
-var serviceSettings = []string{"TIDINGS_BASE_URL", "TIDINGS_ADDR", "TIDINGS_SECURE_COOKIES", "TIDINGS_TRUSTED_PROXIES", "TIDINGS_BACKUP_INTERVAL", "TIDINGS_BACKUP_KEEP", "TIDINGS_BACKUP_MAX_BYTES", "TIDINGS_BACKUP_COPY_MAX_BYTES"}
+var serviceSettings = []string{"TIDINGS_BASE_URL", "TIDINGS_ADDR", "TIDINGS_SECURE_COOKIES", "TIDINGS_TRUSTED_PROXIES", "TIDINGS_SEARXNG_URL", "TIDINGS_BACKUP_INTERVAL", "TIDINGS_BACKUP_KEEP", "TIDINGS_BACKUP_MAX_BYTES", "TIDINGS_BACKUP_COPY_MAX_BYTES"}
 
 func main() {
 	paths := svcconfig.Detect("tidings", "/var/lib/tidings")
@@ -64,6 +64,7 @@ Settings:
   TIDINGS_BASE_URL               Public HTTPS address, used in invitation links
   TIDINGS_SECURE_COOKIES         true to require HTTPS cookies
   TIDINGS_TRUSTED_PROXIES        Proxy IPs or CIDRs to trust
+  TIDINGS_SEARXNG_URL            Optional SearXNG search endpoint for interest discovery
   TIDINGS_BACKUP_INTERVAL        Automatic backup interval (24h; 0 turns it off)
   TIDINGS_BACKUP_KEEP            Automatic backups to keep (7)
   TIDINGS_BACKUP_MAX_BYTES       Total size of automatic backups (10 GiB)
@@ -216,7 +217,11 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	app, err := reader.NewApp(ctx, s, reader.Config{Version: version, SecureCookies: secure, BaseURL: base, TrustedProxies: clientip.Resolver{Trusted: trusted}, Backups: backups})
+	app, err := reader.NewApp(ctx, s, reader.Config{
+		Version: version, SecureCookies: secure, BaseURL: base,
+		TrustedProxies: clientip.Resolver{Trusted: trusted}, Backups: backups,
+		SearXNGURL: lookup("TIDINGS_SEARXNG_URL"),
+	})
 	if err != nil {
 		return err
 	}

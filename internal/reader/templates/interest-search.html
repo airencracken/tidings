@@ -1,0 +1,71 @@
+{{define "interest-search"}}
+<form method="post" action="/sources/search" class="catalog-filters">
+  {{template "interest-form-context" .}}
+  <div class="catalog-field catalog-keywords">
+    <label for="interest">Interest</label>
+    <input id="interest" name="interest" type="search" required maxlength="200" value="{{.InterestQuery}}" aria-describedby="interest-help">
+  </div>
+  <button>Find feeds</button>
+</form>
+<p class="field-help" id="interest-help">Include a place or language to narrow your search. Your search terms go to this instance’s search provider.</p>
+{{if .InterestTags}}
+<form method="post" action="/sources/search" class="catalog-filters">
+  {{template "interest-form-context" .}}
+  <div class="catalog-field">
+    <label for="interest-tag">Source tag</label>
+    <select id="interest-tag" name="interest" required>
+      <option value="">Choose a tag</option>
+      {{range .InterestTags}}<option>{{.}}</option>{{end}}
+    </select>
+  </div>
+  <button class="button secondary">Find more feeds</button>
+</form>
+{{end}}
+{{end}}
+
+{{define "interest-form-context"}}
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+{{if .GroupScope}}<input type="hidden" name="scope" value="household">{{end}}
+{{end}}
+
+{{define "interest-results"}}
+<div class="page-heading">
+  <div><h1>Find feeds by interest</h1></div>
+  <a href="{{if .GroupScope}}/sources?scope=household{{else}}/sources{{end}}">Back to sources</a>
+</div>
+<section class="paper" aria-label="Search">
+  {{template "interest-search" .}}
+  {{if .Error}}<p class="error" role="alert">{{.Error}}</p>{{end}}
+</section>
+{{if not .Error}}
+<section class="catalog-category" aria-label="Matching feeds">
+  {{if .InterestResults}}
+  <form action="/sources/search/follow" method="post">
+    {{template "interest-form-context" .}}
+  <div class="catalog-grid">
+    {{range .InterestResults}}
+    <article class="paper catalog-card">
+      <h2>{{.Title}}</h2>
+      <p class="feed-url"><a href="{{.URL}}" target="_blank" rel="noopener noreferrer">{{.Publisher}} <span class="sr-only">feed</span></a></p>
+      <details>
+        <summary>Preview recent headlines</summary>
+        <ul>
+          {{range .Headlines}}
+          <li><a href="{{cleanLink .URL}}" target="_blank" rel="noopener noreferrer">{{.Title}}</a> <time datetime="{{isoDate .Published}}">{{date .Published}}</time></li>
+          {{end}}
+        </ul>
+      </details>
+      {{if .FollowedID}}
+      <a href="/sources{{if $.GroupScope}}?scope=household{{end}}#source-{{.FollowedID}}">Following <span class="sr-only">{{.Title}}</span></a>
+      {{else}}
+      <label class="check"><input type="checkbox" name="url" value="{{.URL}}"> Select <span class="sr-only">{{.Title}}</span></label>
+      {{end}}
+    </article>
+    {{end}}
+  </div>
+    {{if .InterestCanFollow}}<p><button>Follow selected feeds</button></p>{{end}}
+  </form>
+  {{else}}<p>No working feeds found. Try a different search or <a href="/sources{{if .GroupScope}}?scope=household{{end}}#add-source">add a source by website</a>.</p>{{end}}
+</section>
+{{end}}
+{{end}}

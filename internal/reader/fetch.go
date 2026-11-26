@@ -12,6 +12,7 @@ import (
 )
 
 type FetchResult struct {
+	Address        string
 	Feed           ParsedFeed
 	ETag, Modified string
 	Unchanged      bool
@@ -117,7 +118,11 @@ func (f *Fetcher) Fetch(ctx context.Context, raw, etag, modified string) (FetchR
 	if err != nil {
 		return out, err
 	}
-	out.Feed, err = ParseFeed(body, res.Request.URL.String(), time.Now().UTC())
+	out.Address, err = WebURL(res.Request.URL.String())
+	if err != nil {
+		return out, err
+	}
+	out.Feed, err = ParseFeed(body, out.Address, time.Now().UTC())
 	if err != nil {
 		return out, err
 	}
